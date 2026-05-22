@@ -11,7 +11,7 @@ import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
-    <div className="antialiased text-gray-900 bg-gray-50 min-h-screen font-sans">
+    <div className="antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans">
       {/* Current Setup: Just rendering the Landing Page */}
       <LandingPage />
       

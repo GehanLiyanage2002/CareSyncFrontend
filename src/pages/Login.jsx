@@ -217,8 +217,8 @@ const Login = () => {
 
         <p className="text-center mt-6 text-sm text-slate-500">
           Don't have an account?{' '}
-          <button type="button" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
-            Contact your administrator
+          <button type="button" onClick={() => navigate('/register')} className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+            Create an account
           </button>
         </p>
       </div>

@@ -62,7 +62,7 @@ const Header = () => {
             Doctor Login
           </button>
           <a href="#doctors" className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
-            Get Started
+            Book Appointment
           </a>
         </div>
       </div>

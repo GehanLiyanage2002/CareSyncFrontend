@@ -36,9 +36,15 @@ const authSlice = createSlice({
       localStorage.removeItem('caresync_token');
       localStorage.removeItem('caresync_user');
     },
+    updateUser: (state, action) => {
+      // Merge the updated fields into the existing user object
+      state.user = { ...state.user, ...action.payload };
+      // Persist the updated user object to localStorage
+      localStorage.setItem('caresync_user', JSON.stringify(state.user));
+    },
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout, updateUser } = authSlice.actions;
 
 export default authSlice.reducer;

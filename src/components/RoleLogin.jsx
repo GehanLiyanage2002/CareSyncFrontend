@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const RoleLogin = () => {
+  const navigate = useNavigate();
   const roles = [
     { name: 'Patient', desc: 'Book appointments & access medical records.', color: 'bg-green-100 text-green-700' },
     { name: 'Doctor', desc: 'Manage schedule & conduct virtual consultations.', color: 'bg-blue-100 text-blue-700' },
@@ -17,7 +19,11 @@ const RoleLogin = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {roles.map((role, index) => (
-            <div key={index} className="bg-slate-800 p-8 rounded-2xl flex flex-col items-center text-center hover:bg-slate-700 transition cursor-pointer border border-slate-700">
+            <div 
+              key={index} 
+              onClick={() => navigate('/login')}
+              className="bg-slate-800 p-8 rounded-2xl flex flex-col items-center text-center hover:bg-slate-700 transition cursor-pointer border border-slate-700"
+            >
               <div className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl mb-4 ${role.color}`}>
                 {role.name.charAt(0)}
               </div>

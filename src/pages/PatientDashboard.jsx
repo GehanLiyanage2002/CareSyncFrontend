@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
+import MedicalProfile from '../components/MedicalProfile';
 
 // Inline SVGs for no-dependency icons to keep it lightweight
 const HomeIcon = ({ className = "w-5 h-5" }) => (
@@ -169,11 +170,17 @@ const PatientDashboard = () => {
 
         {/* Dynamic Content Area based on Active Tab */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 min-h-[400px]">
-          <h3 className="text-2xl font-bold text-slate-800 mb-6">{activeTab} Overview</h3>
-          <div className="flex flex-col items-center justify-center h-64 text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-            <p className="text-lg font-medium">Content for {activeTab} will be displayed here.</p>
-            <p className="text-sm mt-2">Select a different tab from the sidebar to switch views.</p>
-          </div>
+          {activeTab === 'Medical Profile' ? (
+            <MedicalProfile />
+          ) : (
+            <>
+              <h3 className="text-2xl font-bold text-slate-800 mb-6">{activeTab} Overview</h3>
+              <div className="flex flex-col items-center justify-center h-64 text-slate-400 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                <p className="text-lg font-medium">Content for {activeTab} will be displayed here.</p>
+                <p className="text-sm mt-2">Select a different tab from the sidebar to switch views.</p>
+              </div>
+            </>
+          )}
         </div>
 
       </main>

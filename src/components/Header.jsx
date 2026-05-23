@@ -39,7 +39,7 @@ const Header = () => {
           <a href="#hero" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</a>
           <a href="#doctors" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</a>
           <a href="#services" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</a>
-          <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a>
+          {/* <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a> */}
         </nav>
         <div className="flex items-center space-x-4">
           <button 
@@ -51,13 +51,13 @@ const Header = () => {
           </button>
           <button
             onClick={() => navigate('/login')}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-semibold transition text-sm"
+            className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
           >
             Patient Login
           </button>
           <button
             onClick={() => navigate('/login')}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold transition text-sm"
+            className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
           >
             Doctor Login
           </button>

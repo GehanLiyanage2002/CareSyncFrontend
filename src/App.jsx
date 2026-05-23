@@ -55,6 +55,15 @@ function App() {
           />
 
           {/* Protected Role-Based Routes */}
+          {/* /patient-dashboard is the primary Patient redirect from Login */}
+          <Route 
+            path="/patient-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={['Patient']}>
+                <PatientDashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/patient/*" 
             element={

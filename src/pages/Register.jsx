@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import axios from 'axios';
-import { loginSuccess } from '../features/auth/authSlice';
 
 // ── Success Toast ─────────────────────────────────────────────────────────────
 const SuccessToast = ({ message, onClose }) => {
@@ -36,7 +34,6 @@ const EyeIcon = ({ open }) =>
 // ── Register Page ─────────────────────────────────────────────────────────────
 const Register = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [fullName, setFullName]               = useState('');
   const [email, setEmail]                     = useState('');
@@ -50,7 +47,6 @@ const Register = () => {
 
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
-  const [toast, setToast]     = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,15 +85,8 @@ const Register = () => {
         role,
       });
 
-      const { token, user } = response.data;
-
-      // Auto-login: persist token & user in Redux + localStorage
-      dispatch(loginSuccess({ user, token }));
-
-      setToast(true);
-
-      // Brief pause to show the success toast, then go straight to dashboard
-      setTimeout(() => navigate('/patient-dashboard'), 1800);
+      // Since the backend now sends the OTP via email, we can redirect immediately
+      navigate('/verify-otp', { state: { email } });
     } catch (err) {
       const msg =
         err.response?.data?.message ||
@@ -110,13 +99,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Success Toast */}
-      {toast && (
-        <SuccessToast
-          message="Account created! Taking you to your dashboard..."
-          onClose={() => setToast(false)}
-        />
-      )}
+
 
       {/* Decorative blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />

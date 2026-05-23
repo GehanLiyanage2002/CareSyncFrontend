@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import axios from 'axios';
+import { loginSuccess } from '../features/auth/authSlice';
 
 // ── Success Toast ─────────────────────────────────────────────────────────────
 const SuccessToast = ({ message, onClose }) => {
@@ -34,6 +36,7 @@ const EyeIcon = ({ open }) =>
 // ── Register Page ─────────────────────────────────────────────────────────────
 const Register = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [fullName, setFullName]               = useState('');
   const [email, setEmail]                     = useState('');
@@ -78,7 +81,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post('http://localhost:5000/api/auth/register', {
         full_name: fullName.trim(),
         email,
         mobile_number: mobileNumber.trim(),
@@ -86,10 +89,15 @@ const Register = () => {
         role,
       });
 
+      const { token, user } = response.data;
+
+      // Auto-login: persist token & user in Redux + localStorage
+      dispatch(loginSuccess({ user, token }));
+
       setToast(true);
 
-      // Wait for the toast to be visible, then redirect to login
-      setTimeout(() => navigate('/login'), 2000);
+      // Brief pause to show the success toast, then go straight to dashboard
+      setTimeout(() => navigate('/patient-dashboard'), 1800);
     } catch (err) {
       const msg =
         err.response?.data?.message ||
@@ -105,7 +113,7 @@ const Register = () => {
       {/* Success Toast */}
       {toast && (
         <SuccessToast
-          message="Account created! Redirecting to login..."
+          message="Account created! Taking you to your dashboard..."
           onClose={() => setToast(false)}
         />
       )}

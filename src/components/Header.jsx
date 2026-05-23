@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check local storage or system preference on load
@@ -47,7 +49,19 @@ const Header = () => {
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <a href="#login" className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md font-semibold transition text-sm"
+          >
+            Patient Login
+          </button>
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold transition text-sm"
+          >
+            Doctor Login
+          </button>
+          <a href="#doctors" className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
             Get Started
           </a>
         </div>

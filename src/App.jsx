@@ -14,7 +14,7 @@ function App() {
     <div className="antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans">
       {/* Current Setup: Just rendering the Landing Page */}
       <LandingPage />
-      
+
       {/* Future Setup with React Router:
       <Router>
         <Routes>

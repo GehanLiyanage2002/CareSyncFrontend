@@ -35,11 +35,12 @@ const EyeIcon = ({ open }) =>
 const Register = () => {
   const navigate = useNavigate();
 
-  const [fullName, setFullName]             = useState('');
-  const [email, setEmail]                   = useState('');
-  const [password, setPassword]             = useState('');
+  const [fullName, setFullName]               = useState('');
+  const [email, setEmail]                     = useState('');
+  const [mobileNumber, setMobileNumber]       = useState('');
+  const [password, setPassword]               = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const role                                = 'Patient'; // default & fixed
+  const role                                  = 'Patient'; // default & fixed
 
   const [showPassword, setShowPassword]           = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -57,6 +58,14 @@ const Register = () => {
       setError('Please enter your full name.');
       return;
     }
+    if (!mobileNumber.trim()) {
+      setError('Please enter your mobile number.');
+      return;
+    }
+    if (!/^[0-9+\-\s]{7,15}$/.test(mobileNumber.trim())) {
+      setError('Please enter a valid mobile number.');
+      return;
+    }
     if (password.length < 6) {
       setError('Password must be at least 6 characters long.');
       return;
@@ -72,6 +81,7 @@ const Register = () => {
       await axios.post('http://localhost:5000/api/auth/register', {
         full_name: fullName.trim(),
         email,
+        mobile_number: mobileNumber.trim(),
         password,
         role,
       });
@@ -200,7 +210,30 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Password */}
+            {/* Mobile Number */}
+            <div>
+              <label htmlFor="reg-mobile" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Mobile Number
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3" />
+                  </svg>
+                </div>
+                <input
+                  id="reg-mobile"
+                  name="mobile_number"
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  placeholder="+94 77 123 4567"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                />
+              </div>
+            </div>
             <div>
               <label htmlFor="reg-password" className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Password

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check local storage or system preference on load
@@ -37,7 +39,7 @@ const Header = () => {
           <a href="#hero" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</a>
           <a href="#doctors" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</a>
           <a href="#services" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</a>
-          <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a>
+          {/* <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a> */}
         </nav>
         <div className="flex items-center space-x-4">
           <button 
@@ -47,8 +49,20 @@ const Header = () => {
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <a href="#login" className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
-            Get Started
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+          >
+            Patient Login
+          </button>
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+          >
+            Doctor Login
+          </button>
+          <a href="#doctors" className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+            Book Appointment
           </a>
         </div>
       </div>

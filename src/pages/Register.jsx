@@ -408,15 +408,17 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Role badge (display only, locked to Patient) */}
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-              <span className="text-blue-500">
+            {/* Role badge */}
+            <div className={`flex items-center gap-2 border rounded-xl px-4 py-3 ${
+              role === 'Doctor' ? 'bg-indigo-50 border-indigo-100' : 'bg-blue-50 border-blue-100'
+            }`}>
+              <span className={role === 'Doctor' ? 'text-indigo-500' : 'text-blue-500'}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </span>
-              <p className="text-sm text-blue-700 font-semibold">
-                Registering as: <span className="font-extrabold">Patient</span>
+              <p className={`text-sm font-semibold ${role === 'Doctor' ? 'text-indigo-700' : 'text-blue-700'}`}>
+                Registering as: <span className="font-extrabold">{role}</span>
               </p>
             </div>
 

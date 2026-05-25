@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, UserCircle, History, LogOut, Star } from 'lucide-react';
 import DoctorProfileEdit from '../components/doctor/DoctorProfileEdit';
 import DoctorKanbanBoard from '../components/doctor/DoctorKanbanBoard';
@@ -6,13 +6,21 @@ import AppointmentHistory from '../components/doctor/AppointmentHistory';
 import DoctorReviews from '../components/doctor/DoctorReviews';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const DoctorDashboard = () => {
   const [activeTab, setActiveTab] = useState('kanban');
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Support navigating directly to a specific tab via location state (e.g. from Header dropdown)
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
 
   const handleLogout = () => {
     dispatch(logout());

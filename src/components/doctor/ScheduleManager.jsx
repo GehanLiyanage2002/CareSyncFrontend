@@ -16,7 +16,6 @@ const ScheduleManager = () => {
   });
 
   const [formData, setFormData] = useState({
-    day_of_week: '1', // Default to Monday
     start_time: '08:00',
     end_time: '17:00',
     slot_duration_minutes: '15'
@@ -25,16 +24,6 @@ const ScheduleManager = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-
-  const daysOfWeek = [
-    { value: 0, label: 'Sunday' },
-    { value: 1, label: 'Monday' },
-    { value: 2, label: 'Tuesday' },
-    { value: 3, label: 'Wednesday' },
-    { value: 4, label: 'Thursday' },
-    { value: 5, label: 'Friday' },
-    { value: 6, label: 'Saturday' }
-  ];
 
   const fetchSchedules = async () => {
     try {
@@ -72,8 +61,13 @@ const ScheduleManager = () => {
 
     setLoading(true);
     try {
+      const year = selectedDate.getFullYear();
+      const monthStr = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(selectedDate.getDate()).padStart(2, '0');
+      const schedule_date = `${year}-${monthStr}-${dayStr}`;
+
       await axios.post('http://localhost:5000/api/doctor/schedule', {
-        day_of_week: parseInt(formData.day_of_week),
+        schedule_date: schedule_date,
         start_time: formData.start_time,
         end_time: formData.end_time,
         slot_duration_minutes: parseInt(formData.slot_duration_minutes)
@@ -128,7 +122,7 @@ const ScheduleManager = () => {
     <div id="schedule-manager" className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mt-8 scroll-mt-24">
       <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
         <Settings className="w-5 h-5 text-indigo-600" />
-        <h3 className="text-lg font-bold text-slate-800">Weekly Schedule Manager</h3>
+        <h3 className="text-lg font-bold text-slate-800">Schedule Manager</h3>
       </div>
       
       <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -142,15 +136,14 @@ const ScheduleManager = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-end mb-1">
                 <label className="text-sm font-medium text-slate-700">Select Date</label>
-                <span className="text-xs text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-md">Applies Weekly</span>
               </div>
               <div className="relative">
                 <DatePicker
                   selected={selectedDate}
                   onChange={(date) => {
                     setSelectedDate(date);
-                    setFormData({ ...formData, day_of_week: date.getDay().toString() });
                   }}
+                  minDate={new Date()}
                   dateFormat="EEEE, MMMM d"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm text-slate-700 font-medium cursor-pointer"
                   wrapperClassName="w-full"
@@ -167,7 +160,7 @@ const ScheduleManager = () => {
                   onChange={(date) => handleTimeChange(date, 'start_time')}
                   showTimeSelect
                   showTimeSelectOnly
-                  timeIntervals={30}
+                  timeIntervals={15}
                   timeCaption="Time"
                   dateFormat="hh:mm aa"
                   customInput={<CustomTimeInput label="Start with" isStart={true} />}
@@ -181,7 +174,7 @@ const ScheduleManager = () => {
                   onChange={(date) => handleTimeChange(date, 'end_time')}
                   showTimeSelect
                   showTimeSelectOnly
-                  timeIntervals={30}
+                  timeIntervals={15}
                   timeCaption="Time"
                   dateFormat="hh:mm aa"
                   customInput={<CustomTimeInput label="End with" isStart={false} />}
@@ -244,11 +237,16 @@ const ScheduleManager = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {schedules.map((schedule) => (
+              {schedules.map((schedule) => {
+                const dateObj = new Date(schedule.schedule_date);
+                const options = { weekday: 'long', month: 'short', day: 'numeric' };
+                const formattedDate = dateObj.toLocaleDateString('en-US', options);
+                
+                return (
                 <div key={schedule.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-indigo-100 hover:shadow-md transition-all group">
                   <div className="flex justify-between items-start mb-3">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-bold bg-indigo-100 text-indigo-700">
-                      {daysOfWeek.find(d => d.value === schedule.day_of_week)?.label}
+                      {formattedDate}
                     </span>
                     <span className="text-xs font-semibold text-slate-400 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
                       {schedule.slot_duration_minutes}m slots
@@ -262,7 +260,7 @@ const ScheduleManager = () => {
                     <span>{schedule.end_time.substring(0,5)}</span>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>

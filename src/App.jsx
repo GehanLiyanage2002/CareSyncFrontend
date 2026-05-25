@@ -9,7 +9,9 @@ import OtpVerification from './pages/OtpVerification';
 import PatientDashboardHome from './pages/PatientDashboardHome';
 import PatientAppointmentsPage from './pages/PatientAppointmentsPage';
 import PatientMedicalProfilePage from './pages/PatientMedicalProfilePage';
-import DoctorDashboard from './pages/DoctorDashboard';
+import DoctorDashboardHome from './pages/DoctorDashboardHome';
+import DoctorKanbanPage from './pages/DoctorKanbanPage';
+import DoctorHistoryPage from './pages/DoctorHistoryPage';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EditProfilePage from './pages/EditProfilePage';
@@ -34,7 +36,7 @@ const GenericDashboardRedirect = () => {
   
   switch (user.role) {
     case 'Patient': return <Navigate to="/patient/dashboard" replace />;
-    case 'Doctor': return <Navigate to="/doctor" replace />;
+    case 'Doctor': return <Navigate to="/doctor/dashboard" replace />;
     case 'Receptionist': return <Navigate to="/receptionist" replace />;
     case 'Admin': return <Navigate to="/admin" replace />;
     default: return <div className="p-8">Welcome to CareSync. Your role is not recognized.</div>;
@@ -109,11 +111,28 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          {/* Doctor Routes */}
           <Route 
-            path="/doctor/*" 
+            path="/doctor/dashboard" 
             element={
               <ProtectedRoute allowedRoles={['Doctor']}>
-                <DoctorDashboard />
+                <DoctorDashboardHome />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/doctor/kanban" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <DoctorKanbanPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/doctor/history" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <DoctorHistoryPage />
               </ProtectedRoute>
             } 
           />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse } from 'lucide-react';
+import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
@@ -137,7 +137,7 @@ const Header = () => {
                   <div className="bg-white dark:bg-slate-900 mx-2 mb-2 rounded-2xl flex flex-col overflow-hidden shadow-inner border border-slate-100 dark:border-slate-800">
                     
                     <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient/dashboard'); }}
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/dashboard' : '/patient/dashboard'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Home className="text-slate-500 dark:text-slate-400" size={20} />
@@ -145,28 +145,22 @@ const Header = () => {
                     </button>
                     
                     <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient/appointments'); }}
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/kanban' : '/patient/appointments'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Calendar className="text-slate-500 dark:text-slate-400" size={20} />
-                      <span className="font-medium text-slate-700 dark:text-slate-200">My Appointments</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointments Board' : 'My Appointments'}</span>
                     </button>
 
                     <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient/medical-profile'); }}
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/history' : '/patient/medical-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
-                      <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />
-                      <span className="font-medium text-slate-700 dark:text-slate-200">Medical Profile</span>
+                      {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
                     </button>
 
-                    <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <Settings className="text-slate-500 dark:text-slate-400" size={20} />
-                      <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>
-                    </button>
+                   
 
                     <div className="p-2">
                       <button 

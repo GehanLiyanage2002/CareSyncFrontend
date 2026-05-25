@@ -6,7 +6,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import DoctorRegister from './pages/DoctorRegister';
 import OtpVerification from './pages/OtpVerification';
-import PatientDashboard from './pages/PatientDashboard';
+import PatientDashboardHome from './pages/PatientDashboardHome';
+import PatientAppointmentsPage from './pages/PatientAppointmentsPage';
+import PatientMedicalProfilePage from './pages/PatientMedicalProfilePage';
 import DoctorDashboard from './pages/DoctorDashboard';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -30,7 +32,7 @@ const GenericDashboardRedirect = () => {
   if (!user) return <Navigate to="/login" replace />;
   
   switch (user.role) {
-    case 'Patient': return <Navigate to="/patient" replace />;
+    case 'Patient': return <Navigate to="/patient/dashboard" replace />;
     case 'Doctor': return <Navigate to="/doctor" replace />;
     case 'Receptionist': return <Navigate to="/receptionist" replace />;
     case 'Admin': return <Navigate to="/admin" replace />;
@@ -68,15 +70,31 @@ function App() {
             path="/patient-dashboard"
             element={
               <ProtectedRoute allowedRoles={['Patient']}>
-                <PatientDashboard />
+                <Navigate to="/patient/dashboard" replace />
               </ProtectedRoute>
             } 
           />
           <Route 
-            path="/patient/*" 
+            path="/patient/dashboard" 
             element={
               <ProtectedRoute allowedRoles={['Patient']}>
-                <PatientDashboard />
+                <PatientDashboardHome />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/patient/appointments" 
+            element={
+              <ProtectedRoute allowedRoles={['Patient']}>
+                <PatientAppointmentsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/patient/medical-profile" 
+            element={
+              <ProtectedRoute allowedRoles={['Patient']}>
+                <PatientMedicalProfilePage />
               </ProtectedRoute>
             } 
           />

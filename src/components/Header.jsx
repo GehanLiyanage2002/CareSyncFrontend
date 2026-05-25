@@ -137,7 +137,15 @@ const Header = () => {
                   <div className="bg-white dark:bg-slate-900 mx-2 mb-2 rounded-2xl flex flex-col overflow-hidden shadow-inner border border-slate-100 dark:border-slate-800">
                     
                     <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient-dashboard', { state: { activeTab: 'My Appointments' } }); }}
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient/dashboard'); }}
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                    >
+                      <Home className="text-slate-500 dark:text-slate-400" size={20} />
+                      <span className="font-medium text-slate-700 dark:text-slate-200">Dashboard</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient/appointments'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Calendar className="text-slate-500 dark:text-slate-400" size={20} />
@@ -145,7 +153,7 @@ const Header = () => {
                     </button>
 
                     <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient-dashboard', { state: { activeTab: 'Medical Profile' } }); }}
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient/medical-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />
@@ -153,7 +161,7 @@ const Header = () => {
                     </button>
 
                     <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor-dashboard' : '/patient-dashboard', { state: { activeTab: 'Settings' } }); }}
+                      onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Settings className="text-slate-500 dark:text-slate-400" size={20} />

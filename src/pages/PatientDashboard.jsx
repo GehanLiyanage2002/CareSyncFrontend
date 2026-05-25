@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MedicalProfile from '../components/MedicalProfile';
 
 // Inline SVGs for no-dependency icons to keep it lightweight
@@ -51,7 +51,14 @@ const PatientDashboard = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('Dashboard');
+
+  useEffect(() => {
+    if (location.state && location.state.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -96,7 +103,14 @@ const PatientDashboard = () => {
             ))}
           </nav>
         </div>
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-slate-100 flex flex-col gap-2">
+          <button
+            onClick={() => navigate('/edit-profile')}
+            className="w-full flex items-center gap-3 px-5 py-3 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 font-semibold"
+          >
+            <UserIcon />
+            Edit Profile
+          </button>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-5 py-3 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 font-semibold"

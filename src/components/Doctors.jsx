@@ -38,8 +38,19 @@ const Doctors = ({ onBookNow }) => {
       );
     });
 
+    socket.on('doctorFeeChanged', (data) => {
+      setDoctors(prevDoctors => 
+        prevDoctors.map(doc => 
+          (doc.doctor_id === data.doctor_id || doc.id === data.doctor_id)
+            ? { ...doc, consultationFee: data.consultation_fee }
+            : doc
+        )
+      );
+    });
+
     return () => {
       socket.off('doctorAvailabilityChanged');
+      socket.off('doctorFeeChanged');
     };
   }, []);
 

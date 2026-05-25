@@ -6,7 +6,8 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
-const DoctorProfile = ({ doctor, onBack }) => {
+const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
+  const [doctor, setDoctor] = useState(initialDoctor);
   const { user, token } = useSelector(state => state.auth);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
@@ -26,6 +27,28 @@ const DoctorProfile = ({ doctor, onBack }) => {
   const [dynamicSlots, setDynamicSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleFeeChanged = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({ ...prev, consultationFee: data.consultation_fee }));
+      }
+    };
+    
+    const handleAvailabilityChanged = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({ ...prev, is_available: data.is_available }));
+      }
+    };
+
+    socket.on('doctorFeeChanged', handleFeeChanged);
+    socket.on('doctorAvailabilityChanged', handleAvailabilityChanged);
+
+    return () => {
+      socket.off('doctorFeeChanged', handleFeeChanged);
+      socket.off('doctorAvailabilityChanged', handleAvailabilityChanged);
+    };
+  }, [doctor.id, doctor.doctor_id]);
 
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);

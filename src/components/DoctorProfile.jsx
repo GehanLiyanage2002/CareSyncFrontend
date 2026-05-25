@@ -264,12 +264,12 @@ const DoctorProfile = ({ doctor, onBack }) => {
               </div>
 
               <div className="border border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl p-4 flex items-start gap-3 transition-colors duration-300">
-                <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <Check className={`h-5 w-5 shrink-0 ${doctor.is_available === false ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`} />
                 <div>
                   <span className="block text-xs text-gray-500 dark:text-gray-400 font-semibold">Availability</span>
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    Available
+                  <span className={`text-sm font-bold flex items-center gap-1.5 ${doctor.is_available === false ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    <span className={`w-2.5 h-2.5 rounded-full ${doctor.is_available === false ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse'}`}></span>
+                    {doctor.is_available === false ? 'Unavailable' : 'Available'}
                   </span>
                 </div>
               </div>
@@ -285,11 +285,18 @@ const DoctorProfile = ({ doctor, onBack }) => {
       </div>
 
       {/* Appointment Booking Panel */}
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-lg border border-blue-50/50 dark:border-gray-700/50 transition-colors duration-300">
-        <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-8 flex items-center gap-2 transition-colors">
-          <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          Book Your Appointment
-        </h3>
+      {doctor.is_available === false ? (
+        <div className="bg-rose-50 dark:bg-rose-900/20 rounded-3xl p-8 shadow-sm border border-rose-100 dark:border-rose-800/30 text-center transition-colors duration-300 mt-8">
+          <Calendar className="h-12 w-12 text-rose-400 dark:text-rose-500 mx-auto mb-4" />
+          <h3 className="text-2xl font-bold text-rose-900 dark:text-rose-400 mb-2">Currently Unavailable</h3>
+          <p className="text-rose-700 dark:text-rose-300">This doctor is not accepting new appointments at the moment.</p>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-lg border border-blue-50/50 dark:border-gray-700/50 transition-colors duration-300 mt-8">
+          <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-8 flex items-center gap-2 transition-colors">
+            <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            Book Your Appointment
+          </h3>
 
         <form onSubmit={handleBookingSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -527,7 +534,8 @@ const DoctorProfile = ({ doctor, onBack }) => {
           </div>
 
         </form>
-      </div>
+        </div>
+      )}
 
       {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (

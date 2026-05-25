@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, GraduationCap, Calendar, ChevronRight } from 'lucide-react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const Doctors = ({ onBookNow }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -12,9 +15,7 @@ const Doctors = ({ onBookNow }) => {
       try {
         const response = await axios.get('http://localhost:5000/api/users/doctors');
         if (response.data.success) {
-          // Filter to show only available doctors (or based on your requirement)
-          const availableDoctors = response.data.doctors.filter(d => d.is_available !== false);
-          setDoctors(availableDoctors);
+          setDoctors(response.data.doctors);
         }
       } catch (error) {
         console.error("Error fetching doctors:", error);
@@ -24,6 +25,22 @@ const Doctors = ({ onBookNow }) => {
     };
 
     fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+    socket.on('doctorAvailabilityChanged', (data) => {
+      setDoctors(prevDoctors => 
+        prevDoctors.map(doc => 
+          (doc.doctor_id === data.doctor_id || doc.id === data.doctor_id)
+            ? { ...doc, is_available: data.is_available }
+            : doc
+        )
+      );
+    });
+
+    return () => {
+      socket.off('doctorAvailabilityChanged');
+    };
   }, []);
 
   const filteredDoctors = doctors.filter(doctor =>
@@ -83,18 +100,33 @@ const Doctors = ({ onBookNow }) => {
                   {doctor.specialization}
                 </p>
 
-                {/* Experience Badge */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 mb-6 transition-colors">
-                  <GraduationCap className="h-4 w-4" />
-                  <span>{doctor.experience}</span>
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  {/* Experience Badge */}
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 transition-colors">
+                    <GraduationCap className="h-4 w-4" />
+                    <span>{doctor.experience}</span>
+                  </div>
+                  {/* Availability Badge */}
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors ${
+                    doctor.is_available === false 
+                    ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-100 dark:border-rose-900/60 text-rose-600 dark:text-rose-400' 
+                    : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/60 text-emerald-600 dark:text-emerald-400'
+                  }`}>
+                    <div className={`w-1.5 h-1.5 rounded-full ${doctor.is_available === false ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
+                    <span>{doctor.is_available === false ? 'Unavailable' : 'Available'}</span>
+                  </div>
                 </div>
 
                 {/* Book Now Button */}
                 <button 
                   onClick={() => onBookNow && onBookNow(doctor)}
-                  className="w-full mt-auto bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-1.5 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 group-hover:gap-2.5"
+                  className={`w-full mt-auto py-3 rounded-2xl font-bold flex items-center justify-center gap-1.5 transition-all duration-300 shadow-sm ${
+                    doctor.is_available === false
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 hover:shadow-md'
+                    : 'bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white hover:shadow-lg active:scale-95 group-hover:gap-2.5'
+                  }`}
                 >
-                  <span>Book Now</span>
+                  <span>{doctor.is_available === false ? 'View Profile' : 'Book Now'}</span>
                   <ChevronRight className="h-4 w-4 transition-transform" />
                 </button>
               </div>

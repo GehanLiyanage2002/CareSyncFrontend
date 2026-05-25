@@ -185,9 +185,29 @@ const Header = () => {
               )}
             </div>
           )}
-          <button onClick={() => navigate('/#doctors')} className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
-            Book Appointment
-          </button>
+          {user?.role === 'Doctor' ? (
+            <button 
+              onClick={() => {
+                if (window.location.pathname === '/doctor/dashboard') {
+                  const el = document.getElementById('schedule-manager');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  navigate('/doctor/dashboard');
+                  setTimeout(() => {
+                    const el = document.getElementById('schedule-manager');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
+                }
+              }} 
+              className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+            >
+              Set Appointment
+            </button>
+          ) : (
+            <button onClick={() => navigate('/#doctors')} className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+              Book Appointment
+            </button>
+          )}
         </div>
       </div>
     </header>

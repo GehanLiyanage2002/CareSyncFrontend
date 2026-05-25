@@ -85,6 +85,19 @@ const PatientDashboardHome = () => {
           </div>
         </div>
         
+        {/* Back Button */}
+        <div className="mt-12 flex justify-center">
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="flex items-center gap-2 px-6 py-3 bg-white text-slate-600 hover:text-blue-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:border-blue-200 transition-all duration-300 group"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 group-hover:-translate-x-1 transition-transform">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+            Back to Home
+          </button>
+        </div>
+        
       </main>
     </div>
   );

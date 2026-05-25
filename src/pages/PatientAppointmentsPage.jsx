@@ -6,6 +6,9 @@ import { Calendar, Clock, Star, ChevronRight, Stethoscope, Hash, CreditCard, Che
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const statusConfig = {
   pending: {
@@ -64,6 +67,23 @@ const PatientAppointmentsPage = () => {
       prev.map((a) => (a.id === appointmentId ? { ...a, has_review: true } : a))
     );
   };
+
+  // Real-time: listen for appointment status changes from doctor
+  useEffect(() => {
+    const handleStatusChange = ({ appointment_id, status }) => {
+      setAppointments((prev) =>
+        prev.map((a) =>
+          a.id === appointment_id ? { ...a, status } : a
+        )
+      );
+      toast(`Appointment status updated to ${status}`, {
+        icon: status === 'completed' ? '✅' : status === 'cancelled' ? '❌' : status === 'confirmed' ? '📋' : '🕐',
+      });
+    };
+
+    socket.on('appointmentStatusChanged', handleStatusChange);
+    return () => socket.off('appointmentStatusChanged', handleStatusChange);
+  }, []);
 
   const filters = [
     { key: 'all', label: 'All' },

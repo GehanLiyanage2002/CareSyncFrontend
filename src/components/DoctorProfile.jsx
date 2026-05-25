@@ -217,6 +217,23 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
       .finally(() => setLoadingReviews(false));
   }, [doctor]);
 
+  // Real-time: listen for new reviews on this doctor's profile
+  useEffect(() => {
+    const doctorId = doctor.id || doctor.doctor_id;
+    const handleReviewAdded = ({ doctor_id, review }) => {
+      if (doctor_id !== doctorId) return;
+      setReviews(prev => [review, ...prev]);
+      setReviewStats(prev => {
+        const newTotal = prev.total_reviews + 1;
+        const newAvg = ((prev.average_rating * prev.total_reviews) + review.rating) / newTotal;
+        return { total_reviews: newTotal, average_rating: Math.round(newAvg * 10) / 10 };
+      });
+    };
+
+    socket.on('reviewAdded', handleReviewAdded);
+    return () => socket.off('reviewAdded', handleReviewAdded);
+  }, [doctor]);
+
   const printTicket = () => {
     window.print();
   };

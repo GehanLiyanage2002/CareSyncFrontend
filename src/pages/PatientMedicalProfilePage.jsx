@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import MedicalProfile from '../components/MedicalProfile';
+import MedicalProfileTab from '../components/profile/MedicalProfileTab';
 
 const PatientMedicalProfilePage = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const PatientMedicalProfilePage = () => {
       
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 min-h-[400px]">
-          <MedicalProfile />
+          <MedicalProfileTab />
         </div>
 
         {/* Back Button */}

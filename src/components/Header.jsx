@@ -52,12 +52,12 @@ const Header = () => {
     <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
         <div className="flex items-center">
-          <span className="text-2xl font-bold text-blue-700 dark:text-blue-400">CareSync</span>
+          <span className="text-2xl font-bold text-blue-700 dark:text-blue-400 cursor-pointer" onClick={() => navigate('/')}>CareSync</span>
         </div>
         <nav className="hidden md:flex space-x-8">
-          <a href="#hero" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</a>
-          <a href="#doctors" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</a>
-          <a href="#services" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</a>
+          <button onClick={() => navigate('/#hero')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</button>
+          <button onClick={() => navigate('/#doctors')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</button>
+          <button onClick={() => navigate('/#services')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</button>
           {/* <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a> */}
         </nav>
         <div className="flex items-center space-x-4">
@@ -168,14 +168,6 @@ const Header = () => {
                       <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>
                     </button>
 
-                    <button 
-                      onClick={() => { setIsDropdownOpen(false); navigate('/'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
-                    >
-                      <Home className="text-slate-500 dark:text-slate-400" size={20} />
-                      <span className="font-medium text-slate-700 dark:text-slate-200">Home Page</span>
-                    </button>
-
                     <div className="p-2">
                       <button 
                         onClick={() => {
@@ -195,9 +187,9 @@ const Header = () => {
               )}
             </div>
           )}
-          <a href="#doctors" className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+          <button onClick={() => navigate('/#doctors')} className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
             Book Appointment
-          </a>
+          </button>
         </div>
       </div>
     </header>

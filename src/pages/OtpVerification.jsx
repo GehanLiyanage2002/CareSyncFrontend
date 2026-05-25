@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { loginSuccess } from '../features/auth/authSlice';
+import toastLib from 'react-hot-toast';
 
 // ── Success Toast ─────────────────────────────────────────────────────────────
 const SuccessToast = ({ message, onClose }) => {
@@ -105,8 +106,13 @@ const OtpVerification = () => {
       
       setToast(true);
       
-      // Navigate to dashboard
-      setTimeout(() => navigate('/patient-dashboard'), 2000);
+      // Navigate based on role
+      if (user?.role === 'Patient') {
+        toastLib.success(`Welcome back, ${user?.name || 'Patient'}`);
+        setTimeout(() => navigate('/'), 2000);
+      } else {
+        setTimeout(() => navigate('/dashboard'), 2000);
+      }
     } catch (err) {
       setError(
         err.response?.data?.message || 'Verification failed. Please try again.'

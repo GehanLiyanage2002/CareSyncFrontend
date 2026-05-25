@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { loginSuccess } from '../features/auth/authSlice';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -34,9 +35,10 @@ const Login = () => {
       // Dispatch loginSuccess to update Redux store AND persist to localStorage
       dispatch(loginSuccess({ user, token }));
 
-      // Role-based navigation: Patient goes to /patient-dashboard
+      // Role-based navigation: Patient goes to /
       if (user?.role === 'Patient') {
-        navigate('/patient-dashboard');
+        toast.success(`Welcome back, ${user?.name || 'Patient'}`);
+        navigate('/');
       } else if (user?.role === 'Doctor') {
         navigate('/doctor');
       } else if (user?.role === 'Receptionist') {

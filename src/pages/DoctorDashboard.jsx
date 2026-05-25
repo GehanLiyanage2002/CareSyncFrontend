@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, UserCircle, History, LogOut } from 'lucide-react';
+import { LayoutDashboard, UserCircle, History, LogOut, Star } from 'lucide-react';
 import DoctorProfileEdit from '../components/doctor/DoctorProfileEdit';
 import DoctorKanbanBoard from '../components/doctor/DoctorKanbanBoard';
 import AppointmentHistory from '../components/doctor/AppointmentHistory';
+import DoctorReviews from '../components/doctor/DoctorReviews';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -21,6 +22,7 @@ const DoctorDashboard = () => {
   const navItems = [
     { id: 'kanban', label: 'Appointments Board', icon: LayoutDashboard },
     { id: 'history', label: 'Appointment History', icon: History },
+    { id: 'reviews', label: 'My Reviews', icon: Star },
     { id: 'profile', label: 'My Profile', icon: UserCircle },
   ];
 
@@ -93,6 +95,7 @@ const DoctorDashboard = () => {
             {activeTab === 'profile' && <DoctorProfileEdit />}
             {activeTab === 'kanban' && <DoctorKanbanBoard />}
             {activeTab === 'history' && <AppointmentHistory />}
+            {activeTab === 'reviews' && <DoctorReviews />}
           </div>
         </div>
       </main>

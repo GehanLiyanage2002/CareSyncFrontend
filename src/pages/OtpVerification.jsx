@@ -110,6 +110,8 @@ const OtpVerification = () => {
       if (user?.role === 'Patient') {
         toastLib.success(`Welcome back, ${user?.name || 'Patient'}`);
         setTimeout(() => navigate('/'), 2000);
+      } else if (user?.role === 'Doctor') {
+        setTimeout(() => navigate('/doctor/dashboard'), 2000);
       } else {
         setTimeout(() => navigate('/dashboard'), 2000);
       }

@@ -63,6 +63,10 @@ const DoctorRegister = () => {
       setError('Please enter your full name.');
       return;
     }
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
     if (!mobileNumber.trim()) {
       setError('Please enter your mobile number.');
       return;
@@ -77,6 +81,18 @@ const DoctorRegister = () => {
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match. Please try again.');
+      return;
+    }
+    if (!specialization) {
+      setError('Please select a specialization.');
+      return;
+    }
+    if (experience === '' || isNaN(experience) || Number(experience) < 0) {
+      setError('Please enter valid years of experience.');
+      return;
+    }
+    if (!bio.trim()) {
+      setError('Please provide a professional bio.');
       return;
     }
 

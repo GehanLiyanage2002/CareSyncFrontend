@@ -40,7 +40,7 @@ const Login = () => {
         toast.success(`Welcome back, ${user?.name || 'Patient'}`);
         navigate('/');
       } else if (user?.role === 'Doctor') {
-        navigate('/doctor');
+        navigate('/doctor/dashboard');
       } else if (user?.role === 'Receptionist') {
         navigate('/receptionist');
       } else if (user?.role === 'Admin') {

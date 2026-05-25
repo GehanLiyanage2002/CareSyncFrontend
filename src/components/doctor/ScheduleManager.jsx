@@ -2,11 +2,19 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { CalendarDays, Clock, Save, Trash2, Settings } from 'lucide-react';
+import { CalendarDays, Clock, Save, Trash2, Settings, ChevronDown } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const ScheduleManager = () => {
   const { token } = useSelector((state) => state.auth);
   
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + ((1 + 7 - d.getDay()) % 7)); // Next Monday by default
+    return d;
+  });
+
   const [formData, setFormData] = useState({
     day_of_week: '1', // Default to Monday
     start_time: '08:00',
@@ -83,8 +91,41 @@ const ScheduleManager = () => {
     }
   };
 
+
+  const getTimeDate = (timeStr) => {
+    const [h, m] = timeStr.split(':');
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+  };
+
+  const handleTimeChange = (date, field) => {
+    if (!date) return;
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    setFormData({ ...formData, [field]: `${h}:${m}` });
+  };
+
+  const CustomTimeInput = React.forwardRef(({ value, onClick, label, isStart }, ref) => (
+    <button
+      type="button"
+      className={`w-full relative flex items-center justify-between px-4 py-2.5 rounded-2xl border-2 transition-all ${isStart ? 'border-blue-500 bg-blue-50/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+      onClick={onClick}
+      ref={ref}
+    >
+      <div className="flex items-center gap-3">
+        <Clock className={isStart ? "text-blue-500" : "text-slate-400"} size={22} strokeWidth={1.5} />
+        <div className="flex flex-col items-start">
+          <span className={`text-[11px] font-semibold ${isStart ? 'text-blue-500' : 'text-slate-500'}`}>{label}</span>
+          <span className="text-base font-medium text-slate-700">{value || '00:00 AM'}</span>
+        </div>
+      </div>
+      <ChevronDown className={isStart ? "text-blue-500" : "text-slate-400"} size={20} />
+    </button>
+  ));
+
   return (
-    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mt-8">
+    <div id="schedule-manager" className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mt-8 scroll-mt-24">
       <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
         <Settings className="w-5 h-5 text-indigo-600" />
         <h3 className="text-lg font-bold text-slate-800">Weekly Schedule Manager</h3>
@@ -97,72 +138,84 @@ const ScheduleManager = () => {
           <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-5">Set Working Hours</h4>
           
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Day of Week */}
+            {/* React DatePicker Component */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Day of the Week</label>
+              <div className="flex justify-between items-end mb-1">
+                <label className="text-sm font-medium text-slate-700">Select Date</label>
+                <span className="text-xs text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-md">Applies Weekly</span>
+              </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <CalendarDays size={18} className="text-slate-400" />
-                </div>
-                <select
-                  name="day_of_week"
-                  value={formData.day_of_week}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors appearance-none"
-                  required
-                >
-                  {daysOfWeek.map(day => (
-                    <option key={day.value} value={day.value}>{day.label}</option>
-                  ))}
-                </select>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => {
+                    setSelectedDate(date);
+                    setFormData({ ...formData, day_of_week: date.getDay().toString() });
+                  }}
+                  dateFormat="EEEE, MMMM d"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm text-slate-700 font-medium cursor-pointer"
+                  wrapperClassName="w-full"
+                  popperPlacement="bottom-start"
+                />
               </div>
             </div>
 
             {/* Time Range */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Start Time</label>
-                <input
-                  type="time"
-                  name="start_time"
-                  value={formData.start_time}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
-                  required
+              <div className="space-y-1">
+                <DatePicker
+                  selected={getTimeDate(formData.start_time)}
+                  onChange={(date) => handleTimeChange(date, 'start_time')}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={30}
+                  timeCaption="Time"
+                  dateFormat="hh:mm aa"
+                  customInput={<CustomTimeInput label="Start with" isStart={true} />}
+                  wrapperClassName="w-full"
+                  popperClassName="time-picker-popper"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">End Time</label>
-                <input
-                  type="time"
-                  name="end_time"
-                  value={formData.end_time}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
-                  required
+              <div className="space-y-1">
+                <DatePicker
+                  selected={getTimeDate(formData.end_time)}
+                  onChange={(date) => handleTimeChange(date, 'end_time')}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={30}
+                  timeCaption="Time"
+                  dateFormat="hh:mm aa"
+                  customInput={<CustomTimeInput label="End with" isStart={false} />}
+                  wrapperClassName="w-full"
+                  popperClassName="time-picker-popper"
                 />
               </div>
             </div>
 
             {/* Slot Duration */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Consultation Duration</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Clock size={18} className="text-slate-400" />
-                </div>
+            <div className="space-y-1 mt-4">
+              <div className="relative w-full">
                 <select
                   name="slot_duration_minutes"
                   value={formData.slot_duration_minutes}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors appearance-none"
+                  className="w-full h-full absolute top-0 left-0 opacity-0 cursor-pointer z-10"
                   required
                 >
-                  <option value="15">15 Minutes</option>
-                  <option value="30">30 Minutes</option>
-                  <option value="45">45 Minutes</option>
-                  <option value="60">60 Minutes</option>
+                  <option value="15">15 mins</option>
+                  <option value="30">30 mins</option>
+                  <option value="45">45 mins</option>
+                  <option value="60">60 mins</option>
                 </select>
+                <div className="w-full flex items-center justify-between px-4 py-2.5 rounded-2xl border-2 border-slate-200 bg-white transition-colors relative z-0">
+                  <div className="flex items-center gap-3">
+                    <Clock className="text-slate-400" size={22} strokeWidth={1.5} />
+                    <div className="flex flex-col items-start">
+                      <span className="text-[11px] font-semibold text-slate-500">Duration</span>
+                      <span className="text-base font-medium text-slate-700">{formData.slot_duration_minutes} mins</span>
+                    </div>
+                  </div>
+                  <ChevronDown className="text-slate-400" size={20} />
+                </div>
               </div>
             </div>
 

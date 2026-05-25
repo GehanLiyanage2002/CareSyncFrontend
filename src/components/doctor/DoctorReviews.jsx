@@ -25,6 +25,10 @@ const DoctorReviews = () => {
           average_rating: res.data.average_rating,
           total_reviews: res.data.total_reviews,
         });
+        // Auto-mark all as read when doctor opens the reviews page
+        axios.put('http://localhost:5000/api/reviews/mark-read', {}, {
+          headers: { Authorization: token }
+        }).catch(() => {});
       }
     } catch (error) {
       console.error('Failed to fetch reviews:', error);

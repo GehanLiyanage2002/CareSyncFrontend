@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, CheckCircle, GraduationCap, Calendar, Loader } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const DoctorProfile = ({ doctor, onBack }) => {
   const { user, token } = useSelector(state => state.auth);
@@ -22,6 +25,7 @@ const DoctorProfile = ({ doctor, onBack }) => {
   const [errors, setErrors] = useState({});
   const [dynamicSlots, setDynamicSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
@@ -83,7 +87,21 @@ const DoctorProfile = ({ doctor, onBack }) => {
       };
       fetchSlots();
     }
-  }, [selectedDate, doctor]);
+  }, [selectedDate, doctor, refreshTrigger]);
+
+  useEffect(() => {
+    socket.on('slotBooked', (data) => {
+      const docId = doctor?.id || doctor?.doctor_id;
+      // If the booking is for the currently viewed doctor and date, trigger refresh
+      if (data.doctor_id === docId && selectedDate?.valueDate === data.date) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    });
+
+    return () => {
+      socket.off('slotBooked');
+    };
+  }, [doctor, selectedDate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

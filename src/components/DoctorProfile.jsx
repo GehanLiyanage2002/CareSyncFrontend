@@ -46,12 +46,26 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
       }
     };
 
+    const handleProfileUpdated = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({
+          ...prev,
+          location: data.location,
+          specialization: data.specialization,
+          experience: data.experience,
+          about: data.bio,
+        }));
+      }
+    };
+
     socket.on('doctorFeeChanged', handleFeeChanged);
     socket.on('doctorAvailabilityChanged', handleAvailabilityChanged);
+    socket.on('doctorProfileUpdated', handleProfileUpdated);
 
     return () => {
       socket.off('doctorFeeChanged', handleFeeChanged);
       socket.off('doctorAvailabilityChanged', handleAvailabilityChanged);
+      socket.off('doctorProfileUpdated', handleProfileUpdated);
     };
   }, [doctor.id, doctor.doctor_id]);
 
@@ -252,7 +266,10 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
         <h1 className="text-2xl font-bold text-blue-900 dark:text-blue-400">Doctor Profile</h1>
         <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200 dark:border-amber-900/60 px-3 py-1 rounded-full text-sm font-bold">
           <Star className="h-4 w-4 fill-amber-500 stroke-amber-500" />
-          <span>{doctor.rating}</span>
+          <span>{reviewStats.average_rating > 0 ? reviewStats.average_rating : (doctor.rating || '—')}</span>
+          {reviewStats.total_reviews > 0 && (
+            <span className="text-xs font-normal text-amber-500/70 ml-0.5">({reviewStats.total_reviews})</span>
+          )}
         </div>
       </div>
 

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, CheckCircle, GraduationCap, Calendar } from 'lucide-react';
+import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, CheckCircle, GraduationCap, Calendar, Loader } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 const DoctorProfile = ({ doctor, onBack }) => {
+  const { user, token } = useSelector(state => state.auth);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash'); // 'Cash' or 'Online'
@@ -9,14 +12,16 @@ const DoctorProfile = ({ doctor, onBack }) => {
   const [tokenNumber, setTokenNumber] = useState(null);
   
   const [formData, setFormData] = useState({
-    fullName: '',
+    fullName: user?.name || user?.full_name || '',
     age: '',
     mobileNumber: '',
     gender: '',
-    email: ''
+    email: user?.email || ''
   });
 
   const [errors, setErrors] = useState({});
+  const [dynamicSlots, setDynamicSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Generate next 5 days
   const [dates, setDates] = useState([]);
@@ -29,26 +34,40 @@ const DoctorProfile = ({ doctor, onBack }) => {
     for (let i = 1; i <= 5; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
+      const year = d.getFullYear();
+      const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(d.getDate()).padStart(2, '0');
       tempDates.push({
         dayName: daysOfWeek[d.getDay()],
         dayNum: d.getDate(),
         month: months[d.getMonth()],
-        year: d.getFullYear(),
-        formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+        year: year,
+        formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${year}`,
+        valueDate: `${year}-${monthStr}-${dayStr}`
       });
     }
     setDates(tempDates);
   }, []);
 
-  // Time slots template
-  const timeSlots = [
-    { time: '09:00 AM', available: true },
-    { time: '10:30 AM', available: false },
-    { time: '11:00 AM', available: true },
-    { time: '02:00 PM', available: true },
-    { time: '03:30 PM', available: false },
-    { time: '05:00 PM', available: true }
-  ];
+  useEffect(() => {
+    if (selectedDate && doctor?.id) {
+      const fetchSlots = async () => {
+        setLoadingSlots(true);
+        try {
+          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${doctor.id}?date=${selectedDate.valueDate}`);
+          if (res.data.success) {
+            setDynamicSlots(res.data.slots);
+          }
+        } catch (error) {
+          console.error("Failed to fetch slots", error);
+          setDynamicSlots([]);
+        } finally {
+          setLoadingSlots(false);
+        }
+      };
+      fetchSlots();
+    }
+  }, [selectedDate, doctor]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -83,14 +102,41 @@ const DoctorProfile = ({ doctor, onBack }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Generate a mock token number e.g. CS-042
-      const randomToken = 'CS-' + Math.floor(100 + Math.random() * 900);
-      setTokenNumber(randomToken);
-      setShowSuccessModal(true);
+      try {
+        const res = await axios.post('http://localhost:5000/api/appointments', {
+          doctor_id: doctor.id,
+          appointment_date: selectedDate.valueDate,
+          start_time: selectedTime,
+          patient_name: formData.fullName,
+          age: parseInt(formData.age),
+          mobile_number: formData.mobileNumber,
+          gender: formData.gender,
+          email: formData.email,
+          payment_method: paymentMethod
+        }, {
+          headers: { Authorization: token }
+        });
+        
+        if (res.data.success) {
+          setTokenNumber(res.data.appointment.token_number);
+          setShowSuccessModal(true);
+        }
+      } catch (error) {
+        console.error("Booking failed", error);
+        alert(error.response?.data?.message || 'Booking failed');
+      }
     }
+  };
+
+  const formatTimeDisplay = (time24) => {
+    const [h, m] = time24.split(':');
+    const hours = parseInt(h);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours % 12 || 12;
+    return `${hours12.toString().padStart(2, '0')}:${m} ${ampm}`;
   };
 
   const printTicket = () => {
@@ -334,28 +380,35 @@ const DoctorProfile = ({ doctor, onBack }) => {
                 <p className="text-sm text-gray-400 dark:text-gray-500 italic bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl text-center">
                   Select a date to view available time slots.
                 </p>
+              ) : loadingSlots ? (
+                <div className="flex justify-center py-4">
+                  <Loader className="w-6 h-6 animate-spin text-blue-500" />
+                </div>
+              ) : dynamicSlots.length === 0 ? (
+                <p className="text-sm text-rose-500 italic bg-rose-50 p-4 rounded-2xl text-center">
+                  No slots available for this date.
+                </p>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  {timeSlots.map((slot, idx) => (
+                  {dynamicSlots.map((slot24, idx) => {
+                    const displayTime = formatTimeDisplay(slot24);
+                    return (
                     <button
                       key={idx}
                       type="button"
-                      disabled={!slot.available}
                       onClick={() => {
-                        setSelectedTime(slot.time);
+                        setSelectedTime(slot24);
                         if (errors.time) setErrors({ ...errors, time: '' });
                       }}
                       className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${
-                        !slot.available
-                          ? 'bg-gray-100 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-700 cursor-not-allowed line-through'
-                          : selectedTime === slot.time
+                        selectedTime === slot24
                           ? 'bg-teal-500 border-teal-500 text-white shadow'
                           : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-950/20 hover:border-teal-400'
                       }`}
                     >
-                      {slot.time}
+                      {displayTime}
                     </button>
-                  ))}
+                  )})}
                 </div>
               )}
             </div>
@@ -382,7 +435,7 @@ const DoctorProfile = ({ doctor, onBack }) => {
               <div>
                 <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 dark:text-blue-400">Selected Time</span>
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {selectedTime ? selectedTime : 'Not selected'}
+                  {selectedTime ? formatTimeDisplay(selectedTime) : 'Not selected'}
                 </span>
               </div>
 

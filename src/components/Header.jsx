@@ -159,9 +159,13 @@ const Header = () => {
                       {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
                     </button>
-
-                   
-
+                    <button 
+                      onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                    >
+                      <Settings className="text-slate-500 dark:text-slate-400" size={20} />
+                      <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>
+                    </button>
                     <div className="p-2">
                       <button 
                         onClick={() => {

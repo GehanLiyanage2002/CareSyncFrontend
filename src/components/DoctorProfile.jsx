@@ -23,38 +23,54 @@ const DoctorProfile = ({ doctor, onBack }) => {
   const [dynamicSlots, setDynamicSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
-  // Generate next 5 days
+  const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
 
+  // Fetch configured dates
   useEffect(() => {
-    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const tempDates = [];
-
-    for (let i = 1; i <= 5; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      const year = d.getFullYear();
-      const monthStr = String(d.getMonth() + 1).padStart(2, '0');
-      const dayStr = String(d.getDate()).padStart(2, '0');
-      tempDates.push({
-        dayName: daysOfWeek[d.getDay()],
-        dayNum: d.getDate(),
-        month: months[d.getMonth()],
-        year: year,
-        formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${year}`,
-        valueDate: `${year}-${monthStr}-${dayStr}`
-      });
+    const docId = doctor?.id || doctor?.doctor_id;
+    if (docId) {
+      const fetchDates = async () => {
+        setLoadingDates(true);
+        try {
+          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${docId}`);
+          if (res.data.success && res.data.dates) {
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            const tempDates = res.data.dates.map(dateStr => {
+              const d = new Date(dateStr);
+              const year = d.getFullYear();
+              const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+              const dayStr = String(d.getDate()).padStart(2, '0');
+              return {
+                dayName: daysOfWeek[d.getDay()],
+                dayNum: d.getDate(),
+                month: months[d.getMonth()],
+                year: year,
+                formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${year}`,
+                valueDate: `${year}-${monthStr}-${dayStr}`
+              };
+            });
+            setDates(tempDates);
+          }
+        } catch (error) {
+          console.error("Failed to fetch configured dates", error);
+        } finally {
+          setLoadingDates(false);
+        }
+      };
+      fetchDates();
     }
-    setDates(tempDates);
-  }, []);
+  }, [doctor]);
 
   useEffect(() => {
-    if (selectedDate && doctor?.id) {
+    const docId = doctor?.id || doctor?.doctor_id;
+    if (selectedDate && docId) {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${doctor.id}?date=${selectedDate.valueDate}`);
+          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
             setDynamicSlots(res.data.slots);
           }
@@ -106,8 +122,9 @@ const DoctorProfile = ({ doctor, onBack }) => {
     e.preventDefault();
     if (validateForm()) {
       try {
+        const docId = doctor?.id || doctor?.doctor_id;
         const res = await axios.post('http://localhost:5000/api/appointments', {
-          doctor_id: doctor.id,
+          doctor_id: docId,
           appointment_date: selectedDate.valueDate,
           start_time: selectedTime,
           patient_name: formData.fullName,
@@ -265,28 +282,38 @@ const DoctorProfile = ({ doctor, onBack }) => {
             <div>
               <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">Select Date</h4>
               {errors.date && <p className="text-rose-500 text-xs mb-2">{errors.date}</p>}
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                {dates.map((date, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedTime(null); // Reset selected time slot
-                      if (errors.date) setErrors({ ...errors, date: '' });
-                    }}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all duration-300 min-w-[70px] ${
-                      selectedDate?.formattedDate === date.formattedDate
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                        : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <span className="text-xs uppercase tracking-wider">{date.dayName}</span>
-                    <span className="text-xl font-bold my-1">{date.dayNum}</span>
-                    <span className="text-xs">{date.month}</span>
-                  </button>
-                ))}
-              </div>
+              {loadingDates ? (
+                <div className="flex justify-center py-4 w-full text-blue-500">
+                  <Loader className="animate-spin h-6 w-6" />
+                </div>
+              ) : dates.length === 0 ? (
+                <div className="text-sm text-gray-500 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
+                  No availability currently configured.
+                </div>
+              ) : (
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                  {dates.map((date, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDate(date);
+                        setSelectedTime(null); // Reset selected time slot
+                        if (errors.date) setErrors({ ...errors, date: '' });
+                      }}
+                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all duration-300 min-w-[70px] ${
+                        selectedDate?.formattedDate === date.formattedDate
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                          : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <span className="text-xs uppercase tracking-wider">{date.dayName}</span>
+                      <span className="text-xl font-bold my-1">{date.dayNum}</span>
+                      <span className="text-xs">{date.month}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Patient Details Form */}

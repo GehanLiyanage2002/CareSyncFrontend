@@ -127,7 +127,7 @@ const Header = () => {
                         setIsDropdownOpen(false);
                         navigate('/edit-profile');
                       }}
-                      className="px-6 py-2 rounded-full border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-full sm:w-auto"
+                      className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
                     >
                       Manage your CareSync Profile
                     </button>

@@ -40,7 +40,12 @@ const Register = () => {
   const [mobileNumber, setMobileNumber]       = useState('');
   const [password, setPassword]               = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const role                                  = 'Patient'; // default & fixed
+  const [role, setRole]                       = useState('Patient');
+
+  // Doctor specific fields
+  const [specialization, setSpecialization]   = useState('');
+  const [experience, setExperience]           = useState('');
+  const [bio, setBio]                         = useState('');
 
   const [showPassword, setShowPassword]           = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -83,6 +88,11 @@ const Register = () => {
         mobile_number: mobileNumber.trim(),
         password,
         role,
+        ...(role === 'Doctor' && {
+          specialization,
+          experience: experience.toString() + ' Years',
+          bio
+        })
       });
 
       // Since the backend now sends the OTP via email, we can redirect immediately
@@ -133,7 +143,7 @@ const Register = () => {
               </svg>
             </div>
             <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Create Account</h1>
-            <p className="mt-2 text-slate-500 text-base font-medium">Join CareSync as a Patient</p>
+            <p className="mt-2 text-slate-500 text-base font-medium">Join CareSync as a {role}</p>
           </div>
 
           {/* ── Error Alert ──────────────────────────────────────────────── */}
@@ -150,6 +160,18 @@ const Register = () => {
 
           {/* ── Form ────────────────────────────────────────────────────── */}
           <form onSubmit={handleSubmit} noValidate className="space-y-5">
+
+            {/* Role Selection */}
+            <div className="flex gap-4 mb-4">
+              <label className={`flex-1 flex items-center justify-center gap-2 p-3 border rounded-xl cursor-pointer transition-all ${role === 'Patient' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                <input type="radio" name="role" value="Patient" checked={role === 'Patient'} onChange={(e) => setRole(e.target.value)} className="hidden" />
+                Patient
+              </label>
+              <label className={`flex-1 flex items-center justify-center gap-2 p-3 border rounded-xl cursor-pointer transition-all ${role === 'Doctor' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                <input type="radio" name="role" value="Doctor" checked={role === 'Doctor'} onChange={(e) => setRole(e.target.value)} className="hidden" />
+                Doctor
+              </label>
+            </div>
 
             {/* Full Name */}
             <div>
@@ -225,6 +247,73 @@ const Register = () => {
                 />
               </div>
             </div>
+
+            {/* Doctor Specific Fields */}
+            {role === 'Doctor' && (
+              <div className="space-y-5 p-5 bg-blue-50/50 rounded-xl border border-blue-100">
+                <h3 className="text-sm font-bold text-blue-800">Doctor Professional Details</h3>
+                
+                {/* Specialization */}
+                <div>
+                  <label htmlFor="reg-specialization" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Specialization
+                  </label>
+                  <select
+                    id="reg-specialization"
+                    name="specialization"
+                    required
+                    value={specialization}
+                    onChange={(e) => setSpecialization(e.target.value)}
+                    className="block w-full px-4 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm font-medium"
+                  >
+                    <option value="" disabled>Select Specialization</option>
+                    <option value="Psychology">Psychology</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Neurology">Neurology</option>
+                    <option value="Pediatrics">Pediatrics</option>
+                    <option value="Orthopedics">Orthopedics</option>
+                    <option value="General Practice">General Practice</option>
+                  </select>
+                </div>
+
+                {/* Experience */}
+                <div>
+                  <label htmlFor="reg-experience" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Experience (Years)
+                  </label>
+                  <input
+                    id="reg-experience"
+                    name="experience"
+                    type="number"
+                    min="0"
+                    max="60"
+                    required
+                    value={experience}
+                    onChange={(e) => setExperience(e.target.value)}
+                    placeholder="e.g. 5"
+                    className="block w-full px-4 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm font-medium"
+                  />
+                </div>
+
+                {/* Bio */}
+                <div>
+                  <label htmlFor="reg-bio" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    Professional Bio
+                  </label>
+                  <textarea
+                    id="reg-bio"
+                    name="bio"
+                    rows="3"
+                    required
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Brief description of your background..."
+                    className="block w-full px-4 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 text-sm font-medium resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            )}
+
             <div>
               <label htmlFor="reg-password" className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Password
@@ -302,15 +391,17 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Role badge (display only, locked to Patient) */}
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-              <span className="text-blue-500">
+            {/* Role badge */}
+            <div className={`flex items-center gap-2 border rounded-xl px-4 py-3 ${
+              role === 'Doctor' ? 'bg-indigo-50 border-indigo-100' : 'bg-blue-50 border-blue-100'
+            }`}>
+              <span className={role === 'Doctor' ? 'text-indigo-500' : 'text-blue-500'}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </span>
-              <p className="text-sm text-blue-700 font-semibold">
-                Registering as: <span className="font-extrabold">Patient</span>
+              <p className={`text-sm font-semibold ${role === 'Doctor' ? 'text-indigo-700' : 'text-blue-700'}`}>
+                Registering as: <span className="font-extrabold">{role}</span>
               </p>
             </div>
 

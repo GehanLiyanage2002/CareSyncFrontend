@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Clock, User, CreditCard, X, Hash } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -19,16 +19,23 @@ const DoctorKanbanBoard = () => {
   });
   const [selectedTask, setSelectedTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [consultationFee, setConsultationFee] = useState(0);
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/doctor/appointments', {
-          headers: { Authorization: token }
-        });
+        // Fetch both profile and appointments
+        const [profileRes, appointmentsRes] = await Promise.all([
+          axios.get('http://localhost:5000/api/doctor/profile', { headers: { Authorization: token } }),
+          axios.get('http://localhost:5000/api/doctor/appointments', { headers: { Authorization: token } })
+        ]);
 
-        if (response.data.success) {
-          const appointments = response.data.appointments;
+        if (profileRes.data.success) {
+          setConsultationFee(profileRes.data.profile?.consultation_fee || 0);
+        }
+
+        if (appointmentsRes.data.success) {
+          const appointments = appointmentsRes.data.appointments;
           
           const newTasks = {};
           const cols = {
@@ -70,15 +77,21 @@ const DoctorKanbanBoard = () => {
           }));
         }
       } catch (error) {
-        console.error('Error fetching appointments:', error);
-        toast.error('Failed to fetch appointments for the board');
+        console.error('Error fetching data:', error);
+        toast.error('Failed to fetch board data');
       } finally {
         setIsLoading(false);
       }
     };
     
-    if (token) fetchAppointments();
+    if (token) fetchData();
   }, [token]);
+
+  // Derived stats
+  const totalAppointments = Object.keys(data.tasks).length;
+  const completedCount = data.columns['completed'].taskIds.length;
+  const cancelledCount = data.columns['cancelled'].taskIds.length;
+  const totalEarnings = completedCount * consultationFee;
 
   const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
@@ -138,14 +151,55 @@ const DoctorKanbanBoard = () => {
 
   return (
     <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6 flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-gray-700">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
-            Appointments Board
-          </h2>
-          <p className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-2">Drag and drop appointments across columns to update their status instantly.</p>
+      
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {/* Total Appointments */}
+        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-emerald-100 dark:border-gray-700">
+          <div>
+            <p className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1">Total Appointments</p>
+            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">{totalAppointments}</h4>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <Calendar size={20} />
+          </div>
+        </div>
+
+        {/* Total Earnings */}
+        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-amber-100 dark:border-gray-700">
+          <div>
+            <p className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1">Total Earnings</p>
+            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">Rs. {totalEarnings}</h4>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+            <span className="font-bold text-xl">Rs</span>
+          </div>
+        </div>
+
+        {/* Completed */}
+        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-blue-100 dark:border-gray-700">
+          <div>
+            <p className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1">Completed</p>
+            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">{completedCount}</h4>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+            <Check size={20} />
+          </div>
+        </div>
+
+        {/* Cancelled */}
+        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-rose-100 dark:border-gray-700">
+          <div>
+            <p className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1">Cancelled</p>
+            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">{cancelledCount}</h4>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center">
+            <X size={20} />
+          </div>
         </div>
       </div>
+
+      
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 flex-1 pb-4 items-start">

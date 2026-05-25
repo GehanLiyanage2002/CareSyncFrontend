@@ -5,6 +5,7 @@ import { Calendar, CheckCircle, Users, Clock, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import ScheduleManager from '../components/doctor/ScheduleManager';
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -240,6 +241,9 @@ const DoctorDashboardHome = () => {
             )}
           </div>
         </div>
+
+        {/* Schedule Manager */}
+        <ScheduleManager />
         
       </main>
     </div>

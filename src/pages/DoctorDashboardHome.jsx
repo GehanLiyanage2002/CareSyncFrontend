@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import ScheduleManager from '../components/doctor/ScheduleManager';
+import FeeManager from '../components/doctor/FeeManager';
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -244,6 +245,9 @@ const DoctorDashboardHome = () => {
 
         {/* Schedule Manager */}
         <ScheduleManager />
+        
+        {/* Fee Manager */}
+        <FeeManager />
         
       </main>
     </div>

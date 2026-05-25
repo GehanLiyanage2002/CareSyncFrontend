@@ -10,7 +10,7 @@ const SuccessToast = ({ message, onClose }) => {
   }, [onClose]);
 
   return (
-    <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-emerald-500 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-emerald-200 font-semibold text-sm animate-[fadeInDown_0.3s_ease-out]">
+    <div className="fixed top-6 right-6 z-50 flex items-center gap-3 bg-indigo-500 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-indigo-200 font-semibold text-sm animate-[fadeInDown_0.3s_ease-out]">
       <span className="text-xl">✅</span>
       <span>{message}</span>
       <button onClick={onClose} className="ml-2 opacity-75 hover:opacity-100 text-lg leading-none">×</button>
@@ -31,8 +31,8 @@ const EyeIcon = ({ open }) =>
     </svg>
   );
 
-// ── Register Page ─────────────────────────────────────────────────────────────
-const Register = () => {
+// ── Doctor Register Page ─────────────────────────────────────────────────────────────
+const DoctorRegister = () => {
   const navigate = useNavigate();
 
   const [fullName, setFullName]               = useState('');
@@ -40,7 +40,13 @@ const Register = () => {
   const [mobileNumber, setMobileNumber]       = useState('');
   const [password, setPassword]               = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const role                                  = 'Patient'; // default & fixed
+  
+  // Doctor specific fields
+  const [specialization, setSpecialization]   = useState('');
+  const [experience, setExperience]           = useState('');
+  const [bio, setBio]                         = useState('');
+  
+  const role                                  = 'Doctor'; // default & fixed
 
   const [showPassword, setShowPassword]           = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -83,6 +89,9 @@ const Register = () => {
         mobile_number: mobileNumber.trim(),
         password,
         role,
+        specialization,
+        experience: experience.toString() + ' Years',
+        bio
       });
 
       // Since the backend now sends the OTP via email, we can redirect immediately
@@ -98,24 +107,24 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
 
 
       {/* Decorative blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20" />
 
       {/* Card container */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-200/50 p-8 md:p-10 border border-white/60">
+      <div className="relative z-10 w-full max-w-md my-8">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-200/50 p-8 md:p-10 border border-white/60">
 
           {/* ── Back to Home ────────────────────────────────────────────── */}
           <div className="flex justify-start mb-2">
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors duration-150 group"
+              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-indigo-600 font-semibold transition-colors duration-150 group"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-150">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -126,14 +135,14 @@ const Register = () => {
 
           {/* ── Logo & Header ────────────────────────────────────────────── */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg shadow-emerald-300 mb-5">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-300 mb-5">
               {/* Medical cross icon */}
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="white" className="w-8 h-8">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Create Account</h1>
-            <p className="mt-2 text-slate-500 text-base font-medium">Join CareSync as a Patient</p>
+            <p className="mt-2 text-slate-500 text-base font-medium">Join CareSync as a Doctor</p>
           </div>
 
           {/* ── Error Alert ──────────────────────────────────────────────── */}
@@ -170,8 +179,8 @@ const Register = () => {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="John Doe"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  placeholder="Dr. John Doe"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
@@ -196,7 +205,7 @@ const Register = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
@@ -221,8 +230,72 @@ const Register = () => {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   placeholder="+94 77 123 4567"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
                 />
+              </div>
+            </div>
+
+            {/* Doctor Specific Fields */}
+            <div className="space-y-5 p-5 bg-indigo-50/50 rounded-xl border border-indigo-100">
+              <h3 className="text-sm font-bold text-indigo-800">Doctor Professional Details</h3>
+              
+              {/* Specialization */}
+              <div>
+                <label htmlFor="reg-specialization" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                  Specialization
+                </label>
+                <select
+                  id="reg-specialization"
+                  name="specialization"
+                  required
+                  value={specialization}
+                  onChange={(e) => setSpecialization(e.target.value)}
+                  className="block w-full px-4 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm font-medium"
+                >
+                  <option value="" disabled>Select Specialization</option>
+                  <option value="Psychology">Psychology</option>
+                  <option value="Cardiology">Cardiology</option>
+                  <option value="Neurology">Neurology</option>
+                  <option value="Pediatrics">Pediatrics</option>
+                  <option value="Orthopedics">Orthopedics</option>
+                  <option value="General Practice">General Practice</option>
+                </select>
+              </div>
+
+              {/* Experience */}
+              <div>
+                <label htmlFor="reg-experience" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                  Experience (Years)
+                </label>
+                <input
+                  id="reg-experience"
+                  name="experience"
+                  type="number"
+                  min="0"
+                  max="60"
+                  required
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                  placeholder="e.g. 5"
+                  className="block w-full px-4 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm font-medium"
+                />
+              </div>
+
+              {/* Bio */}
+              <div>
+                <label htmlFor="reg-bio" className="block text-sm font-semibold text-slate-700 mb-1.5">
+                  Professional Bio
+                </label>
+                <textarea
+                  id="reg-bio"
+                  name="bio"
+                  rows="3"
+                  required
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Brief description of your background..."
+                  className="block w-full px-4 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm font-medium resize-none"
+                ></textarea>
               </div>
             </div>
 
@@ -245,7 +318,7 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 6 characters"
-                  className="block w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
                 />
                 <button
                   type="button"
@@ -282,8 +355,8 @@ const Register = () => {
                     ${confirmPassword && confirmPassword !== password
                       ? 'border-red-300 focus:ring-red-400'
                       : confirmPassword && confirmPassword === password
-                        ? 'border-emerald-300 focus:ring-emerald-500'
-                        : 'border-slate-200 focus:ring-emerald-500'
+                        ? 'border-indigo-300 focus:ring-indigo-500'
+                        : 'border-slate-200 focus:ring-indigo-500'
                     }`}
                 />
                 <button
@@ -296,22 +369,22 @@ const Register = () => {
                 </button>
                 {/* Live match indicator */}
                 {confirmPassword && (
-                  <p className={`text-xs mt-1.5 font-semibold ${confirmPassword === password ? 'text-emerald-600' : 'text-red-500'}`}>
+                  <p className={`text-xs mt-1.5 font-semibold ${confirmPassword === password ? 'text-indigo-600' : 'text-red-500'}`}>
                     {confirmPassword === password ? '✓ Passwords match' : '✗ Passwords do not match'}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Role badge (display only, locked to Patient) */}
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-              <span className="text-blue-500">
+            {/* Role badge (display only, locked to Doctor) */}
+            <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
+              <span className="text-indigo-500">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </span>
-              <p className="text-sm text-blue-700 font-semibold">
-                Registering as: <span className="font-extrabold">Patient</span>
+              <p className="text-sm text-indigo-700 font-semibold">
+                Registering as: <span className="font-extrabold">Doctor</span>
               </p>
             </div>
 
@@ -322,8 +395,8 @@ const Register = () => {
               disabled={loading}
               className={`w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-white text-sm font-bold shadow-lg transition-all duration-200 ease-out
                 ${loading
-                  ? 'bg-emerald-400 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-emerald-300/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
+                  ? 'bg-indigo-400 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-300/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
                 }`}
             >
               {loading ? (
@@ -352,7 +425,7 @@ const Register = () => {
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150"
+            className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors duration-150"
           >
             Sign in instead
           </button>
@@ -362,4 +435,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default DoctorRegister;

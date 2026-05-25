@@ -1,12 +1,20 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import PatientDashboard from './pages/PatientDashboard';
-import DoctorDashboard from './pages/DoctorDashboard';
+import DoctorRegister from './pages/DoctorRegister';
+import OtpVerification from './pages/OtpVerification';
+import PatientDashboardHome from './pages/PatientDashboardHome';
+import PatientAppointmentsPage from './pages/PatientAppointmentsPage';
+import PatientMedicalProfilePage from './pages/PatientMedicalProfilePage';
+import DoctorDashboardHome from './pages/DoctorDashboardHome';
+import DoctorKanbanPage from './pages/DoctorKanbanPage';
+import DoctorHistoryPage from './pages/DoctorHistoryPage';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import EditProfilePage from './pages/EditProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const Unauthorized = () => (
@@ -27,8 +35,8 @@ const GenericDashboardRedirect = () => {
   if (!user) return <Navigate to="/login" replace />;
   
   switch (user.role) {
-    case 'Patient': return <Navigate to="/patient" replace />;
-    case 'Doctor': return <Navigate to="/doctor" replace />;
+    case 'Patient': return <Navigate to="/patient/dashboard" replace />;
+    case 'Doctor': return <Navigate to="/doctor/dashboard" replace />;
     case 'Receptionist': return <Navigate to="/receptionist" replace />;
     case 'Admin': return <Navigate to="/admin" replace />;
     default: return <div className="p-8">Welcome to CareSync. Your role is not recognized.</div>;
@@ -38,12 +46,15 @@ const GenericDashboardRedirect = () => {
 function App() {
   return (
     <div className="antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans">
+      <Toaster position="top-right" />
       <Router>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/doctor-register" element={<DoctorRegister />} />
+          <Route path="/verify-otp" element={<OtpVerification />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
           {/* Generic Dashboard Redirect Route */}
@@ -56,29 +67,72 @@ function App() {
             } 
           />
 
+          {/* Profile Route - accessible by any authenticated user */}
+          <Route 
+            path="/edit-profile" 
+            element={
+              <ProtectedRoute>
+                <EditProfilePage />
+              </ProtectedRoute>
+            } 
+          />
+
           {/* Protected Role-Based Routes */}
           {/* /patient-dashboard is the primary Patient redirect from Login */}
           <Route 
             path="/patient-dashboard"
             element={
               <ProtectedRoute allowedRoles={['Patient']}>
-                <PatientDashboard />
+                <Navigate to="/patient/dashboard" replace />
               </ProtectedRoute>
             } 
           />
           <Route 
-            path="/patient/*" 
+            path="/patient/dashboard" 
             element={
               <ProtectedRoute allowedRoles={['Patient']}>
-                <PatientDashboard />
+                <PatientDashboardHome />
               </ProtectedRoute>
             } 
           />
           <Route 
-            path="/doctor/*" 
+            path="/patient/appointments" 
+            element={
+              <ProtectedRoute allowedRoles={['Patient']}>
+                <PatientAppointmentsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/patient/medical-profile" 
+            element={
+              <ProtectedRoute allowedRoles={['Patient']}>
+                <PatientMedicalProfilePage />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Doctor Routes */}
+          <Route 
+            path="/doctor/dashboard" 
             element={
               <ProtectedRoute allowedRoles={['Doctor']}>
-                <DoctorDashboard />
+                <DoctorDashboardHome />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/doctor/kanban" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <DoctorKanbanPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/doctor/history" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <DoctorHistoryPage />
               </ProtectedRoute>
             } 
           />

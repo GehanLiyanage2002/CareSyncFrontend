@@ -21,7 +21,7 @@ const RoleLogin = () => {
           {roles.map((role, index) => (
             <div 
               key={index} 
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/login', { state: { role: role.name === 'Major Admin' ? 'Admin' : role.name } })}
               className="bg-slate-800 p-8 rounded-2xl flex flex-col items-center text-center hover:bg-slate-700 transition cursor-pointer border border-slate-700"
             >
               <div className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl mb-4 ${role.color}`}>

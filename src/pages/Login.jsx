@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { loginSuccess } from '../features/auth/authSlice';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +13,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
+
+  const loginRole = location.state?.role || 'Patient';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,11 +35,12 @@ const Login = () => {
       // Dispatch loginSuccess to update Redux store AND persist to localStorage
       dispatch(loginSuccess({ user, token }));
 
-      // Role-based navigation: Patient goes to /patient-dashboard
+      // Role-based navigation: Patient goes to /
       if (user?.role === 'Patient') {
-        navigate('/patient-dashboard');
+        toast.success(`Welcome back, ${user?.name || 'Patient'}`);
+        navigate('/');
       } else if (user?.role === 'Doctor') {
-        navigate('/doctor');
+        navigate('/doctor/dashboard');
       } else if (user?.role === 'Receptionist') {
         navigate('/receptionist');
       } else if (user?.role === 'Admin') {
@@ -92,7 +97,7 @@ const Login = () => {
               </svg>
             </div>
             <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Welcome Back</h1>
-            <p className="mt-2 text-slate-500 text-base font-medium">Sign in to your CareSync account</p>
+            <p className="mt-2 text-slate-500 text-base font-medium">Sign in to your {loginRole} account</p>
           </div>
 
           {/* Error Alert */}
@@ -215,12 +220,24 @@ const Login = () => {
           </p>
         </div>
 
-        <p className="text-center mt-6 text-sm text-slate-500">
-          Don't have an account?{' '}
-          <button type="button" onClick={() => navigate('/register')} className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
-            Create an account
-          </button>
-        </p>
+        <div className="text-center mt-6 text-sm text-slate-500">
+          {loginRole === 'Doctor' && (
+            <span>
+              Are you a medical professional?{' '}
+              <button type="button" onClick={() => navigate('/doctor-register')} className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors duration-150">
+                Register as a Doctor
+              </button>
+            </span>
+          )}
+          {loginRole === 'Patient' && (
+            <span>
+              Don't have an account?{' '}
+              <button type="button" onClick={() => navigate('/register')} className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+                Create an account
+              </button>
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

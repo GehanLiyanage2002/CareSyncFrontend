@@ -1,93 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, GraduationCap, Calendar, ChevronRight } from 'lucide-react';
+import axios from 'axios';
 
 const Doctors = ({ onBookNow }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const doctors = [
-    {
-      name: "Dr. David Kim",
-      specialization: "Oncologist",
-      experience: "7 Years",
-      successRate: "97%",
-      patients: "3.2k+",
-      qualifications: "MBBS, MD (Oncology)",
-      location: "CareSync Hospital, Block C",
-      consultationFee: 1500,
-      about: "Specialized in advanced cancer therapy, precision oncology, and early cancer detection.",
-      rating: "4.9",
-      image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400"
-    },
-    {
-      name: "Dr. Emily Rodriguez",
-      specialization: "Pediatrician",
-      experience: "8 Years",
-      successRate: "99%",
-      patients: "5k+",
-      qualifications: "MBBS, MD (Pediatrics)",
-      location: "CareSync Hospital, Block B",
-      consultationFee: 1200,
-      about: "Dedicated pediatrician focusing on adolescent health, early child development, and preventative care.",
-      rating: "5.0",
-      image: "https://images.unsplash.com/photo-1594824813573-246434e33963?auto=format&fit=crop&q=80&w=400"
-    },
-    {
-      name: "Dr. Kabir Malhotra",
-      specialization: "Nephrologist",
-      experience: "7 Years",
-      successRate: "94%",
-      patients: "2.1k+",
-      qualifications: "MBBS, MD (Nephrology)",
-      location: "CareSync Hospital, Block A",
-      consultationFee: 1300,
-      about: "Expert in kidney disease management, dialysis therapy, and post-transplant follow-up care.",
-      rating: "4.8",
-      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400"
-    },
-    {
-      name: "Dr. Rahul Sharma",
-      specialization: "Cardiologist",
-      experience: "10 Years",
-      successRate: "98%",
-      patients: "8k+",
-      qualifications: "MBBS, MD (Cardiology)",
-      location: "CareSync Hospital, Block D",
-      consultationFee: 1800,
-      about: "Cardiology expert specialized in heart valve disorders, coronary interventions, and preventative cardiac care.",
-      rating: "5.0",
-      image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400"
-    },
-    {
-      name: "Dr. Rohan Mehta",
-      specialization: "ENT Specialist",
-      experience: "12 Years",
-      successRate: "96%",
-      patients: "6.2k+",
-      qualifications: "MBBS, MS (ENT)",
-      location: "CareSync Hospital, Block B",
-      consultationFee: 1000,
-      about: "Experienced ENT specialist diagnosing and treating ear, nose, throat, and complex sinus disorders.",
-      rating: "4.9",
-      image: "https://images.unsplash.com/photo-1638202993928-7267aad84c31?auto=format&fit=crop&q=80&w=400"
-    },
-    {
-      name: "Dr. Sarah Johnson",
-      specialization: "Psychiatrist",
-      experience: "9 Years",
-      successRate: "95%",
-      patients: "4.1k+",
-      qualifications: "MBBS, MD (Psychiatry)",
-      location: "CareSync Hospital, Block A",
-      consultationFee: 1400,
-      about: "Providing expert mental health care, mood disorders therapy, and cognitive behavioral treatments.",
-      rating: "4.9",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400"
-    }
-  ];
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/users/doctors');
+        if (response.data.success) {
+          // Filter to show only available doctors (or based on your requirement)
+          const availableDoctors = response.data.doctors.filter(d => d.is_available !== false);
+          setDoctors(availableDoctors);
+        }
+      } catch (error) {
+        console.error("Error fetching doctors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   const filteredDoctors = doctors.filter(doctor =>
-    doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase())
+    (doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+    (doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
 
   return (

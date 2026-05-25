@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import DoctorRegister from './pages/DoctorRegister';
 import OtpVerification from './pages/OtpVerification';
 import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
@@ -45,6 +46,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/doctor-register" element={<DoctorRegister />} />
           <Route path="/verify-otp" element={<OtpVerification />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 

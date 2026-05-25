@@ -50,13 +50,13 @@ const Header = () => {
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/login', { state: { role: 'Patient' } })}
             className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
           >
             Patient Login
           </button>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/login', { state: { role: 'Doctor' } })}
             className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
           >
             Doctor Login

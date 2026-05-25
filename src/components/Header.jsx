@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse, History } from 'lucide-react';
+import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse, History, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
@@ -159,6 +159,21 @@ const Header = () => {
                       {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
                     </button>
+
+                    {/* My Reviews — Doctor only */}
+                    {user?.role === 'Doctor' && (
+                      <button 
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          navigate('/doctor/reviews');
+                        }}
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      >
+                        <Star className="text-amber-400" size={20} />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">My Reviews</span>
+                      </button>
+                    )}
+
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"

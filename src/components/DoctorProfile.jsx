@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, CheckCircle, GraduationCap, Calendar, Loader } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
@@ -27,12 +27,8 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
   const [dynamicSlots, setDynamicSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const slotsContainerRef = useRef(null);
-  const scrollSlots = (dir) => {
-    if (slotsContainerRef.current) {
-      slotsContainerRef.current.scrollBy({ top: dir * 120, behavior: 'smooth' });
-    }
-  };
+  const [slotPage, setSlotPage] = useState(0);
+  const SLOTS_PER_PAGE = 8;
 
   useEffect(() => {
     const handleFeeChanged = (data) => {
@@ -353,6 +349,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
                       onClick={() => {
                         setSelectedDate(date);
                         setSelectedTime(null); // Reset selected time slot
+                        setSlotPage(0); // Reset pagination to first page
                         if (errors.date) setErrors({ ...errors, date: '' });
                       }}
                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all duration-300 min-w-[70px] ${
@@ -470,59 +467,70 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
                   No slots available for this date.
                 </p>
               ) : (
-                <div className="flex flex-col gap-2">
-                  {/* Scroll Up Button */}
-                  <button
-                    type="button"
-                    onClick={() => scrollSlots(-1)}
-                    className="w-full flex items-center justify-center py-1.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 transition-all duration-200 group"
-                    aria-label="Scroll up"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
+                (() => {
+                  const totalPages = Math.ceil(dynamicSlots.length / SLOTS_PER_PAGE);
+                  const visibleSlots = dynamicSlots.slice(slotPage * SLOTS_PER_PAGE, (slotPage + 1) * SLOTS_PER_PAGE);
+                  return (
+                    <div className="flex flex-col gap-3">
+                      {/* Slots Grid - exactly 8 slots */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {visibleSlots.map((slot24, idx) => {
+                          const displayTime = formatTimeDisplay(slot24);
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setSelectedTime(slot24);
+                                if (errors.time) setErrors({ ...errors, time: '' });
+                              }}
+                              className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${
+                                selectedTime === slot24
+                                  ? 'bg-teal-500 border-teal-500 text-white shadow'
+                                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-950/20 hover:border-teal-400'
+                              }`}
+                            >
+                              {displayTime}
+                            </button>
+                          );
+                        })}
+                      </div>
 
-                  {/* Scrollable Slots Grid */}
-                  <div
-                    ref={slotsContainerRef}
-                    className="grid grid-cols-2 gap-2 max-h-[240px] overflow-y-auto scroll-smooth pr-1"
-                    style={{ scrollbarWidth: 'thin', scrollbarColor: '#14b8a6 #f1f5f9' }}
-                  >
-                    {dynamicSlots.map((slot24, idx) => {
-                      const displayTime = formatTimeDisplay(slot24);
-                      return (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            setSelectedTime(slot24);
-                            if (errors.time) setErrors({ ...errors, time: '' });
-                          }}
-                          className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${
-                            selectedTime === slot24
-                              ? 'bg-teal-500 border-teal-500 text-white shadow'
-                              : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-950/20 hover:border-teal-400'
-                          }`}
-                        >
-                          {displayTime}
-                        </button>
-                      );
-                    })}
-                  </div>
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-1">
+                          <button
+                            type="button"
+                            disabled={slotPage === 0}
+                            onClick={() => setSlotPage(p => p - 1)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Prev
+                          </button>
 
-                  {/* Scroll Down Button */}
-                  <button
-                    type="button"
-                    onClick={() => scrollSlots(1)}
-                    className="w-full flex items-center justify-center py-1.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 transition-all duration-200 group"
-                    aria-label="Scroll down"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
+                          <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
+                            {slotPage + 1} / {totalPages}
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={slotPage >= totalPages - 1}
+                            onClick={() => setSlotPage(p => p + 1)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                          >
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()
               )}
             </div>
 

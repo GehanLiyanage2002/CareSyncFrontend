@@ -12,6 +12,7 @@ import PatientMedicalProfilePage from './pages/PatientMedicalProfilePage';
 import DoctorDashboard from './pages/DoctorDashboard';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import EditProfilePage from './pages/EditProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const Unauthorized = () => (
@@ -60,6 +61,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <GenericDashboardRedirect />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Profile Route - accessible by any authenticated user */}
+          <Route 
+            path="/edit-profile" 
+            element={
+              <ProtectedRoute>
+                <EditProfilePage />
               </ProtectedRoute>
             } 
           />

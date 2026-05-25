@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Header from '../components/Header';
-import { Calendar, CheckCircle, Users, Clock, Check } from 'lucide-react';
+import { Calendar, CheckCircle, Users, Clock, Check, Kanban } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -179,9 +179,10 @@ const DoctorDashboardHome = () => {
             </h3>
             <button 
               onClick={() => navigate('/doctor/kanban')}
-              className="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95"
             >
-              View Kanban Board &rarr;
+              <Kanban className="w-4 h-4" />
+              Appointment Board
             </button>
           </div>
           
@@ -194,46 +195,44 @@ const DoctorDashboardHome = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                    <th className="px-6 py-4 font-semibold">Token Number</th>
                     <th className="px-6 py-4 font-semibold">Patient Name</th>
+                    <th className="px-6 py-4 font-semibold">Age/Gender</th>
                     <th className="px-6 py-4 font-semibold">Time</th>
                     <th className="px-6 py-4 font-semibold">Contact</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold text-right">Action</th>
+                    <th className="px-6 py-4 font-semibold text-right">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {appointments.map((apt) => (
                     <tr key={apt.id} className="hover:bg-slate-50/80 transition-colors group">
+                      <td className="px-6 py-4 whitespace-nowrap font-bold text-teal-700">
+                        {apt.token_number || '-'}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
                         {apt.patient_name || 'Unknown Patient'}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                        {apt.patient_age ? `${apt.patient_age} Yrs` : '-'} {apt.patient_gender ? `/ ${apt.patient_gender}` : ''}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
-                        {apt.start_time || apt.appointment_time}
+                        {apt.start_time ? apt.start_time.substring(0, 5) : (apt.appointment_time || '-')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-slate-600">
                         {apt.patient_contact || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${
                           apt.status === 'completed' 
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : apt.status === 'confirmed'
                             ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : apt.status === 'cancelled'
+                            ? 'bg-rose-50 text-rose-700 border-rose-200'
                             : 'bg-amber-50 text-amber-700 border-amber-200'
                         }`}>
                           {apt.status ? apt.status.charAt(0).toUpperCase() + apt.status.slice(1) : 'Pending'}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {apt.status !== 'completed' && (
-                          <button 
-                            onClick={() => markCompleted(apt.id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded-lg text-sm font-semibold transition-all border border-emerald-200 shadow-sm"
-                          >
-                            <Check className="w-4 h-4" />
-                            Complete
-                          </button>
-                        )}
                       </td>
                     </tr>
                   ))}

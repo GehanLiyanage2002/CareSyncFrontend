@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Clock, User, FileText, X } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 const DoctorKanbanBoard = () => {
   const { token } = useSelector((state) => state.auth);
   const [data, setData] = useState({
     tasks: {},
     columns: {
-      'column-1': { id: 'column-1', title: 'Upcoming', taskIds: [] },
-      'column-2': { id: 'column-2', title: 'In Progress', taskIds: [] },
-      'column-3': { id: 'column-3', title: 'Completed', taskIds: [] },
+      'pending': { id: 'pending', title: 'Pending', taskIds: [] },
+      'confirmed': { id: 'confirmed', title: 'Confirmed', taskIds: [] },
+      'completed': { id: 'completed', title: 'Completed', taskIds: [] },
+      'cancelled': { id: 'cancelled', title: 'Cancelled', taskIds: [] },
     },
-    columnOrder: ['column-1', 'column-2', 'column-3'],
+    columnOrder: ['pending', 'confirmed', 'completed', 'cancelled'],
   });
   const [selectedTask, setSelectedTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,39 +31,47 @@ const DoctorKanbanBoard = () => {
           const appointments = response.data.appointments;
           
           const newTasks = {};
-          const col1TaskIds = [];
-          const col2TaskIds = [];
-          const col3TaskIds = [];
+          const cols = {
+            'pending': [],
+            'confirmed': [],
+            'completed': [],
+            'cancelled': []
+          };
 
           appointments.forEach(apt => {
             newTasks[apt.id] = {
               id: apt.id,
+              tokenNumber: apt.token_number,
               patientName: apt.patient_name,
-              time: apt.appointment_time,
-              reason: apt.reason,
+              time: apt.start_time,
+              date: apt.appointment_date,
               age: apt.patient_age,
               gender: apt.patient_gender,
               contact: apt.patient_contact,
-              status: apt.status
+              status: apt.status,
+              paymentMethod: apt.payment_method
             };
 
-            if (apt.status === 'Upcoming') col1TaskIds.push(apt.id);
-            else if (apt.status === 'In Progress') col2TaskIds.push(apt.id);
-            else if (apt.status === 'Completed') col3TaskIds.push(apt.id);
+            const status = apt.status?.toLowerCase() || 'pending';
+            if (cols[status]) {
+              cols[status].push(apt.id);
+            }
           });
 
           setData(prev => ({
             ...prev,
             tasks: newTasks,
             columns: {
-              'column-1': { ...prev.columns['column-1'], taskIds: col1TaskIds },
-              'column-2': { ...prev.columns['column-2'], taskIds: col2TaskIds },
-              'column-3': { ...prev.columns['column-3'], taskIds: col3TaskIds },
+              'pending': { ...prev.columns['pending'], taskIds: cols['pending'] },
+              'confirmed': { ...prev.columns['confirmed'], taskIds: cols['confirmed'] },
+              'completed': { ...prev.columns['completed'], taskIds: cols['completed'] },
+              'cancelled': { ...prev.columns['cancelled'], taskIds: cols['cancelled'] },
             }
           }));
         }
       } catch (error) {
         console.error('Error fetching appointments:', error);
+        toast.error('Failed to fetch appointments for the board');
       } finally {
         setIsLoading(false);
       }
@@ -98,55 +108,69 @@ const DoctorKanbanBoard = () => {
     finishTaskIds.splice(destination.index, 0, draggableId);
     const newFinish = { ...finishColumn, taskIds: finishTaskIds };
 
-    setData({
-      ...data,
-      columns: { ...data.columns, [newStart.id]: newStart, [newFinish.id]: newFinish },
-    });
+    setData(prev => ({
+      ...prev,
+      columns: { ...prev.columns, [newStart.id]: newStart, [newFinish.id]: newFinish },
+      tasks: {
+        ...prev.tasks,
+        [draggableId]: { ...prev.tasks[draggableId], status: newFinish.id }
+      }
+    }));
 
     // Make API call to update status
     try {
-      const newStatus = finishColumn.title; // 'Upcoming', 'In Progress', 'Completed'
+      const newStatus = finishColumn.id; // 'pending', 'confirmed', 'completed', 'cancelled'
       await axios.put(`http://localhost:5000/api/doctor/appointments/${draggableId}/status`, {
         status: newStatus
       }, {
         headers: { Authorization: token }
       });
+      toast.success(`Status updated to ${finishColumn.title}`);
     } catch (error) {
       console.error('Error updating status:', error);
-      // Ideally revert the optimistic UI update here if it failed
+      toast.error('Failed to update status');
     }
   };
 
   if (isLoading) {
-    return <div className="h-full flex items-center justify-center text-gray-500">Loading appointments...</div>;
+    return <div className="h-full flex items-center justify-center text-gray-500 animate-pulse text-lg font-semibold">Loading your Kanban Board...</div>;
   }
 
   return (
     <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-gray-700">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Appointments Board</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Drag and drop appointments to update their status.</p>
+          <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white flex items-center gap-2">
+            Appointments Board
+          </h2>
+          <p className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-2">Drag and drop appointments across columns to update their status instantly.</p>
         </div>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex flex-col md:flex-row gap-6 flex-1 overflow-x-auto pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 flex-1 pb-4 items-start">
           {data.columnOrder.map((columnId) => {
             const column = data.columns[columnId];
             const tasks = column.taskIds.map((taskId) => data.tasks[taskId]);
 
             return (
-              <div key={column.id} className="flex-1 min-w-[300px] flex flex-col bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800 rounded-t-xl">
-                  <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                    <span className={`w-3 h-3 rounded-full ${
-                      column.id === 'column-1' ? 'bg-blue-500' : 
-                      column.id === 'column-2' ? 'bg-amber-500' : 'bg-green-500'
+              <div key={column.id} className="flex flex-col bg-slate-50/50 dark:bg-gray-900/50 rounded-3xl border border-slate-100 dark:border-gray-700 overflow-hidden shadow-sm h-full">
+                <div className={`p-5 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center
+                  ${column.id === 'pending' ? 'bg-amber-50/80 dark:bg-amber-900/20' : 
+                    column.id === 'confirmed' ? 'bg-blue-50/80 dark:bg-blue-900/20' : 
+                    column.id === 'completed' ? 'bg-emerald-50/80 dark:bg-emerald-900/20' : 
+                    'bg-rose-50/80 dark:bg-rose-900/20'}
+                `}>
+                  <h3 className="font-extrabold text-slate-800 dark:text-white flex items-center gap-2 text-sm uppercase tracking-widest">
+                    <span className={`w-3 h-3 rounded-full shadow-sm ${
+                      column.id === 'pending' ? 'bg-amber-500' : 
+                      column.id === 'confirmed' ? 'bg-blue-500' : 
+                      column.id === 'completed' ? 'bg-emerald-500' : 
+                      'bg-rose-500'
                     }`}></span>
                     {column.title}
                   </h3>
-                  <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-bold px-2 py-1 rounded-full">
+                  <span className="bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-200 text-xs font-black px-3 py-1.5 rounded-full shadow-sm border border-slate-100 dark:border-gray-700">
                     {tasks.length}
                   </span>
                 </div>
@@ -156,7 +180,7 @@ const DoctorKanbanBoard = () => {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`flex-1 p-4 space-y-4 transition-colors min-h-[150px] ${snapshot.isDraggingOver ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                      className={`flex-1 p-5 space-y-4 transition-colors min-h-[500px] ${snapshot.isDraggingOver ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
                     >
                       {tasks.map((task, index) => (
                         <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -166,20 +190,28 @@ const DoctorKanbanBoard = () => {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               onClick={() => setSelectedTask(task)}
-                              className={`bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all ${
-                                snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500 rotate-2' : ''
+                              className={`bg-white dark:bg-gray-800 p-5 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 dark:hover:border-blue-600 transition-all ${
+                                snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500 scale-[1.02] rotate-2 z-50' : ''
                               }`}
                             >
-                              <div className="flex justify-between items-start mb-3">
-                                <h4 className="font-semibold text-gray-900 dark:text-white">{task.patientName}</h4>
-                                <span className="flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">
-                                  <Clock size={12} />
-                                  {task.time}
-                                </span>
+                              <div className="flex justify-between items-start mb-4">
+                                <div>
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 mb-3 text-[10px] font-black uppercase tracking-widest bg-slate-100 dark:bg-gray-700 text-slate-500 dark:text-gray-300 rounded-lg">
+                                    <Hash size={10} />
+                                    {task.tokenNumber || 'NO-TOKEN'}
+                                  </span>
+                                  <h4 className="font-extrabold text-slate-800 dark:text-white leading-tight text-lg">{task.patientName}</h4>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                <FileText size={14} className="shrink-0" />
-                                <span className="truncate">{task.reason}</span>
+                              <div className="flex items-center gap-3 text-xs font-bold mt-2">
+                                <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-transparent">
+                                  <Clock size={12} />
+                                  {task.time?.substring(0, 5) || task.time}
+                                </span>
+                                <span className="flex items-center gap-1.5 text-slate-600 dark:text-gray-400 bg-slate-50 dark:bg-gray-800 px-2.5 py-1.5 rounded-lg border border-slate-100 dark:border-transparent">
+                                  <Calendar size={12} />
+                                  {new Date(task.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                </span>
                               </div>
                             </div>
                           )}
@@ -197,51 +229,67 @@ const DoctorKanbanBoard = () => {
 
       {/* Patient Details Modal */}
       {selectedTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedTask(null)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedTask(null)}>
           <div 
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200"
+            className="bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <User className="text-blue-500" /> Patient Details
+            <div className="p-6 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
+              <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+                <User className="text-blue-600" /> Patient Info
               </h3>
               <button 
                 onClick={() => setSelectedTask(null)}
-                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all"
               >
                 <X size={20} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-4 border-b border-gray-100 dark:border-gray-700 pb-4">
-                <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-2xl font-bold">
-                  {selectedTask.patientName.charAt(0)}
+            <div className="p-8 space-y-6">
+              <div className="flex items-center gap-6 border-b border-slate-100 dark:border-gray-700 pb-6">
+                <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-3xl font-black shadow-inner">
+                  {selectedTask.patientName?.charAt(0) || '?'}
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-gray-900 dark:text-white">{selectedTask.patientName}</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedTask.age || '-'} Yrs • {selectedTask.gender || '-'}</p>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] uppercase tracking-widest font-black rounded-lg border border-indigo-100 dark:border-indigo-800">
+                    <Hash size={12} />
+                    {selectedTask.tokenNumber || 'NO-TOKEN'}
+                  </div>
+                  <h4 className="text-2xl font-black text-slate-800 dark:text-white">{selectedTask.patientName}</h4>
+                  <p className="text-sm font-bold text-slate-500 dark:text-gray-400 mt-1">{selectedTask.age || '-'} Yrs • {selectedTask.gender || '-'}</p>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6 bg-slate-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-slate-100 dark:border-gray-700">
                 <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time</label>
-                  <p className="text-gray-900 dark:text-white font-medium flex items-center gap-1 mt-1">
-                    <Clock size={14} className="text-blue-500" /> {selectedTask.time}
+                  <label className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Time & Date</label>
+                  <p className="text-slate-800 dark:text-white font-black flex items-center gap-1.5 mt-2">
+                    <Clock size={16} className="text-blue-500" /> {selectedTask.time?.substring(0, 5) || selectedTask.time}
+                  </p>
+                  <p className="text-slate-500 dark:text-gray-400 font-bold text-sm mt-1 ml-5">
+                    {new Date(selectedTask.date).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric' })}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</label>
-                  <p className="text-gray-900 dark:text-white font-medium mt-1">{selectedTask.contact || '-'}</p>
+                  <label className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Contact Details</label>
+                  <p className="text-slate-800 dark:text-white font-black mt-2">{selectedTask.contact || 'Not Provided'}</p>
                 </div>
-                <div className="col-span-2 mt-2">
-                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reason for Visit</label>
-                  <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700">
-                    {selectedTask.reason || 'No reason provided'}
-                  </div>
+                <div className="col-span-2 pt-4 border-t border-slate-200 dark:border-gray-700">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Payment Method</label>
+                  <p className="text-slate-800 dark:text-white font-black flex items-center gap-1.5 mt-2">
+                    <CreditCard size={18} className={selectedTask.paymentMethod === 'Online' ? 'text-emerald-500' : 'text-amber-500'} /> 
+                    {selectedTask.paymentMethod || 'Cash'}
+                  </p>
                 </div>
               </div>
+            </div>
+            <div className="p-5 bg-slate-50 dark:bg-gray-900 border-t border-slate-100 dark:border-gray-700 flex justify-end">
+              <button 
+                onClick={() => setSelectedTask(null)}
+                className="px-8 py-3 bg-slate-800 dark:bg-white text-white dark:text-gray-900 font-black rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95"
+              >
+                Close Profile
+              </button>
             </div>
           </div>
         </div>

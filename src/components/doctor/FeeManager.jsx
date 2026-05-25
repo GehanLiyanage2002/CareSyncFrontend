@@ -14,7 +14,7 @@ const FeeManager = () => {
     const fetchFee = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/doctor/profile', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         });
         if (res.data.success) {
           setFee(res.data.profile.consultation_fee || 1500);
@@ -40,7 +40,7 @@ const FeeManager = () => {
     try {
       const res = await axios.put('http://localhost:5000/api/doctor/fee', 
         { fee: Number(fee) },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: token } }
       );
       if (res.data.success) {
         toast.success('Consultation fee updated successfully!');

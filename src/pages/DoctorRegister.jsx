@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import FaceCapture from '../components/FaceCapture';
 
 // ── Success Toast ─────────────────────────────────────────────────────────────
 const SuccessToast = ({ message, onClose }) => {
@@ -51,6 +52,8 @@ const DoctorRegister = () => {
   const [showPassword, setShowPassword]           = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [faceDescriptor, setFaceDescriptor] = useState(null);
+
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -95,6 +98,10 @@ const DoctorRegister = () => {
       setError('Please provide a professional bio.');
       return;
     }
+    if (!faceDescriptor) {
+      setError('Please capture your Face ID for biometric login.');
+      return;
+    }
 
     setLoading(true);
 
@@ -107,7 +114,8 @@ const DoctorRegister = () => {
         role,
         specialization,
         experience: experience.toString() + ' Years',
-        bio
+        bio,
+        faceDescriptor
       });
 
       // Since the backend now sends the OTP via email, we can redirect immediately
@@ -402,6 +410,12 @@ const DoctorRegister = () => {
               <p className="text-sm text-indigo-700 font-semibold">
                 Registering as: <span className="font-extrabold">Doctor</span>
               </p>
+            </div>
+
+            {/* Face Capture Section */}
+            <div className="mt-6 mb-4">
+              <p className="text-sm font-semibold text-slate-700 mb-2">Biometric Verification</p>
+              <FaceCapture onCapture={setFaceDescriptor} mode="register" />
             </div>
 
             {/* Submit Button */}

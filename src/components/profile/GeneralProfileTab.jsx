@@ -4,6 +4,7 @@ import { CheckCircle2, ScanFace, Lock, Camera, Mail, User, Phone, Stethoscope, C
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { updateUser } from '../../features/auth/authSlice';
+import FaceCapture from '../FaceCapture';
 
 const GeneralProfileTab = () => {
   const dispatch = useDispatch();
@@ -29,8 +30,33 @@ const GeneralProfileTab = () => {
   const [loading, setLoading] = useState({
     general: false,
     password: false,
-    doctor: false
+    doctor: false,
+    faceId: false
   });
+
+  const [showFaceScanner, setShowFaceScanner] = useState(false);
+
+  const handleFaceCapture = async (faceDescriptor) => {
+    setLoading(prev => ({ ...prev, faceId: true }));
+    try {
+      await axios.put(
+        'http://localhost:5000/api/users/face-id',
+        { faceDescriptor },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      toast.success('Face ID successfully enrolled!');
+      setShowFaceScanner(false);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || 'Failed to enroll Face ID.');
+    } finally {
+      setLoading(prev => ({ ...prev, faceId: false }));
+    }
+  };
 
   // Fetch doctor profile if user is a doctor
   useEffect(() => {
@@ -318,22 +344,39 @@ const GeneralProfileTab = () => {
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-white mb-6">Security Settings</h2>
         
-        {/* Face ID Enrollment */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-5 mb-8 bg-blue-50/80 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/50">
-          <div className="flex items-center gap-4 mb-4 sm:mb-0">
-            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
-              <ScanFace size={24} />
+        {/* Face ID Enrollment (Doctors Only) */}
+        {user?.role === 'Doctor' && (
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-blue-50/80 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/50">
+              <div className="flex items-center gap-4 mb-4 sm:mb-0">
+                <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <ScanFace size={24} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 dark:text-white">Face ID Authentication</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Use facial recognition for faster, secure logins.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowFaceScanner(!showFaceScanner)}
+                className="w-full sm:w-auto px-5 py-2.5 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-600 rounded-xl font-medium hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center justify-center gap-2"
+              >
+                <ScanFace size={18} />
+                {showFaceScanner ? 'Cancel' : 'Enroll Face ID'}
+              </button>
             </div>
-            <div>
-              <h3 className="font-semibold text-slate-800 dark:text-white">Face ID Authentication</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Use facial recognition for faster, secure logins.</p>
-            </div>
+            
+            {showFaceScanner && (
+              <div className="mt-4 animate-fadeIn flex flex-col items-center p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <FaceCapture 
+                  onCapture={handleFaceCapture} 
+                  mode="register" 
+                  buttonText={loading.faceId ? "Saving..." : "Save Face ID"} 
+                />
+              </div>
+            )}
           </div>
-          <button className="w-full sm:w-auto px-5 py-2.5 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-600 rounded-xl font-medium hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center justify-center gap-2">
-            <ScanFace size={18} />
-            Enroll Face ID
-          </button>
-        </div>
+        )}
 
         <div className="border-t border-slate-100 dark:border-slate-700 pt-8">
           <h3 className="text-lg font-medium text-slate-800 dark:text-white mb-4">Change Password</h3>

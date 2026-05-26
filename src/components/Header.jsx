@@ -197,7 +197,7 @@ const Header = () => {
                         onClick={() => {
                           setIsDropdownOpen(false);
                           dispatch(logout());
-                          navigate('/login');
+                          navigate('/');
                         }}
                         className="flex items-center gap-4 px-4 py-3 w-full hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl transition-colors text-left font-medium"
                       >

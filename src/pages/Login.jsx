@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { loginSuccess } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
+import FaceCapture from '../components/FaceCapture';
+import { Fingerprint, Mail } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +19,7 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const loginRole = location.state?.role || 'Patient';
+  const [useFaceId, setUseFaceId] = useState(loginRole === 'Doctor');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,6 +60,30 @@ const Login = () => {
         setError(
           err.response?.data?.message || 'Something went wrong. Please try again later.'
         );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFaceLogin = async (descriptor) => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login-face', {
+        faceDescriptor: descriptor
+      });
+
+      const { token, user } = response.data;
+      dispatch(loginSuccess({ user, token }));
+      
+      toast.success(`Welcome back, Dr. ${user?.full_name || 'Doctor'}`);
+      navigate('/doctor/dashboard');
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError('Face not recognized. Please try again or use email/password.');
+      } else {
+        setError(err.response?.data?.message || 'Something went wrong during biometric login.');
       }
     } finally {
       setLoading(false);
@@ -112,8 +139,33 @@ const Login = () => {
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          {/* Toggle Login Method for Doctors */}
+          {loginRole === 'Doctor' && (
+            <div className="flex justify-center mb-6 bg-slate-100 p-1.5 rounded-xl w-full max-w-sm mx-auto">
+              <button
+                type="button"
+                onClick={() => setUseFaceId(true)}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all ${useFaceId ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                <Fingerprint className="w-4 h-4" /> Face ID
+              </button>
+              <button
+                type="button"
+                onClick={() => setUseFaceId(false)}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all ${!useFaceId ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                <Mail className="w-4 h-4" /> Password
+              </button>
+            </div>
+          )}
+
+          {/* Form or Face ID */}
+          {useFaceId ? (
+            <div className="animate-fadeIn">
+              <FaceCapture onCapture={handleFaceLogin} mode="login" buttonText="Authenticating..." />
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} noValidate className="space-y-5 animate-fadeIn">
             
             {/* Email Field */}
             <div>
@@ -213,6 +265,7 @@ const Login = () => {
               )}
             </button>
           </form>
+          )}
 
           {/* Footer Note */}
           <p className="mt-6 text-center text-xs text-slate-400 font-medium">

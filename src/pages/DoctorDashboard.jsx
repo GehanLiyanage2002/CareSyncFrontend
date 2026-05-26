@@ -24,7 +24,7 @@ const DoctorDashboard = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate('/');
   };
 
   const navItems = [

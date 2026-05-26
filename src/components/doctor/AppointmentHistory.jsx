@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Clock, User, Check, X, Search, Phone, Hash } from 'lucide-react';
+import { Calendar, Clock, User, Check, X, Search, Phone, Hash, FileText } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import CreateMedicalReport from './CreateMedicalReport';
+import ViewSingleMedicalReportModal from './ViewSingleMedicalReportModal';
 
 const AppointmentHistory = () => {
   const { token } = useSelector((state) => state.auth);
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Medical Report Modal State
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedAppointmentForReport, setSelectedAppointmentForReport] = useState(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -96,13 +103,14 @@ const AppointmentHistory = () => {
               <th className="px-6 py-4">Age / Gender</th>
               <th className="px-6 py-4">Date & Time</th>
               <th className="px-6 py-4">Contact</th>
+              <th className="px-6 py-4 text-center">Medical Report</th>
               <th className="px-6 py-4 text-right">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-gray-700">
             {filteredHistory.length === 0 ? (
               <tr>
-                <td colSpan="6" className="px-6 py-20 text-center">
+                <td colSpan="7" className="px-6 py-20 text-center">
                   <div className="flex flex-col items-center justify-center text-slate-400">
                     <Calendar className="w-12 h-12 mb-3 text-slate-300" />
                     <p className="text-lg font-bold text-slate-500">No records found</p>
@@ -153,6 +161,21 @@ const AppointmentHistory = () => {
                      {apt.patient_contact || 'N/A'}
                   </td>
                   
+                  <td className="px-6 py-4 text-center">
+                    {apt.status === 'completed' && (
+                      <button
+                        onClick={() => {
+                          setSelectedAppointmentForReport({ ...apt, id: apt.id, patient_id: apt.patient_id, patient_name: apt.patient_name });
+                          setIsViewModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:hover:bg-blue-800/40 dark:text-blue-400 text-xs font-bold rounded-full transition-colors border border-blue-200 dark:border-blue-800"
+                      >
+                        <FileText size={14} />
+                        View / Edit
+                      </button>
+                    )}
+                  </td>
+                  
                   <td className="px-6 py-4 text-right">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border shadow-sm ${
                       apt.status === 'completed'
@@ -169,6 +192,30 @@ const AppointmentHistory = () => {
           </tbody>
         </table>
       </div>
+
+      {/* View Medical Report Modal (Read Only) */}
+      <ViewSingleMedicalReportModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedAppointmentForReport(null);
+        }}
+        appointment={selectedAppointmentForReport}
+        onEditClick={() => {
+          setIsViewModalOpen(false);
+          setIsEditModalOpen(true);
+        }}
+      />
+
+      {/* Create / Edit Medical Report Modal (Form) */}
+      <CreateMedicalReport
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedAppointmentForReport(null);
+        }}
+        appointment={selectedAppointmentForReport}
+      />
     </div>
   );
 };

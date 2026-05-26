@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { FileText, X, UploadCloud, CheckCircle } from 'lucide-react';
@@ -14,6 +14,48 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
   });
   const [file, setFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [existingReport, setExistingReport] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Clear or fetch the form whenever the modal is opened
+  useEffect(() => {
+    if (isOpen && appointment?.id) {
+      const fetchReport = async () => {
+        setIsLoading(true);
+        try {
+          const res = await axios.get(`http://localhost:5000/api/reports/appointment/${appointment.id}`, {
+            headers: { Authorization: token }
+          });
+          if (res.data.success && res.data.report) {
+            const report = res.data.report;
+            setExistingReport(report);
+            setIsEditMode(true);
+            setFormData({
+              title: report.title || '',
+              symptoms: report.symptoms || '',
+              treatment_plan: report.treatment_plan || '',
+            });
+          } else {
+            // No existing report
+            setIsEditMode(false);
+            setExistingReport(null);
+            setFormData({ title: '', symptoms: '', treatment_plan: '' });
+          }
+        } catch (error) {
+          console.error('Error fetching report:', error);
+          toast.error('Failed to load existing report data');
+        } finally {
+          setIsLoading(false);
+          setFile(null);
+        }
+      };
+      
+      fetchReport();
+    }
+  }, [isOpen, appointment?.id, token]);
 
   if (!isOpen) return null;
 
@@ -59,15 +101,25 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
         data.append('attachment', file);
       }
 
-      const res = await axios.post('http://localhost:5000/api/reports', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: token,
-        },
-      });
+      let res;
+      if (isEditMode && existingReport) {
+        res = await axios.put(`http://localhost:5000/api/reports/${existingReport.id}`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: token,
+          },
+        });
+      } else {
+        res = await axios.post('http://localhost:5000/api/reports', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: token,
+          },
+        });
+      }
 
       if (res.data.success) {
-        toast.success('Medical report created successfully');
+        toast.success(isEditMode ? 'Medical report updated successfully' : 'Medical report created successfully');
         onClose();
       }
     } catch (error) {
@@ -84,7 +136,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
         <div className="p-6 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center shrink-0 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
           <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
             <FileText className="text-emerald-600 dark:text-emerald-400" /> 
-            Create Medical Report
+            {isEditMode ? 'Edit Medical Report' : 'Create Medical Report'}
           </h3>
           <button 
             onClick={onClose}
@@ -94,7 +146,13 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5 overflow-y-auto custom-scrollbar">
+        {isLoading ? (
+          <div className="flex-1 flex flex-col items-center justify-center min-h-[300px]">
+            <div className="w-10 h-10 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+            <p className="text-slate-500 font-semibold">Loading report details...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5 overflow-y-auto custom-scrollbar">
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-2 shrink-0">
             <p className="text-sm font-bold text-blue-800 dark:text-blue-300">
               Patient: {appointment.patientName}
@@ -157,9 +215,24 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
               />
               {file ? (
                 <div className="flex flex-col items-center text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle size={32} className="mb-2" />
-                  <p className="font-bold">{file.name}</p>
+                  {file.type.startsWith('image/') ? (
+                    <img src={URL.createObjectURL(file)} alt="Preview" className="h-20 object-contain mb-2 rounded-lg shadow-sm" />
+                  ) : (
+                    <CheckCircle size={32} className="mb-2" />
+                  )}
+                  <p className="font-bold truncate max-w-[200px]">{file.name}</p>
                   <p className="text-xs opacity-70 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-2 group-hover:text-emerald-500">CLICK TO REPLACE</p>
+                </div>
+              ) : (isEditMode && existingReport?.attachment_base64) ? (
+                <div className="flex flex-col items-center text-emerald-600 dark:text-emerald-400">
+                  {existingReport.file_mimetype?.startsWith('image/') ? (
+                    <img src={existingReport.attachment_base64} alt="Preview" className="h-20 object-contain mb-2 rounded-lg shadow-sm" />
+                  ) : (
+                    <CheckCircle size={32} className="mb-2" />
+                  )}
+                  <p className="font-bold truncate max-w-[200px]">{existingReport.file_name || 'Attached File'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 mt-2 group-hover:text-emerald-500">CLICK TO REPLACE EXISTING FILE</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center text-slate-400 dark:text-gray-400 group-hover:text-emerald-500 transition-colors">
@@ -195,6 +268,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

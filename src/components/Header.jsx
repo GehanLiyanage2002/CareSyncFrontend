@@ -160,6 +160,17 @@ const Header = () => {
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
                     </button>
 
+                    {/* Patient Medical History */}
+                    {user?.role === 'Patient' && (
+                      <button 
+                        onClick={() => { setIsDropdownOpen(false); navigate('/patient/medical-history'); }}
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      >
+                        <History className="text-slate-500 dark:text-slate-400" size={20} />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">Medical History</span>
+                      </button>
+                    )}
+
                     {/* My Reviews — Doctor only */}
                     {user?.role === 'Doctor' && (
                       <button 

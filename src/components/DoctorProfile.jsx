@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, CheckCircle, GraduationCap, Calendar } from 'lucide-react';
+import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, CheckCircle, GraduationCap, Calendar, Loader } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { io } from 'socket.io-client';
 
-const DoctorProfile = ({ doctor, onBack }) => {
+const socket = io('http://localhost:5000');
+
+const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
+  const [doctor, setDoctor] = useState(initialDoctor);
+  const { user, token } = useSelector(state => state.auth);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash'); // 'Cash' or 'Online'
@@ -9,46 +16,134 @@ const DoctorProfile = ({ doctor, onBack }) => {
   const [tokenNumber, setTokenNumber] = useState(null);
   
   const [formData, setFormData] = useState({
-    fullName: '',
+    fullName: user?.name || user?.full_name || '',
     age: '',
     mobileNumber: '',
     gender: '',
-    email: ''
+    email: user?.email || ''
   });
 
   const [errors, setErrors] = useState({});
-
-  // Generate next 5 days
-  const [dates, setDates] = useState([]);
+  const [dynamicSlots, setDynamicSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [slotPage, setSlotPage] = useState(0);
+  const SLOTS_PER_PAGE = 8;
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({ average_rating: 0, total_reviews: 0 });
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
-    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const tempDates = [];
+    const handleFeeChanged = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({ ...prev, consultationFee: data.consultation_fee }));
+      }
+    };
+    
+    const handleAvailabilityChanged = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({ ...prev, is_available: data.is_available }));
+      }
+    };
 
-    for (let i = 1; i <= 5; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      tempDates.push({
-        dayName: daysOfWeek[d.getDay()],
-        dayNum: d.getDate(),
-        month: months[d.getMonth()],
-        year: d.getFullYear(),
-        formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
-      });
+    const handleProfileUpdated = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({
+          ...prev,
+          location: data.location,
+          specialization: data.specialization,
+          experience: data.experience,
+          about: data.bio,
+        }));
+      }
+    };
+
+    socket.on('doctorFeeChanged', handleFeeChanged);
+    socket.on('doctorAvailabilityChanged', handleAvailabilityChanged);
+    socket.on('doctorProfileUpdated', handleProfileUpdated);
+
+    return () => {
+      socket.off('doctorFeeChanged', handleFeeChanged);
+      socket.off('doctorAvailabilityChanged', handleAvailabilityChanged);
+      socket.off('doctorProfileUpdated', handleProfileUpdated);
+    };
+  }, [doctor.id, doctor.doctor_id]);
+
+  const [loadingDates, setLoadingDates] = useState(false);
+  const [dates, setDates] = useState([]);
+
+  // Fetch configured dates
+  useEffect(() => {
+    const docId = doctor?.id || doctor?.doctor_id;
+    if (docId) {
+      const fetchDates = async () => {
+        setLoadingDates(true);
+        try {
+          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${docId}`);
+          if (res.data.success && res.data.dates) {
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            const tempDates = res.data.dates.map(dateStr => {
+              const d = new Date(dateStr);
+              const year = d.getFullYear();
+              const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+              const dayStr = String(d.getDate()).padStart(2, '0');
+              return {
+                dayName: daysOfWeek[d.getDay()],
+                dayNum: d.getDate(),
+                month: months[d.getMonth()],
+                year: year,
+                formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${year}`,
+                valueDate: `${year}-${monthStr}-${dayStr}`
+              };
+            });
+            setDates(tempDates);
+          }
+        } catch (error) {
+          console.error("Failed to fetch configured dates", error);
+        } finally {
+          setLoadingDates(false);
+        }
+      };
+      fetchDates();
     }
-    setDates(tempDates);
-  }, []);
+  }, [doctor]);
 
-  // Time slots template
-  const timeSlots = [
-    { time: '09:00 AM', available: true },
-    { time: '10:30 AM', available: false },
-    { time: '11:00 AM', available: true },
-    { time: '02:00 PM', available: true },
-    { time: '03:30 PM', available: false },
-    { time: '05:00 PM', available: true }
-  ];
+  useEffect(() => {
+    const docId = doctor?.id || doctor?.doctor_id;
+    if (selectedDate && docId) {
+      const fetchSlots = async () => {
+        setLoadingSlots(true);
+        try {
+          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
+          if (res.data.success) {
+            setDynamicSlots(res.data.slots);
+          }
+        } catch (error) {
+          console.error("Failed to fetch slots", error);
+          setDynamicSlots([]);
+        } finally {
+          setLoadingSlots(false);
+        }
+      };
+      fetchSlots();
+    }
+  }, [selectedDate, doctor, refreshTrigger]);
+
+  useEffect(() => {
+    socket.on('slotBooked', (data) => {
+      const docId = doctor?.id || doctor?.doctor_id;
+      // If the booking is for the currently viewed doctor and date, trigger refresh
+      if (data.doctor_id === docId && selectedDate?.valueDate === data.date) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    });
+
+    return () => {
+      socket.off('slotBooked');
+    };
+  }, [doctor, selectedDate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -83,15 +178,75 @@ const DoctorProfile = ({ doctor, onBack }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleBookingSubmit = (e) => {
+  const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Generate a mock token number e.g. CS-042
-      const randomToken = 'CS-' + Math.floor(100 + Math.random() * 900);
-      setTokenNumber(randomToken);
-      setShowSuccessModal(true);
+      try {
+        const docId = doctor?.id || doctor?.doctor_id;
+        const res = await axios.post('http://localhost:5000/api/appointments', {
+          doctor_id: docId,
+          appointment_date: selectedDate.valueDate,
+          start_time: selectedTime,
+          patient_name: formData.fullName,
+          age: parseInt(formData.age),
+          mobile_number: formData.mobileNumber,
+          gender: formData.gender,
+          email: formData.email,
+          payment_method: paymentMethod
+        }, {
+          headers: { Authorization: token }
+        });
+        
+        if (res.data.success) {
+          setTokenNumber(res.data.appointment.token_number);
+          setShowSuccessModal(true);
+        }
+      } catch (error) {
+        console.error("Booking failed", error);
+        alert(error.response?.data?.message || 'Booking failed');
+      }
     }
   };
+
+  const formatTimeDisplay = (time24) => {
+    const [h, m] = time24.split(':');
+    const hours = parseInt(h);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours % 12 || 12;
+    return `${hours12.toString().padStart(2, '0')}:${m} ${ampm}`;
+  };
+
+  // Fetch reviews for this doctor
+  useEffect(() => {
+    const doctorId = doctor.id || doctor.doctor_id;
+    if (!doctorId) return;
+    axios.get(`http://localhost:5000/api/reviews/${doctorId}`)
+      .then(res => {
+        if (res.data.success) {
+          setReviews(res.data.reviews);
+          setReviewStats({ average_rating: res.data.average_rating, total_reviews: res.data.total_reviews });
+        }
+      })
+      .catch(err => console.error('Failed to load reviews:', err))
+      .finally(() => setLoadingReviews(false));
+  }, [doctor]);
+
+  // Real-time: listen for new reviews on this doctor's profile
+  useEffect(() => {
+    const doctorId = doctor.id || doctor.doctor_id;
+    const handleReviewAdded = ({ doctor_id, review }) => {
+      if (doctor_id !== doctorId) return;
+      setReviews(prev => [review, ...prev]);
+      setReviewStats(prev => {
+        const newTotal = prev.total_reviews + 1;
+        const newAvg = ((prev.average_rating * prev.total_reviews) + review.rating) / newTotal;
+        return { total_reviews: newTotal, average_rating: Math.round(newAvg * 10) / 10 };
+      });
+    };
+
+    socket.on('reviewAdded', handleReviewAdded);
+    return () => socket.off('reviewAdded', handleReviewAdded);
+  }, [doctor]);
 
   const printTicket = () => {
     window.print();
@@ -111,7 +266,10 @@ const DoctorProfile = ({ doctor, onBack }) => {
         <h1 className="text-2xl font-bold text-blue-900 dark:text-blue-400">Doctor Profile</h1>
         <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200 dark:border-amber-900/60 px-3 py-1 rounded-full text-sm font-bold">
           <Star className="h-4 w-4 fill-amber-500 stroke-amber-500" />
-          <span>{doctor.rating}</span>
+          <span>{reviewStats.average_rating > 0 ? reviewStats.average_rating : (doctor.rating || '—')}</span>
+          {reviewStats.total_reviews > 0 && (
+            <span className="text-xs font-normal text-amber-500/70 ml-0.5">({reviewStats.total_reviews})</span>
+          )}
         </div>
       </div>
 
@@ -183,12 +341,12 @@ const DoctorProfile = ({ doctor, onBack }) => {
               </div>
 
               <div className="border border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl p-4 flex items-start gap-3 transition-colors duration-300">
-                <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <Check className={`h-5 w-5 shrink-0 ${doctor.is_available === false ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`} />
                 <div>
                   <span className="block text-xs text-gray-500 dark:text-gray-400 font-semibold">Availability</span>
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    Available
+                  <span className={`text-sm font-bold flex items-center gap-1.5 ${doctor.is_available === false ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    <span className={`w-2.5 h-2.5 rounded-full ${doctor.is_available === false ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse'}`}></span>
+                    {doctor.is_available === false ? 'Unavailable' : 'Available'}
                   </span>
                 </div>
               </div>
@@ -204,11 +362,18 @@ const DoctorProfile = ({ doctor, onBack }) => {
       </div>
 
       {/* Appointment Booking Panel */}
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-lg border border-blue-50/50 dark:border-gray-700/50 transition-colors duration-300">
-        <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-8 flex items-center gap-2 transition-colors">
-          <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          Book Your Appointment
-        </h3>
+      {doctor.is_available === false ? (
+        <div className="bg-rose-50 dark:bg-rose-900/20 rounded-3xl p-8 shadow-sm border border-rose-100 dark:border-rose-800/30 text-center transition-colors duration-300 mt-8">
+          <Calendar className="h-12 w-12 text-rose-400 dark:text-rose-500 mx-auto mb-4" />
+          <h3 className="text-2xl font-bold text-rose-900 dark:text-rose-400 mb-2">Currently Unavailable</h3>
+          <p className="text-rose-700 dark:text-rose-300">This doctor is not accepting new appointments at the moment.</p>
+        </div>
+      ) : (
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-lg border border-blue-50/50 dark:border-gray-700/50 transition-colors duration-300 mt-8">
+          <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-8 flex items-center gap-2 transition-colors">
+            <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            Book Your Appointment
+          </h3>
 
         <form onSubmit={handleBookingSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -219,28 +384,39 @@ const DoctorProfile = ({ doctor, onBack }) => {
             <div>
               <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">Select Date</h4>
               {errors.date && <p className="text-rose-500 text-xs mb-2">{errors.date}</p>}
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                {dates.map((date, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedTime(null); // Reset selected time slot
-                      if (errors.date) setErrors({ ...errors, date: '' });
-                    }}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all duration-300 min-w-[70px] ${
-                      selectedDate?.formattedDate === date.formattedDate
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                        : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <span className="text-xs uppercase tracking-wider">{date.dayName}</span>
-                    <span className="text-xl font-bold my-1">{date.dayNum}</span>
-                    <span className="text-xs">{date.month}</span>
-                  </button>
-                ))}
-              </div>
+              {loadingDates ? (
+                <div className="flex justify-center py-4 w-full text-blue-500">
+                  <Loader className="animate-spin h-6 w-6" />
+                </div>
+              ) : dates.length === 0 ? (
+                <div className="text-sm text-gray-500 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
+                  No availability currently configured.
+                </div>
+              ) : (
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                  {dates.map((date, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDate(date);
+                        setSelectedTime(null); // Reset selected time slot
+                        setSlotPage(0); // Reset pagination to first page
+                        if (errors.date) setErrors({ ...errors, date: '' });
+                      }}
+                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all duration-300 min-w-[70px] ${
+                        selectedDate?.formattedDate === date.formattedDate
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                          : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <span className="text-xs uppercase tracking-wider">{date.dayName}</span>
+                      <span className="text-xl font-bold my-1">{date.dayNum}</span>
+                      <span className="text-xs">{date.month}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Patient Details Form */}
@@ -334,29 +510,79 @@ const DoctorProfile = ({ doctor, onBack }) => {
                 <p className="text-sm text-gray-400 dark:text-gray-500 italic bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl text-center">
                   Select a date to view available time slots.
                 </p>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  {timeSlots.map((slot, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      disabled={!slot.available}
-                      onClick={() => {
-                        setSelectedTime(slot.time);
-                        if (errors.time) setErrors({ ...errors, time: '' });
-                      }}
-                      className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${
-                        !slot.available
-                          ? 'bg-gray-100 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-700 cursor-not-allowed line-through'
-                          : selectedTime === slot.time
-                          ? 'bg-teal-500 border-teal-500 text-white shadow'
-                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-950/20 hover:border-teal-400'
-                      }`}
-                    >
-                      {slot.time}
-                    </button>
-                  ))}
+              ) : loadingSlots ? (
+                <div className="flex justify-center py-4">
+                  <Loader className="w-6 h-6 animate-spin text-blue-500" />
                 </div>
+              ) : dynamicSlots.length === 0 ? (
+                <p className="text-sm text-rose-500 italic bg-rose-50 p-4 rounded-2xl text-center">
+                  No slots available for this date.
+                </p>
+              ) : (
+                (() => {
+                  const totalPages = Math.ceil(dynamicSlots.length / SLOTS_PER_PAGE);
+                  const visibleSlots = dynamicSlots.slice(slotPage * SLOTS_PER_PAGE, (slotPage + 1) * SLOTS_PER_PAGE);
+                  return (
+                    <div className="flex flex-col gap-3">
+                      {/* Slots Grid - exactly 8 slots */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {visibleSlots.map((slot24, idx) => {
+                          const displayTime = formatTimeDisplay(slot24);
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setSelectedTime(slot24);
+                                if (errors.time) setErrors({ ...errors, time: '' });
+                              }}
+                              className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${
+                                selectedTime === slot24
+                                  ? 'bg-teal-500 border-teal-500 text-white shadow'
+                                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-950/20 hover:border-teal-400'
+                              }`}
+                            >
+                              {displayTime}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-1">
+                          <button
+                            type="button"
+                            disabled={slotPage === 0}
+                            onClick={() => setSlotPage(p => p - 1)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Prev
+                          </button>
+
+                          <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
+                            {slotPage + 1} / {totalPages}
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={slotPage >= totalPages - 1}
+                            onClick={() => setSlotPage(p => p + 1)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                          >
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()
               )}
             </div>
 
@@ -382,7 +608,7 @@ const DoctorProfile = ({ doctor, onBack }) => {
               <div>
                 <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 dark:text-blue-400">Selected Time</span>
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {selectedTime ? selectedTime : 'Not selected'}
+                  {selectedTime ? formatTimeDisplay(selectedTime) : 'Not selected'}
                 </span>
               </div>
 
@@ -429,6 +655,67 @@ const DoctorProfile = ({ doctor, onBack }) => {
           </div>
 
         </form>
+        </div>
+      )}
+
+      {/* Reviews Section */}
+      <div className="mt-10 mb-2">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-extrabold text-slate-800 dark:text-white">Patient Reviews</h3>
+            <p className="text-sm text-slate-500 mt-0.5">What patients say about this doctor</p>
+          </div>
+          {reviewStats.total_reviews > 0 && (
+            <div className="flex flex-col items-center bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-2xl px-5 py-3">
+              <span className="text-3xl font-extrabold text-amber-500">{reviewStats.average_rating}</span>
+              <div className="flex gap-0.5 my-1">
+                {[1,2,3,4,5].map(s => (
+                  <Star key={s} size={14} className={s <= Math.round(reviewStats.average_rating) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200 dark:fill-gray-600 dark:text-gray-600'} />
+                ))}
+              </div>
+              <span className="text-xs text-slate-500 font-semibold">{reviewStats.total_reviews} review{reviewStats.total_reviews !== 1 ? 's' : ''}</span>
+            </div>
+          )}
+        </div>
+
+        {loadingReviews ? (
+          <div className="text-center py-10 text-slate-400">
+            <div className="w-8 h-8 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin mx-auto mb-3" />
+            Loading reviews...
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-3xl border border-slate-100 dark:border-gray-700">
+            <Star className="w-12 h-12 text-slate-200 dark:text-gray-600 mx-auto mb-3" />
+            <p className="font-bold text-slate-500 dark:text-gray-400">No reviews yet</p>
+            <p className="text-sm text-slate-400 mt-1">Be the first to review after your appointment!</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {reviews.map((review) => (
+              <div key={review.id} className="bg-white dark:bg-gray-800 rounded-3xl border border-slate-100 dark:border-gray-700 p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {review.patient_name ? review.patient_name.charAt(0).toUpperCase() : 'P'}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 dark:text-white text-sm">{review.patient_name || 'Anonymous'}</p>
+                      <p className="text-xs text-slate-400">{new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {[1,2,3,4,5].map(s => (
+                      <Star key={s} size={13} className={s <= review.rating ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200 dark:fill-gray-600 dark:text-gray-600'} />
+                    ))}
+                  </div>
+                </div>
+                {review.comment && (
+                  <p className="text-sm text-slate-600 dark:text-gray-300 leading-relaxed">{review.comment}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Success Booking Receipt Overlay Modal */}

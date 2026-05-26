@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { CheckCircle2, ScanFace, Lock, Camera, Mail, User, Phone, Stethoscope, Clock, FileText } from 'lucide-react';
+import { CheckCircle2, ScanFace, Lock, Camera, Mail, User, Phone, Stethoscope, Clock, FileText, MapPin } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { updateUser } from '../../features/auth/authSlice';
@@ -22,7 +22,8 @@ const GeneralProfileTab = () => {
   const [doctorData, setDoctorData] = useState({
     specialization: '',
     experience: '',
-    bio: ''
+    bio: '',
+    location: ''
   });
 
   const [loading, setLoading] = useState({
@@ -43,7 +44,8 @@ const GeneralProfileTab = () => {
             setDoctorData({
               specialization: res.data.profile.specialization || '',
               experience: res.data.profile.experience || '',
-              bio: res.data.profile.bio || ''
+              bio: res.data.profile.bio || '',
+              location: res.data.profile.location || ''
             });
           }
         } catch (error) {
@@ -276,6 +278,24 @@ const GeneralProfileTab = () => {
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white resize-none"
                     placeholder="Brief description of your professional background and expertise..."
                     required
+                  />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Clinic Location</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MapPin size={18} className="text-slate-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="location"
+                    value={doctorData.location}
+                    onChange={handleDoctorChange}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
+                    placeholder="e.g. CareSync Hospital, Colombo"
                   />
                 </div>
               </div>

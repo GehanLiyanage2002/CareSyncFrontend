@@ -9,9 +9,11 @@ import OtpVerification from './pages/OtpVerification';
 import PatientDashboardHome from './pages/PatientDashboardHome';
 import PatientAppointmentsPage from './pages/PatientAppointmentsPage';
 import PatientMedicalProfilePage from './pages/PatientMedicalProfilePage';
+import PatientMedicalHistoryPage from './pages/PatientMedicalHistoryPage';
 import DoctorDashboardHome from './pages/DoctorDashboardHome';
 import DoctorKanbanPage from './pages/DoctorKanbanPage';
 import DoctorHistoryPage from './pages/DoctorHistoryPage';
+import DoctorReviewsPage from './pages/DoctorReviewsPage';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EditProfilePage from './pages/EditProfilePage';
@@ -111,6 +113,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/patient/medical-history" 
+            element={
+              <ProtectedRoute allowedRoles={['Patient']}>
+                <PatientMedicalHistoryPage />
+              </ProtectedRoute>
+            } 
+          />
           {/* Doctor Routes */}
           <Route 
             path="/doctor/dashboard" 
@@ -133,6 +143,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['Doctor']}>
                 <DoctorHistoryPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/doctor/reviews" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <DoctorReviewsPage />
               </ProtectedRoute>
             } 
           />

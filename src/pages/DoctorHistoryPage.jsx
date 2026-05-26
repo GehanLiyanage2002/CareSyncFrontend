@@ -11,12 +11,7 @@ const DoctorHistoryPage = () => {
       <Header />
       
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Appointment History</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Review your past consultations and patient records.</p>
-        </div>
-        
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 min-h-[600px] overflow-hidden">
+        <div className="min-h-[600px]">
           <AppointmentHistory />
         </div>
 

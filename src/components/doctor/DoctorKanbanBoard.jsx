@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Clock, User, CreditCard, X, Hash, Check } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import CreateMedicalReport from './CreateMedicalReport';
+import PatientPastRecordsModal from './PatientPastRecordsModal';
 
 const DoctorKanbanBoard = () => {
   const { token } = useSelector((state) => state.auth);
@@ -20,6 +22,14 @@ const DoctorKanbanBoard = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [consultationFee, setConsultationFee] = useState(0);
+
+  // State for Medical Report Modal
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedAppointmentForReport, setSelectedAppointmentForReport] = useState(null);
+
+  // State for Past Records Modal
+  const [isPastRecordsModalOpen, setIsPastRecordsModalOpen] = useState(false);
+  const [selectedPatientForHistory, setSelectedPatientForHistory] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +60,7 @@ const DoctorKanbanBoard = () => {
               id: apt.id,
               tokenNumber: apt.token_number,
               patientName: apt.patient_name,
+              patient_id: apt.patient_id,
               time: apt.start_time,
               date: apt.appointment_date,
               age: apt.patient_age,
@@ -256,6 +267,18 @@ const DoctorKanbanBoard = () => {
                                   </span>
                                   <h4 className="font-extrabold text-slate-800 dark:text-white leading-tight text-lg">{task.patientName}</h4>
                                 </div>
+                                {task.status === 'completed' && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // prevent opening the main details modal
+                                      setSelectedAppointmentForReport(task);
+                                      setIsReportModalOpen(true);
+                                    }}
+                                    className="px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-white rounded-lg text-xs font-black flex items-center gap-1 transition-all border border-emerald-200 dark:border-emerald-800/50 shadow-sm"
+                                  >
+                                    <FileText size={12} /> Report
+                                  </button>
+                                )}
                               </div>
                               <div className="flex items-center gap-3 text-xs font-bold mt-2">
                                 <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-transparent">
@@ -337,17 +360,50 @@ const DoctorKanbanBoard = () => {
                 </div>
               </div>
             </div>
-            <div className="p-5 bg-slate-50 dark:bg-gray-900 border-t border-slate-100 dark:border-gray-700 flex justify-end">
+            <div className="p-5 bg-slate-50 dark:bg-gray-900 border-t border-slate-100 dark:border-gray-700 flex justify-between gap-3">
               <button 
-                onClick={() => setSelectedTask(null)}
-                className="px-8 py-3 bg-slate-800 dark:bg-white text-white dark:text-gray-900 font-black rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95"
+                onClick={() => {
+                  setSelectedPatientForHistory({
+                    patient_id: selectedTask.patient_id,
+                    patientName: selectedTask.patientName
+                  });
+                  setIsPastRecordsModalOpen(true);
+                }}
+                className="px-6 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 dark:text-blue-400 font-bold rounded-xl transition-colors border border-blue-200 dark:border-blue-800 flex items-center gap-2"
               >
-                Close Profile
+                <History size={18} />
+                View Past Records
               </button>
+
+              {selectedTask.status === 'completed' && (
+                <button 
+                  onClick={() => {
+                    setSelectedAppointmentForReport(selectedTask);
+                    setIsReportModalOpen(true);
+                    setSelectedTask(null);
+                  }}
+                  className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <FileText size={18} />
+                  Write Medical Report
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      <CreateMedicalReport 
+        isOpen={isReportModalOpen} 
+        onClose={() => setIsReportModalOpen(false)} 
+        appointment={selectedAppointmentForReport} 
+      />
+
+      <PatientPastRecordsModal
+        isOpen={isPastRecordsModalOpen}
+        onClose={() => setIsPastRecordsModalOpen(false)}
+        patient={selectedPatientForHistory}
+      />
     </div>
   );
 };

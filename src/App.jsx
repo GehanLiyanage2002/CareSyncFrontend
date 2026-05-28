@@ -20,6 +20,7 @@ import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EditProfilePage from './pages/EditProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 
 const Unauthorized = () => (
   <div className="flex h-screen items-center justify-center bg-gray-50">
@@ -51,6 +52,7 @@ function App() {
   return (
     <div className="antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans">
       <Toaster position="top-right" />
+      <ScrollToTop />
       <Router>
         <Routes>
           {/* Public Routes */}

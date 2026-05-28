@@ -32,13 +32,7 @@ const About = () => {
             
             <div className="flex flex-col gap-4 max-w-xs w-full sm:w-auto">
               <button 
-                onClick={() => {
-                  if (window.location.pathname !== '/') {
-                    navigate('/#doctors');
-                  } else {
-                    document.getElementById('doctors')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
+                onClick={() => navigate('/doctors')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-lg font-bold shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between gap-3 group w-full"
               >
                 Find Doctors
@@ -46,13 +40,7 @@ const About = () => {
               </button>
               
               <button 
-                onClick={() => {
-                  if (window.location.pathname !== '/') {
-                    navigate('/#services');
-                  } else {
-                    document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
+                onClick={() => navigate('/services')}
                 className="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3.5 rounded-lg font-bold shadow-lg shadow-slate-500/30 hover:shadow-slate-500/50 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between gap-3 group w-full"
               >
                 Find Services

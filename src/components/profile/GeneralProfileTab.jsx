@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { updateUser } from '../../features/auth/authSlice';
 import FaceCapture from '../FaceCapture';
+import { validateFormFields } from '../../utils/validation';
 
 const GeneralProfileTab = () => {
   const dispatch = useDispatch();
@@ -88,6 +89,17 @@ const GeneralProfileTab = () => {
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
+
+    // SQL Injection validation
+    const validation = validateFormFields({
+      full_name: formData.fullName,
+      mobile_number: formData.contactNumber
+    });
+
+    if (!validation.isValid) {
+      return toast.error(validation.message);
+    }
+
     setLoading(prev => ({ ...prev, general: true }));
     try {
       const res = await axios.put('http://localhost:5000/api/users/general', {
@@ -127,6 +139,19 @@ const GeneralProfileTab = () => {
 
   const handleSaveDoctorProfile = async (e) => {
     e.preventDefault();
+
+    // SQL Injection validation
+    const validation = validateFormFields({
+      specialization: doctorData.specialization,
+      experience: doctorData.experience.toString(),
+      bio: doctorData.bio,
+      location: doctorData.location
+    });
+
+    if (!validation.isValid) {
+      return toast.error(validation.message);
+    }
+
     setLoading(prev => ({ ...prev, doctor: true }));
     try {
       await axios.put('http://localhost:5000/api/users/doctor-profile', doctorData, {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import FaceCapture from '../components/FaceCapture';
+import { validateFormFields } from '../utils/validation';
 
 // ── Success Toast ─────────────────────────────────────────────────────────────
 const SuccessToast = ({ message, onClose }) => {
@@ -100,6 +101,21 @@ const DoctorRegister = () => {
     }
     if (!faceDescriptor) {
       setError('Please capture your Face ID for biometric login.');
+      return;
+    }
+
+    // SQL Injection validation
+    const validation = validateFormFields({ 
+      full_name: fullName, 
+      email, 
+      mobile_number: mobileNumber,
+      specialization,
+      experience: experience.toString(),
+      bio
+    });
+    
+    if (!validation.isValid) {
+      setError(validation.message);
       return;
     }
 

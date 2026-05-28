@@ -3,6 +3,7 @@ import { User, Mail, Phone, MapPin, Award, Clock } from 'lucide-react';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUser } from '../../features/auth/authSlice';
+import { validateFormFields } from '../../utils/validation';
 
 const DoctorProfileEdit = () => {
   const { token, user } = useSelector((state) => state.auth);
@@ -62,6 +63,21 @@ const DoctorProfileEdit = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setError('');
+
+    // SQL Injection validation
+    const validation = validateFormFields({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      phone: profile.phone,
+      specialization: profile.specialization,
+      experience: profile.experience,
+      bio: profile.bio
+    });
+
+    if (!validation.isValid) {
+      setError(validation.message);
+      return;
+    }
     
     try {
       const response = await axios.put('http://localhost:5000/api/doctor/profile', {

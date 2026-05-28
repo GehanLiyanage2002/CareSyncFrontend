@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { updateUser } from '../../features/auth/authSlice';
 import { HeartPulse, Droplets, AlertCircle, Phone, User as UserIcon } from 'lucide-react';
+import { validateFormFields } from '../../utils/validation';
 
 // ── Toast notification component ──────────────────────────────────────────────
 const Toast = ({ message, type, onClose }) => {
@@ -48,6 +49,19 @@ const MedicalProfileTab = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // SQL Injection validation
+    const validation = validateFormFields({
+      allergies,
+      chronic_conditions: chronicConditions,
+      emergency_contact_name: emergencyContactName,
+      emergency_contact_number: emergencyContactNumber
+    });
+
+    if (!validation.isValid) {
+      return showToast(validation.message, 'error');
+    }
+
     setLoading(true);
 
     try {

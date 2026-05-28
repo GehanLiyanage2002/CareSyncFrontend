@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { loginSuccess } from '../features/auth/authSlice';
 import toast from 'react-hot-toast';
+import { validateFormFields } from '../utils/validation';
 import FaceCapture from '../components/FaceCapture';
 import { Fingerprint, Mail } from 'lucide-react';
 
@@ -24,6 +25,14 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // SQL Injection validation
+    const validation = validateFormFields({ email });
+    if (!validation.isValid) {
+      setError(validation.message);
+      return;
+    }
+
     setLoading(true);
 
     try {

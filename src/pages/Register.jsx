@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { validateFormFields } from '../utils/validation';
 
 // ── Success Toast ─────────────────────────────────────────────────────────────
 const SuccessToast = ({ message, onClose }) => {
@@ -71,6 +72,13 @@ const Register = () => {
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match. Please try again.');
+      return;
+    }
+
+    // SQL Injection validation
+    const validation = validateFormFields({ full_name: fullName, email, mobile_number: mobileNumber });
+    if (!validation.isValid) {
+      setError(validation.message);
       return;
     }
 

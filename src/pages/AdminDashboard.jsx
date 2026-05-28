@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   LayoutDashboard, Users, UserRound, Calendar, DollarSign, 
-  LogOut, Activity, TrendingUp, CheckCircle, XCircle 
+  LogOut, Activity, TrendingUp, CheckCircle, XCircle, Stethoscope 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
+import AdminServices from '../components/admin/AdminServices';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('Overview');
@@ -113,6 +114,7 @@ const AdminDashboard = () => {
     { name: 'Doctors', icon: <UserRound size={20} /> },
     { name: 'Patients', icon: <Users size={20} /> },
     { name: 'Appointments', icon: <Calendar size={20} /> },
+    { name: 'Medical Services', icon: <Stethoscope size={20} /> },
     { name: 'Earnings', icon: <DollarSign size={20} /> },
   ];
 
@@ -379,6 +381,11 @@ const AdminDashboard = () => {
                   </table>
                 </div>
               </div>
+            )}
+
+            {/* MEDICAL SERVICES TAB */}
+            {activeTab === 'Medical Services' && (
+              <AdminServices />
             )}
 
           </div>

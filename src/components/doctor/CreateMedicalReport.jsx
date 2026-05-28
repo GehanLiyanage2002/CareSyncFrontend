@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { FileText, X, UploadCloud, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { validateFormFields } from '../../utils/validation';
 
 const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
   const { token } = useSelector((state) => state.auth);
@@ -83,6 +84,18 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
     e.preventDefault();
     if (!formData.title || !formData.symptoms || !formData.treatment_plan) {
       toast.error('Please fill all required fields');
+      return;
+    }
+
+    // SQL Injection validation
+    const validation = validateFormFields({
+      title: formData.title,
+      symptoms: formData.symptoms,
+      treatment_plan: formData.treatment_plan
+    });
+
+    if (!validation.isValid) {
+      toast.error(validation.message);
       return;
     }
 

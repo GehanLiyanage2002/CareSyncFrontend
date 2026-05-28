@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
+import DoctorsPage from './pages/DoctorsPage';
+import ServicesPage from './pages/ServicesPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import DoctorRegister from './pages/DoctorRegister';
@@ -53,6 +55,8 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/doctors" element={<DoctorsPage />} />
+          <Route path="/services" element={<ServicesPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/doctor-register" element={<DoctorRegister />} />

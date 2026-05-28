@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
-const Doctors = ({ onBookNow }) => {
+const Doctors = ({ onBookNow, hideHeader }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,11 +97,13 @@ const Doctors = ({ onBookNow }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Title Section */}
-        <div className="relative text-center mb-16 h-24 flex items-center justify-center">
-          <h3 className="relative z-10 text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Our Doctors
-          </h3>
-        </div>
+        {!hideHeader && (
+          <div className="relative text-center mb-16 h-24 flex items-center justify-center">
+            <h3 className="relative z-10 text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Our Doctors
+            </h3>
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="max-w-xl mx-auto mb-16 relative">

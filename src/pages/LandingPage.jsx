@@ -8,6 +8,7 @@ import RoleLogin from '../components/RoleLogin';
 import Footer from '../components/Footer';
 import DoctorProfile from '../components/DoctorProfile';
 import About from '../components/About';
+import Telemedicine from '../components/Telemedicine';
 
 const LandingPage = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -40,6 +41,7 @@ const LandingPage = () => {
           <>
             <Hero />
             <About />
+            <Telemedicine />
             <Doctors onBookNow={(doctor) => setSelectedDoctor(doctor)} />
             <Services />
             <RoleLogin />

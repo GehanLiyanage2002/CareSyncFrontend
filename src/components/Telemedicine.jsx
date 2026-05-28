@@ -13,7 +13,7 @@ const Telemedicine = () => {
           {/* Left Side: Images & Graphics */}
           <div className="w-full lg:w-1/2 relative">
             {/* Background Graphic */}
-            <div className="absolute -inset-4 bg-blue-100 rounded-[3rem] transform -rotate-3 scale-105 opacity-50 z-0"></div>
+            <div className="absolute -inset-4 bg-blue-100 rounded-[3rem] transform -rotate-0 scale-105 opacity-50 z-0"></div>
             
             {/* Main Image */}
             <div className="relative z-10 rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white">

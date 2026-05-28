@@ -6,7 +6,7 @@ const Telemedicine = () => {
   const navigate = useNavigate();
 
   return (
-    <section id="telemedicine" className="py-24 bg-slate-50 overflow-hidden">
+    <section id="telemedicine" className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-20">
           
@@ -47,9 +47,9 @@ const Telemedicine = () => {
               </span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#111827] leading-tight mb-6">
               Consult Top Doctors <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
+              <span className="text-[#3b82f6]">
                 From Anywhere
               </span>
             </h2>
@@ -86,7 +86,7 @@ const Telemedicine = () => {
             <div className="flex">
               <button 
                 onClick={() => navigate('/login')}
-                className="bg-slate-900 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-bold shadow-xl shadow-slate-900/20 hover:shadow-blue-600/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group w-full sm:w-auto"
+                className="bg-[#3b82f6] hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold shadow-xl shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group w-full sm:w-auto"
               >
                 Start Consultation
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />

@@ -4,13 +4,14 @@ import { io } from 'socket.io-client';
 import { 
   HeartPulse, Ear, Bone, Brain, Activity, 
   Stethoscope, Syringe, Eye, Pill, Microscope, 
-  Baby, Sparkles
+  Baby, Sparkles, Search
 } from 'lucide-react';
 
 const socket = io('http://localhost:5000');
 
 const Services = () => {
   const [services, setServices] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,23 +57,41 @@ const Services = () => {
     return Stethoscope;
   };
 
+  const filteredServices = services.filter(service => 
+    service.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <section id="services" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] tracking-tight">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] tracking-tight mb-8">
             Our Medical Services
           </h2>
+          
+          {/* Search Bar */}
+          <div className="max-w-xl mx-auto relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-blue-500" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search services..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 rounded-full bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all duration-300 font-medium"
+            />
+          </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center items-center h-40">
             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : (
+        ) : filteredServices.length > 0 ? (
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
-            {services.map((service, index) => {
+            {filteredServices.map((service, index) => {
               const IconComponent = getServiceIcon(service.name);
               return (
                 <div 
@@ -86,6 +105,12 @@ const Services = () => {
                 </div>
               );
             })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-slate-500 text-lg font-medium">
+              No services found matching "{searchTerm}"
+            </p>
           </div>
         )}
       </div>

@@ -21,7 +21,7 @@ const About = () => {
             
             <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
               Welcome To Our <br className="hidden md:block" />
-              Hospital
+              Medical Clinic
             </h2>
             
             <p className="text-slate-500 text-lg leading-relaxed mb-8 max-w-lg">

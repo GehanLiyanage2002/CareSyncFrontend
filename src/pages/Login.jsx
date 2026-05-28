@@ -19,8 +19,13 @@ const Login = () => {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const loginRole = location.state?.role || 'Patient';
+  const [loginRole, setLoginRole] = useState(location.state?.role || 'Patient');
   const [useFaceId, setUseFaceId] = useState(loginRole === 'Doctor');
+
+  React.useEffect(() => {
+    setUseFaceId(loginRole === 'Doctor');
+    setError('');
+  }, [loginRole]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,16 +105,32 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative background blobs */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+    <div className="min-h-screen flex">
+      {/* Left side: Graphic / Branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#edf4fa] items-center justify-center overflow-hidden">
+        <div 
+          className="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%233b82f6' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+            backgroundSize: '400px 400px'
+          }}
+        ></div>
+        <div className="relative z-10 w-full max-w-lg p-12 text-center">
+          <div className="w-24 h-24 bg-white rounded-[2rem] mx-auto mb-10 flex items-center justify-center shadow-xl shadow-blue-200/50 rotate-3 hover:rotate-6 transition-transform duration-500">
+            <span className="text-4xl font-black text-blue-600 tracking-tighter">CS</span>
+          </div>
+          <h2 className="text-5xl font-extrabold text-slate-900 mb-6 tracking-tight leading-[1.1]">
+            Your Health,<br />Our Priority
+          </h2>
+          <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-sm mx-auto">
+            Connect with top-tier healthcare professionals in a seamless and modern way.
+          </p>
+        </div>
+      </div>
 
-      {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md">
-        {/* Card */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-200/50 p-8 md:p-10 border border-white/60">
+      {/* Right side: Form */}
+      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center items-center p-6 sm:p-12 lg:p-20 relative overflow-y-auto">
+        <div className="w-full max-w-md">
           
           {/* Back to Home */}
           <div className="flex justify-start mb-2">
@@ -126,14 +147,32 @@ const Login = () => {
           </div>
 
           {/* Logo & Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-lg shadow-blue-300 mb-5">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="white" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
+          <div className="mb-8 mt-4">
             <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Welcome Back</h1>
-            <p className="mt-2 text-slate-500 text-base font-medium">Sign in to your {loginRole} account</p>
+            <p className="mt-2 text-slate-500 text-base font-medium">Sign in to your account</p>
+          </div>
+
+          {/* Role Selection Tabs */}
+          <div className="flex bg-slate-100/80 p-1.5 rounded-xl mb-8 relative border border-slate-200/60">
+            <button
+              type="button"
+              onClick={() => setLoginRole('Patient')}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-lg z-10 transition-all duration-300 ${loginRole === 'Patient' ? 'text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Patient
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoginRole('Doctor')}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-lg z-10 transition-all duration-300 ${loginRole === 'Doctor' ? 'text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Doctor
+            </button>
+            {/* Sliding Background */}
+            <div 
+              className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-lg shadow-sm border border-slate-200/50 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+              style={{ left: loginRole === 'Doctor' ? 'calc(50% + 1.5px)' : '4.5px' }}
+            ></div>
           </div>
 
           {/* Error Alert */}
@@ -277,28 +316,28 @@ const Login = () => {
           )}
 
           {/* Footer Note */}
-          <p className="mt-6 text-center text-xs text-slate-400 font-medium">
+          <p className="mt-8 text-center text-xs text-slate-400 font-medium">
             Protected by industry-standard encryption. Your data is safe with us.
           </p>
-        </div>
 
-        <div className="text-center mt-6 text-sm text-slate-500">
-          {loginRole === 'Doctor' && (
-            <span>
-              Are you a medical professional?{' '}
-              <button type="button" onClick={() => navigate('/doctor-register')} className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors duration-150">
-                Register as a Doctor
-              </button>
-            </span>
-          )}
-          {loginRole === 'Patient' && (
-            <span>
-              Don't have an account?{' '}
-              <button type="button" onClick={() => navigate('/register')} className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
-                Create an account
-              </button>
-            </span>
-          )}
+          <div className="text-center mt-6 text-sm text-slate-500">
+            {loginRole === 'Doctor' && (
+              <span>
+                Are you a medical professional?{' '}
+                <button type="button" onClick={() => navigate('/doctor-register')} className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+                  Register as a Doctor
+                </button>
+              </span>
+            )}
+            {loginRole === 'Patient' && (
+              <span>
+                Don't have an account?{' '}
+                <button type="button" onClick={() => navigate('/register')} className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+                  Create an account
+                </button>
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

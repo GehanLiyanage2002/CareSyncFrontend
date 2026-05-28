@@ -69,23 +69,36 @@ const Header = () => {
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           {!isAuthenticated ? (
-            <>
-              <button
-                onClick={() => navigate('/login', { state: { role: 'Patient' } })}
-                className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
-              >
-                Patient Login
-              </button>
-              <button
-                onClick={() => navigate('/login', { state: { role: 'Doctor' } })}
-                className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
-              >
-                Doctor Login
-              </button>
-            </>
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+            >
+              Sign In
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </button>
           ) : (
-            <div className="relative" ref={dropdownRef}>
-              <button 
+            <>
+              {user?.role === 'Patient' && (
+                <button
+                  onClick={() => {
+                    if (window.location.pathname !== '/') {
+                      navigate('/#doctors');
+                    } else {
+                      document.getElementById('doctors')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 items-center gap-2"
+                >
+                  Book Appointment
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                </button>
+              )}
+              <div className="relative" ref={dropdownRef}>
+                <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border border-blue-600 hover:bg-blue-200 dark:hover:bg-blue-800 transition shadow-sm overflow-hidden ring-2 ring-transparent hover:ring-blue-300 dark:hover:ring-blue-700"
                 title="Account Menu"
@@ -210,30 +223,9 @@ const Header = () => {
                 </div>
               )}
             </div>
+            </>
           )}
-          {user?.role === 'Doctor' ? (
-            <button 
-              onClick={() => {
-                if (window.location.pathname === '/doctor/dashboard') {
-                  const el = document.getElementById('schedule-manager');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  navigate('/doctor/dashboard');
-                  setTimeout(() => {
-                    const el = document.getElementById('schedule-manager');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }, 300);
-                }
-              }} 
-              className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
-            >
-              Set Appointment
-            </button>
-          ) : (
-            <button onClick={() => navigate('/#doctors')} className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
-              Book Appointment
-            </button>
-          )}
+
         </div>
       </div>
     </header>

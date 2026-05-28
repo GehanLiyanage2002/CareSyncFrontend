@@ -96,11 +96,8 @@ const Doctors = ({ onBookNow }) => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Title Section with faded background text */}
+        {/* Title Section */}
         <div className="relative text-center mb-16 h-24 flex items-center justify-center">
-          <h2 className="text-[70px] md:text-[100px] font-extrabold text-slate-50 dark:text-gray-800/10 leading-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center tracking-tight select-none pointer-events-none">
-            Our Doctors
-          </h2>
           <h3 className="relative z-10 text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Our Doctors
           </h3>

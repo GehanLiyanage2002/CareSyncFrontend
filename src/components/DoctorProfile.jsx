@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, CheckCircle, GraduationCap, Calendar, Loader } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
@@ -9,11 +10,13 @@ const socket = io('http://localhost:5000');
 const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
   const [doctor, setDoctor] = useState(initialDoctor);
   const { user, token } = useSelector(state => state.auth);
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash'); // 'Cash' or 'Online'
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [tokenNumber, setTokenNumber] = useState(null);
+  const [showBookingPanel, setShowBookingPanel] = useState(false);
   
   const [formData, setFormData] = useState({
     fullName: user?.name || user?.full_name || '',
@@ -71,150 +74,6 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
 
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
-
-  // Fetch configured dates
-  useEffect(() => {
-    const docId = doctor?.id || doctor?.doctor_id;
-    if (docId) {
-      const fetchDates = async () => {
-        setLoadingDates(true);
-        try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${docId}`);
-          if (res.data.success && res.data.dates) {
-            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            
-            const tempDates = res.data.dates.map(dateStr => {
-              const d = new Date(dateStr);
-              const year = d.getFullYear();
-              const monthStr = String(d.getMonth() + 1).padStart(2, '0');
-              const dayStr = String(d.getDate()).padStart(2, '0');
-              return {
-                dayName: daysOfWeek[d.getDay()],
-                dayNum: d.getDate(),
-                month: months[d.getMonth()],
-                year: year,
-                formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${year}`,
-                valueDate: `${year}-${monthStr}-${dayStr}`
-              };
-            });
-            setDates(tempDates);
-          }
-        } catch (error) {
-          console.error("Failed to fetch configured dates", error);
-        } finally {
-          setLoadingDates(false);
-        }
-      };
-      fetchDates();
-    }
-  }, [doctor]);
-
-  useEffect(() => {
-    const docId = doctor?.id || doctor?.doctor_id;
-    if (selectedDate && docId) {
-      const fetchSlots = async () => {
-        setLoadingSlots(true);
-        try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
-          if (res.data.success) {
-            setDynamicSlots(res.data.slots);
-          }
-        } catch (error) {
-          console.error("Failed to fetch slots", error);
-          setDynamicSlots([]);
-        } finally {
-          setLoadingSlots(false);
-        }
-      };
-      fetchSlots();
-    }
-  }, [selectedDate, doctor, refreshTrigger]);
-
-  useEffect(() => {
-    socket.on('slotBooked', (data) => {
-      const docId = doctor?.id || doctor?.doctor_id;
-      // If the booking is for the currently viewed doctor and date, trigger refresh
-      if (data.doctor_id === docId && selectedDate?.valueDate === data.date) {
-        setRefreshTrigger(prev => prev + 1);
-      }
-    });
-
-    return () => {
-      socket.off('slotBooked');
-    };
-  }, [doctor, selectedDate]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    // Clear validation error on change
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full Name is required';
-    if (!formData.age.trim() || isNaN(formData.age) || parseInt(formData.age) <= 0) {
-      newErrors.age = 'Provide a valid age';
-    }
-    if (!formData.mobileNumber.trim() || formData.mobileNumber.length < 9) {
-      newErrors.mobileNumber = 'Provide a valid mobile number';
-    }
-    if (!formData.gender) newErrors.gender = 'Gender is required';
-    
-    if (!selectedDate) newErrors.date = 'Select a date';
-    if (!selectedTime) newErrors.time = 'Select a time slot';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleBookingSubmit = async (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      try {
-        const docId = doctor?.id || doctor?.doctor_id;
-        const res = await axios.post('http://localhost:5000/api/appointments', {
-          doctor_id: docId,
-          appointment_date: selectedDate.valueDate,
-          start_time: selectedTime,
-          patient_name: formData.fullName,
-          age: parseInt(formData.age),
-          mobile_number: formData.mobileNumber,
-          gender: formData.gender,
-          email: formData.email,
-          payment_method: paymentMethod
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setTokenNumber(res.data.appointment.token_number);
-          setShowSuccessModal(true);
-        }
-      } catch (error) {
-        console.error("Booking failed", error);
-        alert(error.response?.data?.message || 'Booking failed');
-      }
-    }
-  };
-
-  const formatTimeDisplay = (time24) => {
-    const [h, m] = time24.split(':');
-    const hours = parseInt(h);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const hours12 = hours % 12 || 12;
-    return `${hours12.toString().padStart(2, '0')}:${m} ${ampm}`;
-  };
 
   // Fetch reviews for this doctor
   useEffect(() => {
@@ -361,303 +220,6 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
         </div>
       </div>
 
-      {/* Appointment Booking Panel */}
-      {doctor.is_available === false ? (
-        <div className="bg-rose-50 dark:bg-rose-900/20 rounded-3xl p-8 shadow-sm border border-rose-100 dark:border-rose-800/30 text-center transition-colors duration-300 mt-8">
-          <Calendar className="h-12 w-12 text-rose-400 dark:text-rose-500 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-rose-900 dark:text-rose-400 mb-2">Currently Unavailable</h3>
-          <p className="text-rose-700 dark:text-rose-300">This doctor is not accepting new appointments at the moment.</p>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-lg border border-blue-50/50 dark:border-gray-700/50 transition-colors duration-300 mt-8">
-          <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-8 flex items-center gap-2 transition-colors">
-            <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            Book Your Appointment
-          </h3>
-
-        <form onSubmit={handleBookingSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Columns: Date Selection & Patient Details */}
-          <div className="lg:col-span-2 space-y-8">
-            
-            {/* Select Date */}
-            <div>
-              <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">Select Date</h4>
-              {errors.date && <p className="text-rose-500 text-xs mb-2">{errors.date}</p>}
-              {loadingDates ? (
-                <div className="flex justify-center py-4 w-full text-blue-500">
-                  <Loader className="animate-spin h-6 w-6" />
-                </div>
-              ) : dates.length === 0 ? (
-                <div className="text-sm text-gray-500 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
-                  No availability currently configured.
-                </div>
-              ) : (
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                  {dates.map((date, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        setSelectedDate(date);
-                        setSelectedTime(null); // Reset selected time slot
-                        setSlotPage(0); // Reset pagination to first page
-                        if (errors.date) setErrors({ ...errors, date: '' });
-                      }}
-                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all duration-300 min-w-[70px] ${
-                        selectedDate?.formattedDate === date.formattedDate
-                          ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                          : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                      }`}
-                    >
-                      <span className="text-xs uppercase tracking-wider">{date.dayName}</span>
-                      <span className="text-xl font-bold my-1">{date.dayNum}</span>
-                      <span className="text-xs">{date.month}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Patient Details Form */}
-            <div>
-              <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">Patient Details</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                {/* Full Name */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    placeholder="Enter Patient's Full Name"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  />
-                  {errors.fullName && <p className="text-rose-500 text-xs mt-1">{errors.fullName}</p>}
-                </div>
-
-                {/* Age */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Age</label>
-                  <input
-                    type="text"
-                    name="age"
-                    value={formData.age}
-                    onChange={handleInputChange}
-                    placeholder="Patient's Age"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  />
-                  {errors.age && <p className="text-rose-500 text-xs mt-1">{errors.age}</p>}
-                </div>
-
-                {/* Mobile Number */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Mobile Number (10 digits)</label>
-                  <input
-                    type="tel"
-                    name="mobileNumber"
-                    value={formData.mobileNumber}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 0771234567"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  />
-                  {errors.mobileNumber && <p className="text-rose-500 text-xs mt-1">{errors.mobileNumber}</p>}
-                </div>
-
-                {/* Gender */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Gender</label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  {errors.gender && <p className="text-rose-500 text-xs mt-1">{errors.gender}</p>}
-                </div>
-
-                {/* Email */}
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Email (Optional - for receipt)</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="email@example.com"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Time Slots & Live Receipt Summary */}
-          <div className="space-y-6 lg:border-l lg:border-gray-100 dark:lg:border-gray-700 lg:pl-8">
-            
-            {/* Available Time Slots */}
-            <div>
-              <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-3 transition-colors">Available Time Slots</h4>
-              {errors.time && <p className="text-rose-500 text-xs mb-2">{errors.time}</p>}
-              {!selectedDate ? (
-                <p className="text-sm text-gray-400 dark:text-gray-500 italic bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl text-center">
-                  Select a date to view available time slots.
-                </p>
-              ) : loadingSlots ? (
-                <div className="flex justify-center py-4">
-                  <Loader className="w-6 h-6 animate-spin text-blue-500" />
-                </div>
-              ) : dynamicSlots.length === 0 ? (
-                <p className="text-sm text-rose-500 italic bg-rose-50 p-4 rounded-2xl text-center">
-                  No slots available for this date.
-                </p>
-              ) : (
-                (() => {
-                  const totalPages = Math.ceil(dynamicSlots.length / SLOTS_PER_PAGE);
-                  const visibleSlots = dynamicSlots.slice(slotPage * SLOTS_PER_PAGE, (slotPage + 1) * SLOTS_PER_PAGE);
-                  return (
-                    <div className="flex flex-col gap-3">
-                      {/* Slots Grid - exactly 8 slots */}
-                      <div className="grid grid-cols-2 gap-2">
-                        {visibleSlots.map((slot24, idx) => {
-                          const displayTime = formatTimeDisplay(slot24);
-                          return (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => {
-                                setSelectedTime(slot24);
-                                if (errors.time) setErrors({ ...errors, time: '' });
-                              }}
-                              className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${
-                                selectedTime === slot24
-                                  ? 'bg-teal-500 border-teal-500 text-white shadow'
-                                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-950/20 hover:border-teal-400'
-                              }`}
-                            >
-                              {displayTime}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Pagination Controls */}
-                      {totalPages > 1 && (
-                        <div className="flex items-center justify-between mt-1">
-                          <button
-                            type="button"
-                            disabled={slotPage === 0}
-                            onClick={() => setSlotPage(p => p - 1)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Prev
-                          </button>
-
-                          <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
-                            {slotPage + 1} / {totalPages}
-                          </span>
-
-                          <button
-                            type="button"
-                            disabled={slotPage >= totalPages - 1}
-                            onClick={() => setSlotPage(p => p + 1)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
-                          >
-                            Next
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()
-              )}
-            </div>
-
-            {/* Summary Box */}
-            <div className="bg-blue-50/40 dark:bg-gray-900/40 border border-blue-100/50 dark:border-gray-700/50 rounded-3xl p-5 space-y-4 transition-colors duration-300">
-              <div className="border-b border-blue-100 dark:border-gray-700 pb-3">
-                <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 dark:text-blue-400">Selected Doctor</span>
-                <span className="text-md font-bold text-gray-800 dark:text-white">{doctor.name}</span>
-              </div>
-
-              <div>
-                <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 dark:text-blue-400">Doctor Speciality</span>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{doctor.specialization}</span>
-              </div>
-
-              <div>
-                <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 dark:text-blue-400">Selected Date</span>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {selectedDate ? `${selectedDate.dayName}, ${selectedDate.dayNum} ${selectedDate.month} ${selectedDate.year}` : 'Not selected'}
-                </span>
-              </div>
-
-              <div>
-                <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 dark:text-blue-400">Selected Time</span>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {selectedTime ? formatTimeDisplay(selectedTime) : 'Not selected'}
-                </span>
-              </div>
-
-              <div className="border-t border-blue-100 dark:border-gray-700 pt-3 flex justify-between items-center">
-                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Consultation Fee</span>
-                <span className="text-md font-bold text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
-              </div>
-
-              {/* Payment Methods */}
-              <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-xl transition-colors duration-300">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('Cash')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
-                    paymentMethod === 'Cash'
-                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  Cash
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('Online')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
-                    paymentMethod === 'Online'
-                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  Online
-                </button>
-              </div>
-
-              {/* Confirm Booking Button */}
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md transition duration-300 hover:shadow-lg active:scale-98"
-              >
-                Confirm Booking
-              </button>
-            </div>
-
-          </div>
-
-        </form>
-        </div>
-      )}
-
       {/* Reviews Section */}
       <div className="mt-10 mb-2">
         <div className="flex items-center justify-between mb-6">
@@ -717,6 +279,26 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
           </div>
         )}
       </div>
+
+      
+      {/* Appointment Booking Button */}
+      {doctor.is_available === false ? (
+        <div className="bg-rose-50 dark:bg-rose-900/20 rounded-3xl p-8 shadow-sm border border-rose-100 dark:border-rose-800/30 text-center transition-colors duration-300 mt-8 mb-8">
+          <Calendar className="h-12 w-12 text-rose-400 dark:text-rose-500 mx-auto mb-4" />
+          <h3 className="text-2xl font-bold text-rose-900 dark:text-rose-400 mb-2">Currently Unavailable</h3>
+          <p className="text-rose-700 dark:text-rose-300">This doctor is not accepting new appointments at the moment.</p>
+        </div>
+      ) : (
+        <div className="flex justify-center mt-10 mb-10">
+          <button
+            onClick={() => navigate('/book-appointment', { state: { doctor } })}
+            className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-extrabold text-lg py-4 px-10 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2"
+          >
+            <Calendar className="w-6 h-6" />
+            Book Your Appointment
+          </button>
+        </div>
+      )}
 
       {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (

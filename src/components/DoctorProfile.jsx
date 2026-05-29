@@ -30,6 +30,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
   const [dynamicSlots, setDynamicSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  // Fetch reviews for this doctor
   const [slotPage, setSlotPage] = useState(0);
   const SLOTS_PER_PAGE = 8;
   const [reviews, setReviews] = useState([]);
@@ -57,6 +58,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
           specialization: data.specialization,
           experience: data.experience,
           about: data.bio,
+          qualifications: data.qualifications
         }));
       }
     };
@@ -74,8 +76,6 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
 
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
-
-  // Fetch reviews for this doctor
   useEffect(() => {
     const doctorId = doctor.id || doctor.doctor_id;
     if (!doctorId) return;

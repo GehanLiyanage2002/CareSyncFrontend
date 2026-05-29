@@ -153,27 +153,33 @@ const Login = () => {
           </div>
 
           {/* Role Selection Tabs */}
-          <div className="flex bg-slate-100/80 p-1.5 rounded-xl mb-8 relative border border-slate-200/60">
-            <button
-              type="button"
-              onClick={() => setLoginRole('Patient')}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-lg z-10 transition-all duration-300 ${loginRole === 'Patient' ? 'text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Patient
-            </button>
-            <button
-              type="button"
-              onClick={() => setLoginRole('Doctor')}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-lg z-10 transition-all duration-300 ${loginRole === 'Doctor' ? 'text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Doctor
-            </button>
-            {/* Sliding Background */}
-            <div 
-              className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-lg shadow-sm border border-slate-200/50 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-              style={{ left: loginRole === 'Doctor' ? 'calc(50% + 1.5px)' : '4.5px' }}
-            ></div>
-          </div>
+          {['Patient', 'Doctor'].includes(loginRole) ? (
+            <div className="flex bg-slate-100/80 p-1.5 rounded-xl mb-8 relative border border-slate-200/60">
+              <button
+                type="button"
+                onClick={() => setLoginRole('Patient')}
+                className={`flex-1 py-2.5 text-sm font-bold rounded-lg z-10 transition-all duration-300 ${loginRole === 'Patient' ? 'text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Patient
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginRole('Doctor')}
+                className={`flex-1 py-2.5 text-sm font-bold rounded-lg z-10 transition-all duration-300 ${loginRole === 'Doctor' ? 'text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Doctor
+              </button>
+              {/* Sliding Background */}
+              <div 
+                className="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-lg shadow-sm border border-slate-200/50 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                style={{ left: loginRole === 'Doctor' ? 'calc(50% + 1.5px)' : '4.5px' }}
+              ></div>
+            </div>
+          ) : (
+             <div className="mb-8 p-4 bg-blue-50/50 rounded-xl border border-blue-100/50 text-center">
+               <span className="text-blue-700 font-bold text-sm uppercase tracking-wider">{loginRole} Portal</span>
+             </div>
+          )}
 
           {/* Error Alert */}
           {error && (
@@ -215,10 +221,10 @@ const Login = () => {
           ) : (
             <form onSubmit={handleSubmit} noValidate className="space-y-5 animate-fadeIn">
             
-            {/* Email Field */}
+            {/* Email / Username Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Email Address
+                Email Address or Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
@@ -229,12 +235,12 @@ const Login = () => {
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder={['Admin', 'Receptionist'].includes(loginRole) ? loginRole.toLowerCase() : 'you@example.com'}
                   className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
                 />
               </div>

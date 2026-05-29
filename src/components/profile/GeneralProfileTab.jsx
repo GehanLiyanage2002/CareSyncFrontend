@@ -279,7 +279,7 @@ const GeneralProfileTab = () => {
                   value={formData.contactNumber}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+94 7X XXX XXXX"
                   required
                 />
               </div>

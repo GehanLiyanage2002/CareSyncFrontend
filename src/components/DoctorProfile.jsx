@@ -257,8 +257,22 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
               <div key={review.id} className="bg-white dark:bg-gray-800 rounded-3xl border border-slate-100 dark:border-gray-700 p-5 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      {review.patient_name ? review.patient_name.charAt(0).toUpperCase() : 'P'}
+                    <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+                      {review.patient_id ? (
+                        <img 
+                          src={`http://localhost:5000/api/users/profile-image/${review.patient_id}?t=${Date.now()}`}
+                          alt={review.patient_name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <span className={review.patient_id ? 'hidden' : 'block'}>
+                        {review.patient_name ? review.patient_name.charAt(0).toUpperCase() : 'P'}
+                      </span>
                     </div>
                     <div>
                       <p className="font-bold text-slate-800 dark:text-white text-sm">{review.patient_name || 'Anonymous'}</p>

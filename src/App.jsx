@@ -20,6 +20,7 @@ import DoctorReviewsPage from './pages/DoctorReviewsPage';
 import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EditProfilePage from './pages/EditProfilePage';
+import BookAppointmentPage from './pages/BookAppointmentPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -66,6 +67,16 @@ function App() {
           <Route path="/doctor-register" element={<DoctorRegister />} />
           <Route path="/verify-otp" element={<OtpVerification />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          
+          {/* Book Appointment Route */}
+          <Route 
+            path="/book-appointment" 
+            element={
+              <ProtectedRoute>
+                <BookAppointmentPage />
+              </ProtectedRoute>
+            } 
+          />
 
           {/* Generic Dashboard Redirect Route */}
           <Route 

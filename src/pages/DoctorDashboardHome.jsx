@@ -7,6 +7,9 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import ScheduleManager from '../components/doctor/ScheduleManager';
 import FeeManager from '../components/doctor/FeeManager';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -15,6 +18,7 @@ const DoctorDashboardHome = () => {
   const [isAvailable, setIsAvailable] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,7 +51,30 @@ const DoctorDashboardHome = () => {
     if (token) {
       fetchData();
     }
-  }, [token]);
+  }, [token, refreshTrigger]);
+
+  useEffect(() => {
+    const handleSlotBooked = (bookingData) => {
+      if (bookingData.doctor_id === user?.id) {
+        toast.success('New appointment booked! Updating dashboard...', { icon: '🔔' });
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    const handleStatusChanged = (data) => {
+      if (data.doctor_id === user?.id) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    socket.on('slotBooked', handleSlotBooked);
+    socket.on('appointmentStatusChanged', handleStatusChanged);
+
+    return () => {
+      socket.off('slotBooked', handleSlotBooked);
+      socket.off('appointmentStatusChanged', handleStatusChanged);
+    };
+  }, [user]);
 
   const handleToggleAvailability = async () => {
     // Optimistic UI update

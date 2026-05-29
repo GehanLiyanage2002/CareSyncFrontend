@@ -10,7 +10,7 @@ const ServicesPage = () => {
       
       {/* Content Section */}
       <section className="pt-20 pb-10 bg-white relative">
-        <Services />
+        <Services isPage={true} />
       </section>
 
       <Footer />

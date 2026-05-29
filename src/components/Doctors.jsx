@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Search, GraduationCap, Calendar, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
-const Doctors = ({ onBookNow }) => {
+const Doctors = ({ onBookNow, hideHeader }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -59,98 +60,147 @@ const Doctors = ({ onBookNow }) => {
     (doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
 
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 350; // roughly card width + gap
+      if (direction === 'left') {
+        scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else {
+        scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
-    <section id="doctors" className="py-20 bg-blue-50/30 dark:bg-gray-900/30 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-extrabold text-blue-900 dark:text-blue-400 mb-4 transition-colors">
-            Our Medical Experts
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-colors">
-            Find your ideal doctor by name or specialization
-          </p>
-        </div>
+    <section id="doctors" className={`${hideHeader ? 'pb-24 pt-4' : 'py-24'} bg-white relative overflow-hidden transition-colors duration-300`}>
+      
+      {/* Decorative Dots - Left */}
+      <div className="absolute top-1/4 left-10 hidden lg:block opacity-30 z-0">
+        <svg width="80" height="100" viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="dots-left" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="2" fill="#3b82f6" />
+          </pattern>
+          <rect x="0" y="0" width="80" height="100" fill="url(#dots-left)" />
+        </svg>
+      </div>
+
+      {/* Decorative Dots - Right Bottom */}
+      <div className="absolute bottom-10 right-10 hidden lg:block opacity-20 z-0">
+        <svg width="120" height="150" viewBox="0 0 120 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="dots-right" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+            <circle cx="3" cy="3" r="3" fill="transparent" stroke="#3b82f6" strokeWidth="1" />
+          </pattern>
+          <rect x="0" y="0" width="120" height="150" fill="url(#dots-right)" />
+        </svg>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Title Section */}
+        {!hideHeader && (
+          <div className="text-center">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">
+              Our Doctors
+            </h2>
+          </div>
+        )}
 
         {/* Search Bar */}
-        <div className="max-w-md mx-auto mb-16 relative">
+        <div className="max-w-xl mx-auto mb-10 relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+            <Search className="h-5 w-5 text-blue-500" />
           </div>
           <input
             type="text"
             placeholder="Search doctors by name or specialization..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-12 pr-4 py-3 border border-blue-100 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-md transition-all duration-300"
+            className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all duration-300 font-medium"
           />
         </div>
 
-        {/* Doctors Grid */}
+        {/* Carousel / Doctors Grid */}
         {filteredDoctors.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredDoctors.map((doctor, index) => (
-              <div
-                key={index}
-                className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-blue-50/50 dark:border-gray-700/50 flex flex-col items-center text-center group"
-              >
-                {/* Image Container with pulsing circular border */}
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 rounded-full border-2 border-blue-500/30 dark:border-blue-400/30 group-hover:scale-110 transition-transform duration-300 pointer-events-none"></div>
-                  <img
-                    src={doctor.image}
-                    alt={doctor.name}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-md group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
+          <div className="relative flex items-center justify-center">
+            
+            {/* Left Scroll Button */}
+            <button 
+              onClick={() => scroll('left')}
+              className="hidden md:flex absolute -left-4 lg:-left-12 z-20 w-10 h-10 bg-white shadow-md rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+            >
+              <ChevronLeft size={24} />
+            </button>
 
-                {/* Info */}
-                <h3 className="text-xl font-bold text-blue-950 dark:text-white mb-1 transition-colors">
-                  {doctor.name}
-                </h3>
-                <p className="text-blue-600 dark:text-blue-400 font-semibold text-sm mb-4 transition-colors">
-                  {doctor.specialization}
-                </p>
-
-                <div className="flex flex-wrap justify-center gap-2 mb-6">
-                  {/* Experience Badge */}
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 text-xs font-semibold text-blue-700 dark:text-blue-300 transition-colors">
-                    <GraduationCap className="h-4 w-4" />
-                    <span>{doctor.experience}</span>
-                  </div>
-                  {/* Availability Badge */}
-                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors ${
-                    doctor.is_available === false 
-                    ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-100 dark:border-rose-900/60 text-rose-600 dark:text-rose-400' 
-                    : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-100 dark:border-emerald-900/60 text-emerald-600 dark:text-emerald-400'
-                  }`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${doctor.is_available === false ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
-                    <span>{doctor.is_available === false ? 'Unavailable' : 'Available'}</span>
-                  </div>
-                </div>
-
-                {/* Book Now Button */}
-                <button 
-                  onClick={() => onBookNow && onBookNow(doctor)}
-                  className={`w-full mt-auto py-3 rounded-2xl font-bold flex items-center justify-center gap-1.5 transition-all duration-300 shadow-sm ${
-                    doctor.is_available === false
-                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 hover:shadow-md'
-                    : 'bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white hover:shadow-lg active:scale-95 group-hover:gap-2.5'
-                  }`}
+            {/* Scrollable Container */}
+            <div 
+              ref={scrollRef}
+              className="flex overflow-x-auto gap-6 pb-12 snap-x snap-mandatory hide-scrollbar w-full"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {filteredDoctors.map((doctor, index) => (
+                <div
+                  key={index}
+                  className="min-w-[280px] max-w-[320px] flex-shrink-0 snap-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-300 border border-slate-100 dark:border-gray-700/50 flex flex-col items-center text-center group"
                 >
-                  <span>{doctor.is_available === false ? 'View Profile' : 'Book Now'}</span>
-                  <ChevronRight className="h-4 w-4 transition-transform" />
-                </button>
-              </div>
-            ))}
+                  {/* Image & Badge */}
+                  <div className="relative mb-6">
+                    <img
+                      src={doctor.image || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=200&q=80'}
+                      alt={doctor.name}
+                      className="w-28 h-28 rounded-full object-cover shadow-md"
+                    />
+                    <div className="absolute bottom-1 right-1 bg-[#0ea5e9] rounded-full w-6 h-6 flex items-center justify-center border-2 border-white shadow-sm">
+                      <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <h3 className="text-xl font-bold text-[#1e3a8a] dark:text-white mb-1 transition-colors">
+                    {doctor.name}
+                  </h3>
+                  <p className="text-[#0ea5e9] font-medium text-sm mb-2">
+                    {doctor.specialization || 'General Practitioner'}
+                  </p>
+                  
+                  <div className="text-slate-500 dark:text-slate-400 text-xs font-medium space-y-1 mb-8">
+                    <p>CareSync Medical Center</p>
+                    <p>{doctor.experience || '5'} years experience</p>
+                  </div>
+
+                  {/* View Profile / Book Now Button */}
+                  <button 
+                    onClick={() => onBookNow && onBookNow(doctor)}
+                    className="w-full mt-auto py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
+                  >
+                    View Profile
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Scroll Button */}
+            <button 
+              onClick={() => scroll('right')}
+              className="hidden md:flex absolute -right-4 lg:-right-12 z-20 w-10 h-10 bg-white shadow-md rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+            >
+              <ChevronRight size={24} />
+            </button>
+            
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400 text-lg">
+            <p className="text-slate-500 text-lg font-medium">
               No doctors found matching "{searchTerm}"
             </p>
           </div>
         )}
       </div>
+
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 };

@@ -14,6 +14,7 @@ const DoctorProfileEdit = () => {
     email: user?.email || '',
     phone: user?.mobile_number || '',
     specialization: '',
+    qualifications: '',
     experience: '',
     bio: '',
   });
@@ -39,6 +40,7 @@ const DoctorProfileEdit = () => {
             email: fetchedUser?.email || user?.email || '',
             phone: fetchedUser?.mobile_number || user?.mobile_number || '',
             specialization: fetchedProfile?.specialization || '',
+            qualifications: fetchedProfile?.qualifications || '',
             experience: fetchedProfile?.experience || '',
             bio: fetchedProfile?.bio || '',
           });
@@ -70,6 +72,7 @@ const DoctorProfileEdit = () => {
       lastName: profile.lastName,
       phone: profile.phone,
       specialization: profile.specialization,
+      qualifications: profile.qualifications,
       experience: profile.experience,
       bio: profile.bio
     });
@@ -84,6 +87,7 @@ const DoctorProfileEdit = () => {
         full_name: `${profile.firstName} ${profile.lastName}`.trim(),
         mobile_number: profile.phone,
         specialization: profile.specialization,
+        qualifications: profile.qualifications,
         experience: profile.experience,
         bio: profile.bio
       }, {
@@ -182,13 +186,21 @@ const DoctorProfileEdit = () => {
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 text-gray-400 dark:text-gray-500"><Award size={18} /></div>
-              <div className="flex-1 grid grid-cols-2 gap-4">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Specialization</label>
                   {isEditing ? (
                     <input type="text" name="specialization" value={profile.specialization} onChange={handleChange} className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white text-sm" />
                   ) : (
                     <p className="text-gray-800 dark:text-gray-200">{profile.specialization || 'Not specified'}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Qualifications</label>
+                  {isEditing ? (
+                    <input type="text" name="qualifications" value={profile.qualifications} onChange={handleChange} placeholder="e.g. MBBS, MD" className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white text-sm" />
+                  ) : (
+                    <p className="text-gray-800 dark:text-gray-200">{profile.qualifications || 'Not specified'}</p>
                   )}
                 </div>
                 <div>

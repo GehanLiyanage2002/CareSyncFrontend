@@ -6,9 +6,13 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import CreateMedicalReport from './CreateMedicalReport';
 import PatientPastRecordsModal from './PatientPastRecordsModal';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const DoctorKanbanBoard = () => {
-  const { token } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => state.auth);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [data, setData] = useState({
     tasks: {},
     columns: {
@@ -96,7 +100,30 @@ const DoctorKanbanBoard = () => {
     };
     
     if (token) fetchData();
-  }, [token]);
+  }, [token, refreshTrigger]);
+
+  useEffect(() => {
+    const handleSlotBooked = (bookingData) => {
+      if (bookingData.doctor_id === user?.id) {
+        toast.success('New appointment booked! Updating board...', { icon: '🔔' });
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    const handleStatusChanged = (data) => {
+      if (data.doctor_id === user?.id) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    socket.on('slotBooked', handleSlotBooked);
+    socket.on('appointmentStatusChanged', handleStatusChanged);
+
+    return () => {
+      socket.off('slotBooked', handleSlotBooked);
+      socket.off('appointmentStatusChanged', handleStatusChanged);
+    };
+  }, [user]);
 
   // Derived stats
   const totalAppointments = Object.keys(data.tasks).length;

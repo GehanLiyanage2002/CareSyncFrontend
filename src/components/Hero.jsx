@@ -1,57 +1,60 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
-    <section id="hero" className="bg-blue-50 dark:bg-gray-900 py-20 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">
-        <div className="md:w-1/2 mb-10 md:mb-0">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6 transition-colors duration-300">
-            Smart Healthcare, <br />
-            <span className="text-blue-600 dark:text-blue-400">Simplified for You.</span>
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 transition-colors duration-300">
-            Experience seamless scheduling, secure virtual consultations, and AI-powered support in one centralized digital platform.
-          </p>
-          <div className="flex space-x-4">
-            <a href="#login" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition shadow-lg">
-              Book Appointment
-            </a>
-            <a href="#services" className="bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 px-6 py-3 rounded-lg font-semibold text-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition">
-              Explore Services
-            </a>
+    <section id="hero" className="relative bg-[#edf4fa] min-h-screen flex items-center overflow-hidden pt-20">
+      {/* Faint topographical background pattern */}
+      <div 
+        className="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%233b82f6' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+          backgroundSize: '400px 400px'
+        }}
+      ></div>
+
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 w-full relative z-10 flex flex-col md:flex-row items-center">
+        
+        {/* Left Content */}
+        <div className="w-full md:w-1/2 md:pr-10 z-20">
+          <div className="flex items-center gap-4 mb-6">
+            <span className="w-12 h-[2px] bg-[#3b82f6]"></span>
+            <span className="text-[#3b82f6] text-[13px] font-bold tracking-[0.2em] uppercase">
+              Committed to success
+            </span>
           </div>
-        </div>
-        <div className="md:w-1/2 flex justify-center relative mt-10 md:mt-0">
-          {/* Decorative background blob */}
-          <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-300 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-purple-300 dark:bg-purple-600 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-emerald-300 dark:bg-emerald-600 rounded-full mix-blend-multiply filter blur-2xl opacity-30 animate-blob animation-delay-4000"></div>
           
-          {/* Image Container */}
-          <div className="relative w-full max-w-lg rounded-[2rem] shadow-2xl overflow-hidden group border-4 border-white/50 dark:border-gray-800/50 backdrop-blur-sm transform transition duration-500 hover:scale-[1.02]">
-            <img 
-              src="/hero-image.png" 
-              alt="Modern Healthcare Facility" 
-              className="w-full h-full object-cover rounded-[1.75rem] shadow-inner"
-              style={{ minHeight: '400px' }}
-            />
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition duration-300"></div>
-            
-            {/* Floating Badge */}
-            <div className="absolute bottom-6 left-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md px-5 py-3 rounded-2xl shadow-lg border border-white/20 flex items-center gap-4 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 delay-100">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-gray-900 dark:text-white">Trusted Care</p>
-                
-              </div>
-            </div>
-          </div>
+          <h1 className="text-5xl md:text-6xl lg:text-[75px] font-extrabold text-[#111827] leading-[1.1] mb-6 tracking-tight">
+            WE CARE ABOUT <br />
+            YOUR <span className="text-[#1e3a8a]">HEALTH</span>
+          </h1>
+          
+          <p className="text-gray-600 text-base md:text-lg mb-10 max-w-lg leading-relaxed font-medium">
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat is aute irure.
+          </p>
+          
+          <button 
+            onClick={() => navigate('/#doctors')}
+            className="flex items-center justify-center gap-3 bg-[#3b82f6] text-white px-8 py-3.5 rounded-md font-semibold text-sm hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
+          >
+            Appointment <ArrowRight size={16} />
+          </button>
         </div>
+
+        {/* Right Image */}
+        <div className="w-full md:w-1/2 mt-16 md:mt-0 relative z-10 flex justify-end">
+          <img 
+            src="https://themewagon.github.io/live-doc/v1.0.0/assets/img/gallery/hero.png" 
+            alt="Doctor with patients" 
+            className="w-[130%] max-w-none transform md:translate-x-20 lg:translate-x-32"
+            style={{ objectFit: 'contain' }}
+            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1638202993928-7267aad84c31?q=80&w=1000&auto=format&fit=crop' }}
+          />
+        </div>
+        
       </div>
     </section>
   );

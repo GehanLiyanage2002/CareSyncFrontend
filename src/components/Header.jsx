@@ -56,8 +56,9 @@ const Header = () => {
         </div>
         <nav className="hidden md:flex space-x-8">
           <button onClick={() => navigate('/#hero')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</button>
-          <button onClick={() => navigate('/#doctors')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</button>
-          <button onClick={() => navigate('/#services')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</button>
+          <button onClick={() => navigate('/doctors')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</button>
+          <button onClick={() => navigate('/services')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</button>
+          <button onClick={() => navigate('/contact')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Contact Us</button>
           {/* <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a> */}
         </nav>
         <div className="flex items-center space-x-4">
@@ -69,33 +70,57 @@ const Header = () => {
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           {!isAuthenticated ? (
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+            >
+              Sign In
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </button>
+          ) : (
             <>
               <button
-                onClick={() => navigate('/login', { state: { role: 'Patient' } })}
-                className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+                onClick={() => {
+                  if (user?.role === 'Doctor') {
+                    navigate('/doctor/dashboard');
+                    setTimeout(() => {
+                      document.getElementById('schedule-manager')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  } else {
+                    navigate('/doctors');
+                  }
+                }}
+                className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 items-center gap-2"
               >
-                Patient Login
+                {user?.role === 'Doctor' ? 'Set Appointment' : 'Book Appointment'}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
               </button>
-              <button
-                onClick={() => navigate('/login', { state: { role: 'Doctor' } })}
-                className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
-              >
-                Doctor Login
-              </button>
-            </>
-          ) : (
-            <div className="relative" ref={dropdownRef}>
-              <button 
+              <div className="relative" ref={dropdownRef}>
+                <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border border-blue-600 hover:bg-blue-200 dark:hover:bg-blue-800 transition shadow-sm overflow-hidden ring-2 ring-transparent hover:ring-blue-300 dark:hover:ring-blue-700"
                 title="Account Menu"
               >
-                {user?.name || user?.full_name ? <span className="font-bold text-lg">{(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}</span> : <User size={20} />}
+                {user?.name || user?.full_name ? (
+                  <div className="w-full h-full flex items-center justify-center relative">
+                    <img 
+                      src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover rounded-full" 
+                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} 
+                    />
+                    <span className="hidden font-bold text-lg">{(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}</span>
+                  </div>
+                ) : <User size={20} />}
               </button>
 
               {/* Google-Style Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-[-120px] md:right-[-180px] mt-4 w-[360px] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden flex flex-col transform origin-top-right transition-all duration-200 ease-out">
+                <div className="absolute right-0 mt-4 w-[360px] max-w-[90vw] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden flex flex-col transform origin-top-right transition-all duration-200 ease-out">
                   
                   {/* Top Bar with Close Button */}
                   <div className="flex justify-between items-center px-6 pt-4 pb-2">
@@ -112,10 +137,15 @@ const Header = () => {
 
                   {/* Avatar & Greeting Section */}
                   <div className="flex flex-col items-center pt-2 pb-4 px-6">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-white dark:border-slate-800 mb-3 relative">
-                      {(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}
-                      <div className="absolute bottom-0 right-0 bg-white dark:bg-slate-800 rounded-full p-1 shadow-sm border border-slate-200 dark:border-slate-600">
-                        <User size={12} className="text-slate-600 dark:text-slate-300" />
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-white dark:border-slate-800 mb-3 relative overflow-hidden">
+                      <img 
+                        src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} 
+                      />
+                      <div className="hidden absolute inset-0 items-center justify-center">
+                        {(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}
                       </div>
                     </div>
                     <h3 className="text-xl font-medium text-slate-800 dark:text-white mb-4">
@@ -210,30 +240,9 @@ const Header = () => {
                 </div>
               )}
             </div>
+            </>
           )}
-          {user?.role === 'Doctor' ? (
-            <button 
-              onClick={() => {
-                if (window.location.pathname === '/doctor/dashboard') {
-                  const el = document.getElementById('schedule-manager');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  navigate('/doctor/dashboard');
-                  setTimeout(() => {
-                    const el = document.getElementById('schedule-manager');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }, 300);
-                }
-              }} 
-              className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition"
-            >
-              Set Appointment
-            </button>
-          ) : (
-            <button onClick={() => navigate('/#doctors')} className="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition">
-              Book Appointment
-            </button>
-          )}
+
         </div>
       </div>
     </header>

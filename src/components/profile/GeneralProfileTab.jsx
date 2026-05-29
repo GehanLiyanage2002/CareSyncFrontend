@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { CheckCircle2, ScanFace, Lock, Camera, Mail, User, Phone, Stethoscope, Clock, FileText, MapPin } from 'lucide-react';
+import { CheckCircle2, ScanFace, Lock, Camera, Mail, User, Phone, Stethoscope, Clock, FileText, MapPin, Loader } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { updateUser } from '../../features/auth/authSlice';
@@ -10,6 +10,7 @@ import { validateFormFields } from '../../utils/validation';
 const GeneralProfileTab = () => {
   const dispatch = useDispatch();
   const { user, token } = useSelector((state) => state.auth);
+  const fileInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
     fullName: user?.full_name || user?.name || '',
@@ -25,17 +26,48 @@ const GeneralProfileTab = () => {
     specialization: '',
     experience: '',
     bio: '',
-    location: ''
+    location: '',
+    qualifications: ''
   });
 
   const [loading, setLoading] = useState({
     general: false,
     password: false,
     doctor: false,
-    faceId: false
+    faceId: false,
+    image: false
   });
 
   const [showFaceScanner, setShowFaceScanner] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      return toast.error('Image must be less than 10MB');
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setLoading(prev => ({ ...prev, image: true }));
+    try {
+      const res = await axios.put('http://localhost:5000/api/users/profile-image', formData, {
+        headers: { 
+          Authorization: token,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      // Update local storage or state to force refresh
+      dispatch(updateUser({ ...user, profile_image: res.data.imageUrl }));
+      toast.success('Profile picture updated successfully!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update profile picture');
+    } finally {
+      setLoading(prev => ({ ...prev, image: false }));
+    }
+  };
 
   const handleFaceCapture = async (faceDescriptor) => {
     setLoading(prev => ({ ...prev, faceId: true }));
@@ -72,7 +104,8 @@ const GeneralProfileTab = () => {
               specialization: res.data.profile.specialization || '',
               experience: res.data.profile.experience || '',
               bio: res.data.profile.bio || '',
-              location: res.data.profile.location || ''
+              location: res.data.profile.location || '',
+              qualifications: res.data.profile.qualifications || ''
             });
           }
         } catch (error) {
@@ -145,7 +178,8 @@ const GeneralProfileTab = () => {
       specialization: doctorData.specialization,
       experience: doctorData.experience.toString(),
       bio: doctorData.bio,
-      location: doctorData.location
+      location: doctorData.location,
+      qualifications: doctorData.qualifications
     });
 
     if (!validation.isValid) {
@@ -175,17 +209,36 @@ const GeneralProfileTab = () => {
         <form onSubmit={handleSaveProfile} className="space-y-6">
           {/* Avatar Section */}
           <div className="flex items-center gap-6 pb-6 border-b border-slate-100 dark:border-slate-700">
-            <div className="relative group cursor-pointer">
-              <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 text-3xl font-bold shadow-inner">
-                {(user?.full_name || user?.name || 'U').charAt(0).toUpperCase()}
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 text-3xl font-bold shadow-inner overflow-hidden border-2 border-white dark:border-slate-800">
+                <img 
+                  src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`}
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+                <div className="hidden absolute inset-0 items-center justify-center bg-blue-100 dark:bg-blue-900">
+                  {(user?.full_name || user?.name || 'U').charAt(0).toUpperCase()}
+                </div>
               </div>
               <button 
                 type="button"
                 className="absolute bottom-0 right-0 p-2 bg-white dark:bg-slate-700 rounded-full shadow-md border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 title="Change Avatar"
               >
-                <Camera size={18} />
+                {loading.image ? <Loader size={18} className="animate-spin" /> : <Camera size={18} />}
               </button>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleImageUpload} 
+                accept="image/png, image/jpeg" 
+                className="hidden" 
+              />
             </div>
             <div>
               <h3 className="font-medium text-slate-800 dark:text-white text-lg">{user?.full_name || user?.name || 'User'}</h3>
@@ -226,7 +279,7 @@ const GeneralProfileTab = () => {
                   value={formData.contactNumber}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+94 7X XXX XXXX"
                   required
                 />
               </div>
@@ -310,6 +363,24 @@ const GeneralProfileTab = () => {
                     placeholder="10"
                     min="0"
                     required
+                  />
+                </div>
+              </div>
+
+              {/* Qualifications */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Qualifications</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <CheckCircle2 size={18} className="text-slate-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="qualifications"
+                    value={doctorData.qualifications}
+                    onChange={handleDoctorChange}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
+                    placeholder="e.g. MBBS, MD"
                   />
                 </div>
               </div>

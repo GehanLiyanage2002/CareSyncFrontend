@@ -25,7 +25,8 @@ const GeneralProfileTab = () => {
     specialization: '',
     experience: '',
     bio: '',
-    location: ''
+    location: '',
+    qualifications: ''
   });
 
   const [loading, setLoading] = useState({
@@ -72,7 +73,8 @@ const GeneralProfileTab = () => {
               specialization: res.data.profile.specialization || '',
               experience: res.data.profile.experience || '',
               bio: res.data.profile.bio || '',
-              location: res.data.profile.location || ''
+              location: res.data.profile.location || '',
+              qualifications: res.data.profile.qualifications || ''
             });
           }
         } catch (error) {
@@ -145,7 +147,8 @@ const GeneralProfileTab = () => {
       specialization: doctorData.specialization,
       experience: doctorData.experience.toString(),
       bio: doctorData.bio,
-      location: doctorData.location
+      location: doctorData.location,
+      qualifications: doctorData.qualifications
     });
 
     if (!validation.isValid) {
@@ -310,6 +313,24 @@ const GeneralProfileTab = () => {
                     placeholder="10"
                     min="0"
                     required
+                  />
+                </div>
+              </div>
+
+              {/* Qualifications */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Qualifications</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <CheckCircle2 size={18} className="text-slate-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="qualifications"
+                    value={doctorData.qualifications}
+                    onChange={handleDoctorChange}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
+                    placeholder="e.g. MBBS, MD"
                   />
                 </div>
               </div>

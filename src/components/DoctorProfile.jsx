@@ -36,6 +36,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
   const [reviews, setReviews] = useState([]);
   const [reviewStats, setReviewStats] = useState({ average_rating: 0, total_reviews: 0 });
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [imgKey, setImgKey] = useState(Date.now());
 
   useEffect(() => {
     const handleFeeChanged = (data) => {
@@ -103,8 +104,17 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
       });
     };
 
+    const handleProfileImageUpdated = ({ user_id }) => {
+      setImgKey(Date.now());
+    };
+
     socket.on('reviewAdded', handleReviewAdded);
-    return () => socket.off('reviewAdded', handleReviewAdded);
+    socket.on('profileImageUpdated', handleProfileImageUpdated);
+    
+    return () => {
+      socket.off('reviewAdded', handleReviewAdded);
+      socket.off('profileImageUpdated', handleProfileImageUpdated);
+    };
   }, [doctor]);
 
   const printTicket = () => {
@@ -260,7 +270,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
                     <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
                       {review.patient_id ? (
                         <img 
-                          src={`http://localhost:5000/api/users/profile-image/${review.patient_id}?t=${Date.now()}`}
+                          src={`http://localhost:5000/api/users/profile-image/${review.patient_id}?t=${imgKey}`}
                           alt={review.patient_name}
                           className="w-full h-full object-cover"
                           onError={(e) => {

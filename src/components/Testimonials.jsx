@@ -8,6 +8,7 @@ const socket = io('http://localhost:5000');
 const Testimonials = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [imgKey, setImgKey] = useState(Date.now());
   const scrollRef = useRef(null);
 
   const scroll = (direction) => {
@@ -91,10 +92,16 @@ const Testimonials = () => {
       fetchReviews();
     };
 
+    const handleProfileImageUpdated = ({ user_id }) => {
+      setImgKey(Date.now());
+    };
+
     socket.on('reviewAdded', handleNewReview);
+    socket.on('profileImageUpdated', handleProfileImageUpdated);
 
     return () => {
       socket.off('reviewAdded', handleNewReview);
+      socket.off('profileImageUpdated', handleProfileImageUpdated);
     };
   }, []);
 
@@ -144,7 +151,7 @@ const Testimonials = () => {
             ) : (
               reviews.map((testimonial, index) => {
                 const profileImg = testimonial.patient_id 
-                  ? `http://localhost:5000/api/users/profile-image/${testimonial.patient_id}?t=${Date.now()}`
+                  ? `http://localhost:5000/api/users/profile-image/${testimonial.patient_id}?t=${imgKey}`
                   : (testimonial.image || placeholderImages[index % placeholderImages.length]);
 
                 return (

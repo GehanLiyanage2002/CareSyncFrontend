@@ -98,15 +98,15 @@ const Doctors = ({ onBookNow, hideHeader }) => {
         
         {/* Title Section */}
         {!hideHeader && (
-          <div className="relative text-center mb-16 h-24 flex items-center justify-center">
-            <h3 className="relative z-10 text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <div className="text-center">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8">
               Our Doctors
-            </h3>
+            </h2>
           </div>
         )}
 
         {/* Search Bar */}
-        <div className="max-w-xl mx-auto mb-16 relative">
+        <div className="max-w-xl mx-auto mb-10 relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-blue-500" />
           </div>

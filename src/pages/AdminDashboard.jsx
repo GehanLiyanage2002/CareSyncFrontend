@@ -12,6 +12,7 @@ import {
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
 import AdminServices from '../components/admin/AdminServices';
+import AddDoctorModal from '../components/admin/AddDoctorModal';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('Overview');
@@ -28,6 +29,7 @@ const AdminDashboard = () => {
   const [dateFilter, setDateFilter] = useState('All Time');
   const [customDates, setCustomDates] = useState({ start: '', end: '' });
   const [socketConnected, setSocketConnected] = useState(false);
+  const [showAddDoctor, setShowAddDoctor] = useState(false);
 
   const { token, user } = useSelector(state => state.auth);
   const navigate = useNavigate();
@@ -434,8 +436,15 @@ const AdminDashboard = () => {
               {/* DOCTORS TAB (Legacy) */}
               {activeTab === 'Doctors' && (
                 <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
-                  <div className="p-5 border-b border-blue-50">
+                  <div className="p-5 border-b border-blue-50 flex items-center justify-between">
                     <h3 className="text-xl font-extrabold text-slate-800">Doctor Management</h3>
+                    <button
+                      onClick={() => setShowAddDoctor(true)}
+                      className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                      Add Doctor
+                    </button>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -631,6 +640,13 @@ const AdminDashboard = () => {
           )}
         </div>
       </main>
+      {showAddDoctor && (
+        <AddDoctorModal
+          token={token}
+          onClose={() => setShowAddDoctor(false)}
+          onSuccess={() => { fetchDoctors(); setShowAddDoctor(false); }}
+        />
+      )}
     </div>
   );
 };

@@ -81,19 +81,24 @@ const Header = () => {
             </button>
           ) : (
             <>
-              {user?.role === 'Patient' && (
-                <button
-                  onClick={() => {
+              <button
+                onClick={() => {
+                  if (user?.role === 'Doctor') {
+                    navigate('/doctor/dashboard');
+                    setTimeout(() => {
+                      document.getElementById('schedule-manager')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  } else {
                     navigate('/doctors');
-                  }}
-                  className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 items-center gap-2"
-                >
-                  Book Appointment
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                </button>
-              )}
+                  }
+                }}
+                className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 items-center gap-2"
+              >
+                {user?.role === 'Doctor' ? 'Set Appointment' : 'Book Appointment'}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
               <div className="relative" ref={dropdownRef}>
                 <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}

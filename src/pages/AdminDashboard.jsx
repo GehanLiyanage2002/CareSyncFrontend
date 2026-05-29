@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { 
   LayoutDashboard, Users, UserRound, Calendar, DollarSign, 
-  LogOut, Activity, TrendingUp, CheckCircle, XCircle, Stethoscope 
+  LogOut, Activity, TrendingUp, CheckCircle, XCircle, Stethoscope,
+  Search, X, Filter
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
@@ -18,6 +21,13 @@ const AdminDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [earnings, setEarnings] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Filtering and Real-time state
+  const [dateFilter, setDateFilter] = useState('All Time');
+  const [customDates, setCustomDates] = useState({ start: '', end: '' });
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const { token, user } = useSelector(state => state.auth);
   const navigate = useNavigate();
@@ -33,9 +43,39 @@ const AdminDashboard = () => {
     headers: { Authorization: token }
   };
 
+  const getFilterDates = () => {
+    const today = new Date();
+    let startDate = '';
+    let endDate = format(today, 'yyyy-MM-dd');
+
+    switch (dateFilter) {
+      case 'Today':
+        startDate = format(today, 'yyyy-MM-dd');
+        break;
+      case 'This Week':
+        startDate = format(startOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+        endDate = format(endOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+        break;
+      case 'This Month':
+        startDate = format(startOfMonth(today), 'yyyy-MM-dd');
+        endDate = format(endOfMonth(today), 'yyyy-MM-dd');
+        break;
+      case 'Custom':
+        return { startDate: customDates.start, endDate: customDates.end };
+      default:
+        return { startDate: '', endDate: '' };
+    }
+    return { startDate, endDate };
+  };
+
   const fetchStats = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/stats', config);
+      let url = 'http://localhost:5000/api/admin/stats';
+      const { startDate, endDate } = getFilterDates();
+      if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+      }
+      const res = await axios.get(url, config);
       setStats(res.data.stats);
     } catch (err) {
       console.error(err);
@@ -71,7 +111,12 @@ const AdminDashboard = () => {
 
   const fetchEarnings = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/earnings', config);
+      let url = 'http://localhost:5000/api/admin/earnings';
+      const { startDate, endDate } = getFilterDates();
+      if (startDate && endDate) {
+        url += `?startDate=${startDate}&endDate=${endDate}`;
+      }
+      const res = await axios.get(url, config);
       setEarnings(res.data.earnings);
     } catch (err) {
       console.error(err);
@@ -81,7 +126,10 @@ const AdminDashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      if (activeTab === 'Overview') await fetchStats();
+      if (activeTab === 'Overview') {
+        await fetchStats();
+        await fetchEarnings(); // For the doctors table in overview
+      }
       if (activeTab === 'Doctors') await fetchDoctors();
       if (activeTab === 'Patients') await fetchPatients();
       if (activeTab === 'Appointments') await fetchAppointments();
@@ -89,7 +137,27 @@ const AdminDashboard = () => {
       setLoading(false);
     };
     loadData();
-  }, [activeTab]);
+  }, [activeTab, dateFilter, customDates]);
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+    socket.on('connect', () => setSocketConnected(true));
+    socket.on('disconnect', () => setSocketConnected(false));
+    
+    const refreshData = () => {
+      if (activeTab === 'Overview') {
+        fetchStats();
+        fetchEarnings();
+      }
+      if (activeTab === 'Appointments') fetchAppointments();
+    };
+
+    socket.on('appointmentStatusChanged', refreshData);
+    socket.on('slotBooked', refreshData);
+    socket.on('doctorProfileUpdated', refreshData);
+    
+    return () => socket.disconnect();
+  }, [activeTab, dateFilter, customDates]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -110,286 +178,450 @@ const AdminDashboard = () => {
   };
 
   const navItems = [
-    { name: 'Overview', icon: <LayoutDashboard size={20} /> },
-    { name: 'Doctors', icon: <UserRound size={20} /> },
-    { name: 'Patients', icon: <Users size={20} /> },
-    { name: 'Appointments', icon: <Calendar size={20} /> },
-    { name: 'Medical Services', icon: <Stethoscope size={20} /> },
-    { name: 'Earnings', icon: <DollarSign size={20} /> },
+    { name: 'Overview', icon: <LayoutDashboard /> },
+    { name: 'Doctors', icon: <UserRound /> },
+    { name: 'Patients', icon: <Users /> },
+    { name: 'Appointments', icon: <Calendar /> },
+    { name: 'Medical Services', icon: <Stethoscope /> },
+    { name: 'Earnings', icon: <DollarSign /> },
   ];
 
+  const filteredEarnings = earnings.filter(earn => {
+    const query = searchQuery.toLowerCase();
+    return (
+      earn.doctor_name.toLowerCase().includes(query) ||
+      earn.specialization.toLowerCase().includes(query) ||
+      earn.consultation_fee.toString().includes(query)
+    );
+  });
+
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-slate-800 shadow-xl flex flex-col z-20">
-        <div className="p-6 border-b border-slate-100 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-lg shadow-indigo-200 dark:shadow-none">
-              <Activity size={24} />
-            </div>
-            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
-              Admin Portal
-            </h1>
+    <div className="flex flex-col min-h-screen bg-slate-50 overflow-hidden font-sans">
+      {/* Header Navbar */}
+      <header className="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50 flex items-center justify-between px-6 py-4">
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-md shadow-blue-200">
+            CS
+          </div>
+          <div className="hidden sm:block">
+            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700 leading-tight">CareSync</h1>
+            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest">Healthcare Solutions</p>
           </div>
         </div>
-        
-        <nav className="flex-1 p-4 space-y-1">
+
+        {/* Navigation Pills */}
+        <nav className="hidden md:flex bg-blue-50/50 rounded-full p-1.5 border border-blue-100 shadow-inner">
           {navItems.map((item) => (
             <button
               key={item.name}
               onClick={() => setActiveTab(item.name)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
+              className={`flex items-center flex-col px-5 py-1.5 rounded-full transition-all duration-300 min-w-[90px] ${
                 activeTab === item.name
-                  ? 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-slate-500 hover:text-blue-600 hover:bg-blue-100/50'
               }`}
             >
-              {item.icon}
-              {item.name}
+              {React.cloneElement(item.icon, { size: 18, className: 'mb-0.5' })}
+              <span className="text-[10px] font-bold uppercase tracking-wider">{item.name}</span>
             </button>
           ))}
         </nav>
-        
-        <div className="p-4 border-t border-slate-100 dark:border-slate-700">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors font-medium"
-          >
-            <LogOut size={20} />
-            Sign Out
-          </button>
-        </div>
-      </aside>
+
+        {/* Sign Out */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-full font-bold transition-all shadow-sm shadow-amber-200 text-sm hover:-translate-y-0.5"
+        >
+          Sign Out
+        </button>
+      </header>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-8 relative">
-        {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-100 dark:bg-indigo-900/20 rounded-full filter blur-3xl opacity-50 -z-10 mix-blend-multiply"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100 dark:bg-purple-900/20 rounded-full filter blur-3xl opacity-50 -z-10 mix-blend-multiply"></div>
-
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-800 dark:text-white">{activeTab}</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Manage system {activeTab.toLowerCase()} and view reports.</p>
-        </div>
-
-        {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            
-            {/* OVERVIEW TAB */}
-            {activeTab === 'Overview' && stats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  { title: 'Total Patients', value: stats.totalPatients, icon: <UserRound size={24} />, color: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/30' },
-                  { title: 'Total Doctors', value: stats.totalDoctors, icon: <Users size={24} />, color: 'text-indigo-600', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
-                  { title: 'Total Appointments', value: stats.totalAppointments, icon: <Calendar size={24} />, color: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30' },
-                  { title: 'Total Revenue', value: `LKR ${stats.totalRevenue.toLocaleString()}`, icon: <TrendingUp size={24} />, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-                ].map((stat, i) => (
-                  <div key={i} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
-                        {stat.icon}
-                      </div>
-                      <h3 className="text-slate-500 dark:text-slate-400 font-medium">{stat.title}</h3>
+        <div className="max-w-7xl mx-auto">
+          {loading ? (
+            <div className="flex h-64 items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              
+              {/* OVERVIEW TAB */}
+              {activeTab === 'Overview' && stats && (
+                <>
+                  <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+                    <div>
+                      <h2 className="text-4xl font-extrabold text-slate-800 tracking-tight">DASHBOARD</h2>
+                      <p className="text-slate-500 font-medium mt-1">Overview of doctors & appointments</p>
                     </div>
-                    <p className="text-3xl font-bold text-slate-800 dark:text-white">{stat.value}</p>
+
+                    <div className="flex flex-col items-end gap-3">
+                      <div className="flex bg-white border border-slate-200 rounded-full p-1 shadow-sm overflow-x-auto max-w-full">
+                        {['All Time', 'Today', 'This Week', 'This Month', 'Custom'].map(f => (
+                          <button
+                            key={f}
+                            onClick={() => setDateFilter(f)}
+                            className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all whitespace-nowrap ${
+                              dateFilter === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                            }`}
+                          >
+                            {f}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      {dateFilter === 'Custom' && (
+                        <div className="flex gap-2 items-center bg-white border border-slate-200 p-1.5 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2">
+                          <input type="date" value={customDates.start} onChange={e => setCustomDates({...customDates, start: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+                          <span className="text-slate-400 text-xs font-bold">TO</span>
+                          <input type="date" value={customDates.end} onChange={e => setCustomDates({...customDates, end: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
 
-            {/* DOCTORS TAB */}
-            {activeTab === 'Doctors' && (
-              <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider">
-                        <th className="p-4 font-semibold">Doctor Name</th>
-                        <th className="p-4 font-semibold">Email</th>
-                        <th className="p-4 font-semibold">Specialization</th>
-                        <th className="p-4 font-semibold">Status</th>
-                        <th className="p-4 font-semibold text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                      {doctors.map(doctor => (
-                        <tr key={doctor.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <td className="p-4">
-                            <p className="font-semibold text-slate-800 dark:text-white">{doctor.full_name}</p>
-                            <p className="text-sm text-slate-500">{doctor.mobile_number || 'No phone'}</p>
-                          </td>
-                          <td className="p-4 text-slate-600 dark:text-slate-300">{doctor.email}</td>
-                          <td className="p-4 text-slate-600 dark:text-slate-300">
-                            <p>{doctor.specialization}</p>
-                            <p className="text-sm text-slate-500">{doctor.experience} Exp.</p>
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                              doctor.is_approved 
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                            }`}>
-                              {doctor.is_approved ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                              {doctor.is_approved ? 'Approved' : 'Pending'}
-                            </span>
-                          </td>
-                          <td className="p-4 text-right">
-                            <button
-                              onClick={() => handleApproveDoctor(doctor.id, doctor.is_approved)}
-                              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                    {[
+                      { 
+                        title: 'Total Doctors', 
+                        value: stats.totalDoctors, 
+                        icon: <UserRound size={24} />, 
+                        iconColor: 'bg-teal-100 text-teal-600', 
+                        tagColor: 'bg-teal-50 text-teal-700 border-teal-100', 
+                        tag: 'Platform' 
+                      },
+                      { 
+                        title: 'Registered Users', 
+                        value: stats.totalPatients, 
+                        icon: <Users size={24} />, 
+                        iconColor: 'bg-purple-100 text-purple-600', 
+                        tagColor: 'bg-purple-50 text-purple-700 border-purple-100', 
+                        tag: 'Overall' 
+                      },
+                      { 
+                        title: 'Total Appointments', 
+                        value: stats.totalAppointments, 
+                        icon: <Calendar size={24} />, 
+                        iconColor: 'bg-amber-100 text-amber-600', 
+                        tagColor: 'bg-amber-50 text-amber-700 border-amber-100', 
+                        tag: 'All Time' 
+                      },
+                      { 
+                        title: 'Completed Consultations', 
+                        value: stats.totalCompleted, 
+                        icon: <CheckCircle size={24} />, 
+                        iconColor: 'bg-blue-100 text-blue-600', 
+                        tagColor: 'bg-blue-50 text-blue-700 border-blue-100', 
+                        tag: 'Success' 
+                      },
+                      { 
+                        title: 'Canceled Appointments', 
+                        value: stats.totalCancelled, 
+                        icon: <XCircle size={24} />, 
+                        iconColor: 'bg-rose-100 text-rose-600', 
+                        tagColor: 'bg-rose-50 text-rose-700 border-rose-100', 
+                        tag: 'Failed' 
+                      },
+                      { 
+                        title: 'Total Earnings', 
+                        value: `LKR ${stats.totalRevenue.toLocaleString()}`, 
+                        icon: <DollarSign size={24} />, 
+                        iconColor: 'bg-emerald-100 text-emerald-600', 
+                        tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-100', 
+                        tag: 'Revenue' 
+                      },
+                    ].map((stat, i) => (
+                      <div key={i} className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start mb-8">
+                          <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center ${stat.iconColor}`}>
+                            {stat.icon}
+                          </div>
+                          <div className={`px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold rounded-full border ${stat.tagColor}`}>
+                            {stat.tag}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{stat.title}</p>
+                          <p className="text-3xl font-black text-slate-800">{stat.value}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Search Bar */}
+                  <div className="mb-6">
+                    <h3 className="text-[15px] font-bold text-slate-700 mb-2">Search doctors</h3>
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-full max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
+                        <input 
+                          type="text" 
+                          placeholder="Search name / specialization / fee"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-11 pr-4 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white"
+                        />
+                      </div>
+                      <button 
+                        onClick={() => setSearchQuery('')}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-bold text-sm shadow-sm shadow-blue-200 transition-colors"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Doctors Table */}
+                  <div className="bg-white rounded-3xl shadow-md shadow-blue-100/50 border border-blue-50 overflow-hidden">
+                     <div className="p-5 border-b border-blue-50 flex justify-between items-center bg-white">
+                        <h3 className="text-xl font-extrabold text-slate-800">Doctors</h3>
+                        <span className="text-xs font-semibold text-slate-400">Showing {filteredEarnings.length} of {earnings.length}</span>
+                     </div>
+                     <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
+                              <th className="p-4 px-6 font-bold">Doctor</th>
+                              <th className="p-4 font-bold">Specialization</th>
+                              <th className="p-4 font-bold">Fee</th>
+                              <th className="p-4 font-bold text-center">Appointments</th>
+                              <th className="p-4 font-bold text-center">Completed</th>
+                              <th className="p-4 font-bold text-center">Canceled</th>
+                              <th className="p-4 px-6 font-bold text-right">Total Earnings</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-blue-50">
+                            {filteredEarnings.map(earn => (
+                              <tr key={earn.doctor_id} className="hover:bg-blue-50/30 transition-colors group">
+                                <td className="p-4 px-6">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold overflow-hidden shadow-sm">
+                                      <img src={`http://localhost:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} alt={earn.doctor_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name.charAt(0); }} />
+                                    </div>
+                                    <div>
+                                      <p className="font-bold text-slate-700">Dr. {earn.doctor_name}</p>
+                                      <p className="text-[11px] text-slate-400 font-medium">ID: {earn.doctor_id.split('-')[0]}</p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="p-4 text-sm font-semibold text-slate-600">{earn.specialization}</td>
+                                <td className="p-4 text-sm font-semibold text-slate-600">LKR {parseFloat(earn.consultation_fee).toLocaleString()}</td>
+                                <td className="p-4 text-sm font-bold text-slate-700 text-center">{earn.total_appointments || 0}</td>
+                                <td className="p-4 text-sm font-bold text-blue-600 text-center">{earn.completed_appointments || 0}</td>
+                                <td className="p-4 text-sm font-bold text-rose-500 text-center">{earn.canceled_appointments || 0}</td>
+                                <td className="p-4 px-6 text-sm font-black text-slate-800 text-right">LKR {parseFloat(earn.total_earnings).toLocaleString()}</td>
+                              </tr>
+                            ))}
+                            {filteredEarnings.length === 0 && (
+                              <tr><td colSpan="7" className="p-10 text-center text-slate-500 font-medium">No doctors match your search.</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                     </div>
+                  </div>
+                </>
+              )}
+
+              {/* DOCTORS TAB (Legacy) */}
+              {activeTab === 'Doctors' && (
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+                  <div className="p-5 border-b border-blue-50">
+                    <h3 className="text-xl font-extrabold text-slate-800">Doctor Management</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
+                          <th className="p-4 px-6 font-bold">Doctor Name</th>
+                          <th className="p-4 font-bold">Email</th>
+                          <th className="p-4 font-bold">Specialization</th>
+                          <th className="p-4 font-bold">Status</th>
+                          <th className="p-4 px-6 font-bold text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50">
+                        {doctors.map(doctor => (
+                          <tr key={doctor.id} className="hover:bg-blue-50/30 transition-colors">
+                            <td className="p-4 px-6">
+                              <p className="font-bold text-slate-700">{doctor.full_name}</p>
+                              <p className="text-xs text-slate-400 font-medium">{doctor.mobile_number || 'No phone'}</p>
+                            </td>
+                            <td className="p-4 text-sm text-slate-600 font-medium">{doctor.email}</td>
+                            <td className="p-4 text-sm text-slate-600 font-medium">
+                              <p>{doctor.specialization}</p>
+                              <p className="text-xs text-slate-400">{doctor.experience} Exp.</p>
+                            </td>
+                            <td className="p-4">
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
                                 doctor.is_approved 
-                                  ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40' 
-                                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40'
-                              }`}
-                            >
-                              {doctor.is_approved ? 'Suspend' : 'Approve'}
-                            </button>
-                          </td>
+                                  ? 'bg-blue-100 text-blue-700' 
+                                  : 'bg-amber-100 text-amber-700'
+                              }`}>
+                                {doctor.is_approved ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                                {doctor.is_approved ? 'Approved' : 'Pending'}
+                              </span>
+                            </td>
+                            <td className="p-4 px-6 text-right">
+                              <button
+                                onClick={() => handleApproveDoctor(doctor.id, doctor.is_approved)}
+                                className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${
+                                  doctor.is_approved 
+                                    ? 'bg-rose-50 text-rose-600 hover:bg-rose-100' 
+                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                                }`}
+                              >
+                                {doctor.is_approved ? 'Suspend' : 'Approve'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {doctors.length === 0 && (
+                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No doctors registered yet.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* PATIENTS TAB */}
+              {activeTab === 'Patients' && (
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+                  <div className="p-5 border-b border-blue-50">
+                    <h3 className="text-xl font-extrabold text-slate-800">Registered Patients</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
+                          <th className="p-4 px-6 font-bold">Patient Name</th>
+                          <th className="p-4 font-bold">Email</th>
+                          <th className="p-4 font-bold">Mobile</th>
+                          <th className="p-4 font-bold">Blood Group</th>
+                          <th className="p-4 px-6 font-bold">Joined Date</th>
                         </tr>
-                      ))}
-                      {doctors.length === 0 && (
-                        <tr><td colSpan="5" className="p-8 text-center text-slate-500">No doctors registered yet.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50">
+                        {patients.map(patient => (
+                          <tr key={patient.id} className="hover:bg-blue-50/30 transition-colors">
+                            <td className="p-4 px-6 font-bold text-slate-700">{patient.full_name}</td>
+                            <td className="p-4 text-sm text-slate-600 font-medium">{patient.email}</td>
+                            <td className="p-4 text-sm text-slate-600 font-medium">{patient.mobile_number || 'N/A'}</td>
+                            <td className="p-4">
+                              <span className="inline-block px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-xs font-bold">
+                                {patient.blood_group || 'N/A'}
+                              </span>
+                            </td>
+                            <td className="p-4 px-6 text-slate-500 text-xs font-medium uppercase tracking-wider">
+                              {new Date(patient.created_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                        {patients.length === 0 && (
+                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No patients registered yet.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* PATIENTS TAB */}
-            {activeTab === 'Patients' && (
-              <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider">
-                        <th className="p-4 font-semibold">Patient Name</th>
-                        <th className="p-4 font-semibold">Email</th>
-                        <th className="p-4 font-semibold">Mobile</th>
-                        <th className="p-4 font-semibold">Blood Group</th>
-                        <th className="p-4 font-semibold">Joined Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                      {patients.map(patient => (
-                        <tr key={patient.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <td className="p-4 font-semibold text-slate-800 dark:text-white">{patient.full_name}</td>
-                          <td className="p-4 text-slate-600 dark:text-slate-300">{patient.email}</td>
-                          <td className="p-4 text-slate-600 dark:text-slate-300">{patient.mobile_number || 'N/A'}</td>
-                          <td className="p-4">
-                            <span className="inline-block px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full text-xs font-bold">
-                              {patient.blood_group || 'N/A'}
-                            </span>
-                          </td>
-                          <td className="p-4 text-slate-500 text-sm">
-                            {new Date(patient.created_at).toLocaleDateString()}
-                          </td>
+              {/* APPOINTMENTS TAB */}
+              {activeTab === 'Appointments' && (
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+                  <div className="p-5 border-b border-blue-50">
+                    <h3 className="text-xl font-extrabold text-slate-800">All Appointments</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
+                          <th className="p-4 px-6 font-bold">Patient</th>
+                          <th className="p-4 font-bold">Doctor</th>
+                          <th className="p-4 font-bold">Date & Time</th>
+                          <th className="p-4 font-bold">Status</th>
+                          <th className="p-4 px-6 font-bold">Reason</th>
                         </tr>
-                      ))}
-                      {patients.length === 0 && (
-                        <tr><td colSpan="5" className="p-8 text-center text-slate-500">No patients registered yet.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50">
+                        {appointments.map(appt => (
+                          <tr key={appt.id} className="hover:bg-blue-50/30 transition-colors">
+                            <td className="p-4 px-6 font-bold text-slate-700">{appt.patient_name}</td>
+                            <td className="p-4 font-bold text-slate-700">{appt.doctor_name}</td>
+                            <td className="p-4 text-sm text-slate-600 font-medium">
+                              {new Date(appt.date).toLocaleDateString()} at {appt.time}
+                            </td>
+                            <td className="p-4">
+                              <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                appt.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
+                                appt.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' :
+                                'bg-amber-100 text-amber-700'
+                              }`}>
+                                {appt.status}
+                              </span>
+                            </td>
+                            <td className="p-4 px-6 text-sm text-slate-500 font-medium max-w-xs truncate">{appt.reason || 'N/A'}</td>
+                          </tr>
+                        ))}
+                        {appointments.length === 0 && (
+                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No appointments scheduled yet.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* APPOINTMENTS TAB */}
-            {activeTab === 'Appointments' && (
-              <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider">
-                        <th className="p-4 font-semibold">Patient</th>
-                        <th className="p-4 font-semibold">Doctor</th>
-                        <th className="p-4 font-semibold">Date & Time</th>
-                        <th className="p-4 font-semibold">Status</th>
-                        <th className="p-4 font-semibold">Reason</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                      {appointments.map(appt => (
-                        <tr key={appt.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <td className="p-4 font-medium text-slate-800 dark:text-white">{appt.patient_name}</td>
-                          <td className="p-4 font-medium text-slate-800 dark:text-white">{appt.doctor_name}</td>
-                          <td className="p-4 text-slate-600 dark:text-slate-300">
-                            {new Date(appt.date).toLocaleDateString()} at {appt.time}
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                              appt.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
-                              appt.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                              'bg-amber-100 text-amber-700'
-                            }`}>
-                              {appt.status}
-                            </span>
-                          </td>
-                          <td className="p-4 text-sm text-slate-500 max-w-xs truncate">{appt.reason || 'N/A'}</td>
+              {/* EARNINGS TAB */}
+              {activeTab === 'Earnings' && (
+                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+                  <div className="p-6 border-b border-blue-100 bg-blue-50/30">
+                    <h3 className="text-xl font-extrabold text-blue-800 flex items-center gap-2">
+                      <DollarSign size={24} /> Detailed Revenue Tracking
+                    </h3>
+                    <p className="text-sm font-medium text-blue-600 mt-1">Based on completed appointments and consultation fees.</p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-white border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
+                          <th className="p-4 px-6 font-bold">Doctor Name</th>
+                          <th className="p-4 font-bold">Specialization</th>
+                          <th className="p-4 font-bold text-right">Fee (LKR)</th>
+                          <th className="p-4 font-bold text-right">Completed Appts</th>
+                          <th className="p-4 px-6 font-bold text-right">Total Earnings (LKR)</th>
                         </tr>
-                      ))}
-                      {appointments.length === 0 && (
-                        <tr><td colSpan="5" className="p-8 text-center text-slate-500">No appointments scheduled yet.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50">
+                        {earnings.map(earn => (
+                          <tr key={earn.doctor_id} className="hover:bg-blue-50/30 transition-colors">
+                            <td className="p-4 px-6 font-bold text-slate-700">{earn.doctor_name}</td>
+                            <td className="p-4 text-sm text-slate-600 font-medium">{earn.specialization}</td>
+                            <td className="p-4 text-right text-sm text-slate-600 font-medium">{parseFloat(earn.consultation_fee).toLocaleString()}</td>
+                            <td className="p-4 text-right font-bold text-slate-700">{earn.completed_appointments}</td>
+                            <td className="p-4 px-6 text-right font-black text-blue-600">
+                              {parseFloat(earn.total_earnings).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                        {earnings.length === 0 && (
+                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No earning data available.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* EARNINGS TAB */}
-            {activeTab === 'Earnings' && (
-              <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 dark:border-slate-700 bg-emerald-50 dark:bg-emerald-900/10">
-                  <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-400 flex items-center gap-2">
-                    <DollarSign size={20} /> Doctor Revenue Tracking
-                  </h3>
-                  <p className="text-sm text-emerald-600 dark:text-emerald-500 mt-1">Based on completed appointments and consultation fees.</p>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider">
-                        <th className="p-4 font-semibold">Doctor Name</th>
-                        <th className="p-4 font-semibold">Specialization</th>
-                        <th className="p-4 font-semibold text-right">Fee (LKR)</th>
-                        <th className="p-4 font-semibold text-right">Completed Appts</th>
-                        <th className="p-4 font-semibold text-right">Total Earnings (LKR)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                      {earnings.map(earn => (
-                        <tr key={earn.doctor_id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <td className="p-4 font-semibold text-slate-800 dark:text-white">{earn.doctor_name}</td>
-                          <td className="p-4 text-slate-600 dark:text-slate-300">{earn.specialization}</td>
-                          <td className="p-4 text-right text-slate-600 dark:text-slate-300">{parseFloat(earn.consultation_fee).toLocaleString()}</td>
-                          <td className="p-4 text-right font-medium text-slate-800 dark:text-white">{earn.completed_appointments}</td>
-                          <td className="p-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
-                            {parseFloat(earn.total_earnings).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-                      {earnings.length === 0 && (
-                        <tr><td colSpan="5" className="p-8 text-center text-slate-500">No earning data available.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
+              {/* MEDICAL SERVICES TAB */}
+              {activeTab === 'Medical Services' && (
+                <AdminServices />
+              )}
 
-            {/* MEDICAL SERVICES TAB */}
-            {activeTab === 'Medical Services' && (
-              <AdminServices />
-            )}
-
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

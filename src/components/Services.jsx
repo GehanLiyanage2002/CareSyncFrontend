@@ -9,7 +9,7 @@ import {
 
 const socket = io('http://localhost:5000');
 
-const Services = () => {
+const Services = ({ isPage }) => {
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ const Services = () => {
   );
 
   return (
-    <section id="services" className="py-24 bg-white">
+    <section id="services" className={`${isPage ? 'pb-24 pt-4' : 'py-24'} bg-white`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-10">

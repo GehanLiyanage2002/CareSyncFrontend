@@ -72,7 +72,7 @@ const Doctors = ({ onBookNow, hideHeader }) => {
   };
 
   return (
-    <section id="doctors" className="py-24 bg-white relative overflow-hidden transition-colors duration-300">
+    <section id="doctors" className={`${hideHeader ? 'pb-24 pt-4' : 'py-24'} bg-white relative overflow-hidden transition-colors duration-300`}>
       
       {/* Decorative Dots - Left */}
       <div className="absolute top-1/4 left-10 hidden lg:block opacity-30 z-0">

@@ -64,10 +64,19 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <button 
             onClick={toggleDarkMode} 
-            className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+            className={`relative flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              isDarkMode 
+                ? 'bg-slate-800 text-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)] border border-yellow-500/30' 
+                : 'bg-blue-50 text-indigo-600 shadow-[0_0_15px_rgba(99,102,241,0.4)] border border-indigo-200'
+            }`}
             aria-label="Toggle Dark Mode"
           >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            <div className={`absolute transition-all duration-700 transform ${isDarkMode ? 'rotate-[360deg] scale-100 opacity-100' : '-rotate-[90deg] scale-50 opacity-0'}`}>
+              <Sun size={20} className="drop-shadow-md" strokeWidth={2.5} />
+            </div>
+            <div className={`absolute transition-all duration-700 transform ${isDarkMode ? 'rotate-[90deg] scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100'}`}>
+              <Moon size={20} className="drop-shadow-md" fill="currentColor" />
+            </div>
           </button>
           {!isAuthenticated ? (
             <button

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { 
@@ -14,6 +15,7 @@ const Services = ({ isPage }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const scrollRef = React.useRef(null);
+  const navigate = useNavigate();
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -135,9 +137,10 @@ const Services = ({ isPage }) => {
                     
                     {/* View Details Button */}
                     <button 
+                      onClick={() => navigate('/doctors', { state: { service: service.name } })}
                       className="w-full mt-auto py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
                     >
-                      View Details
+                      Book Now
                     </button>
                   </div>
                 );

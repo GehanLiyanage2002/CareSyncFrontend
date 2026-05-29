@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Doctors from '../components/Doctors';
@@ -6,6 +7,9 @@ import DoctorProfile from '../components/DoctorProfile';
 
 const DoctorsPage = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const location = useLocation();
+  const service = location.state?.service;
+  const isTelemedicine = service === 'Telemedicine';
 
   return (
     <div className="min-h-screen bg-white">
@@ -17,6 +21,7 @@ const DoctorsPage = () => {
           <DoctorProfile 
             doctor={selectedDoctor} 
             onBack={() => setSelectedDoctor(null)} 
+            isTelemedicine={isTelemedicine}
           />
         ) : (
           <>
@@ -30,6 +35,7 @@ const DoctorsPage = () => {
             <Doctors 
               hideHeader={true} 
               onBookNow={(doctor) => setSelectedDoctor(doctor)} 
+              defaultSearchTerm={isTelemedicine ? 'Psychology' : ''}
             />
           </>
         )}

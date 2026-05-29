@@ -5,8 +5,9 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
-const Doctors = ({ onBookNow, hideHeader }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
+  const [selectedSpecialization, setSelectedSpecialization] = useState(defaultSearchTerm === 'Psychology' ? 'Psychology' : 'All');
+  const [searchTerm, setSearchTerm] = useState(defaultSearchTerm === 'Psychology' ? '' : defaultSearchTerm);
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
@@ -55,10 +56,14 @@ const Doctors = ({ onBookNow, hideHeader }) => {
     };
   }, []);
 
-  const filteredDoctors = doctors.filter(doctor =>
-    (doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-    (doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
-  );
+  const specializations = ['All', ...new Set(doctors.map(d => d.specialization || 'General Practitioner'))];
+
+  const filteredDoctors = doctors.filter(doctor => {
+    const matchesSearch = (doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+                          (doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+    const matchesSpec = selectedSpecialization === 'All' || (doctor.specialization || 'General Practitioner') === selectedSpecialization;
+    return matchesSearch && matchesSpec;
+  });
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -105,18 +110,38 @@ const Doctors = ({ onBookNow, hideHeader }) => {
           </div>
         )}
 
-        {/* Search Bar */}
-        <div className="max-w-xl mx-auto mb-10 relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-blue-500" />
+        {/* Search & Filter Section */}
+        <div className="max-w-4xl mx-auto mb-12 flex flex-col gap-6">
+          {/* Search Bar */}
+          <div className="relative max-w-2xl mx-auto w-full">
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+              <Search className="h-6 w-6 text-blue-500" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search doctors by name or specialization..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full pl-14 pr-6 py-4 border border-slate-200 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xl transition-all duration-300 font-medium text-lg"
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Search doctors by name or specialization..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all duration-300 font-medium"
-          />
+
+          {/* Specialization Filter Pills */}
+          <div className="flex gap-3 justify-start md:justify-center overflow-x-auto pb-4 hide-scrollbar snap-x px-2">
+            {specializations.map((spec, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSelectedSpecialization(spec)}
+                className={`snap-center whitespace-nowrap px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 shadow-sm border-2 ${
+                  selectedSpecialization === spec
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-blue-500/40'
+                    : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 border-slate-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-gray-500 hover:bg-blue-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                {spec}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Carousel / Doctors Grid */}

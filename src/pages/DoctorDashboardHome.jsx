@@ -228,6 +228,7 @@ const DoctorDashboardHome = () => {
                     <th className="px-6 py-4 font-semibold">Time</th>
                     <th className="px-6 py-4 font-semibold">Contact</th>
                     <th className="px-6 py-4 font-semibold text-right">Status</th>
+                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -260,6 +261,16 @@ const DoctorDashboardHome = () => {
                         }`}>
                           {apt.status ? apt.status.charAt(0).toUpperCase() + apt.status.slice(1) : 'Pending'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {apt.is_telemedicine && apt.status !== 'completed' && apt.status !== 'cancelled' && (
+                          <button
+                            onClick={() => navigate(`/telemedicine/${apt.id}`)}
+                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
+                          >
+                            Start Video Call
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

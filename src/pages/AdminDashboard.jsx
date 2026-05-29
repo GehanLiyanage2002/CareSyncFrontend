@@ -75,10 +75,11 @@ const AdminDashboard = () => {
       if (startDate && endDate) {
         url += `?startDate=${startDate}&endDate=${endDate}`;
       }
-      const res = await axios.get(url, config);
+      const res = await axios.get(url, { headers: { Authorization: token } });
+      console.log('[AdminDashboard] Stats received:', res.data.stats);
       setStats(res.data.stats);
     } catch (err) {
-      console.error(err);
+      console.error('[AdminDashboard] fetchStats error:', err.response?.status, err.response?.data || err.message);
     }
   };
 
@@ -116,10 +117,11 @@ const AdminDashboard = () => {
       if (startDate && endDate) {
         url += `?startDate=${startDate}&endDate=${endDate}`;
       }
-      const res = await axios.get(url, config);
+      const res = await axios.get(url, { headers: { Authorization: token } });
+      console.log('[AdminDashboard] Earnings received:', res.data.earnings?.length, 'records');
       setEarnings(res.data.earnings);
     } catch (err) {
-      console.error(err);
+      console.error('[AdminDashboard] fetchEarnings error:', err.response?.status, err.response?.data || err.message);
     }
   };
 
@@ -140,8 +142,13 @@ const AdminDashboard = () => {
   }, [activeTab, dateFilter, customDates]);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
-    socket.on('connect', () => setSocketConnected(true));
+    const socket = io('http://localhost:5000', { reconnection: true, reconnectionDelay: 1000 });
+    socket.on('connect', () => {
+      setSocketConnected(true);
+      // Refresh data on reconnect (e.g. after server restart)
+      if (activeTab === 'Overview') { fetchStats(); fetchEarnings(); }
+      if (activeTab === 'Appointments') fetchAppointments();
+    });
     socket.on('disconnect', () => setSocketConnected(false));
     
     const refreshData = () => {
@@ -158,6 +165,7 @@ const AdminDashboard = () => {
     
     return () => socket.disconnect();
   }, [activeTab, dateFilter, customDates]);
+
 
   const handleLogout = () => {
     dispatch(logout());
@@ -309,7 +317,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Completed Consultations', 
-                        value: stats.totalCompleted, 
+                        value: stats.totalCompleted || 0, 
                         icon: <CheckCircle size={24} />, 
                         iconColor: 'bg-blue-100 text-blue-600', 
                         tagColor: 'bg-blue-50 text-blue-700 border-blue-100', 
@@ -317,7 +325,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Canceled Appointments', 
-                        value: stats.totalCancelled, 
+                        value: stats.totalCancelled || 0, 
                         icon: <XCircle size={24} />, 
                         iconColor: 'bg-rose-100 text-rose-600', 
                         tagColor: 'bg-rose-50 text-rose-700 border-rose-100', 
@@ -325,7 +333,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Total Earnings', 
-                        value: `LKR ${stats.totalRevenue.toLocaleString()}`, 
+                        value: `LKR ${(stats.totalRevenue || 0).toLocaleString()}`, 
                         icon: <DollarSign size={24} />, 
                         iconColor: 'bg-emerald-100 text-emerald-600', 
                         tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-100', 

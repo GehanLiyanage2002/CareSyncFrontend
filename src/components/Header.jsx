@@ -109,7 +109,7 @@ const Header = () => {
 
               {/* Google-Style Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-[-120px] md:right-[-180px] mt-4 w-[360px] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden flex flex-col transform origin-top-right transition-all duration-200 ease-out">
+                <div className="absolute right-0 mt-4 w-[360px] max-w-[90vw] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden flex flex-col transform origin-top-right transition-all duration-200 ease-out">
                   
                   {/* Top Bar with Close Button */}
                   <div className="flex justify-between items-center px-6 pt-4 pb-2">

@@ -84,11 +84,7 @@ const Header = () => {
               {user?.role === 'Patient' && (
                 <button
                   onClick={() => {
-                    if (window.location.pathname !== '/') {
-                      navigate('/#doctors');
-                    } else {
-                      document.getElementById('doctors')?.scrollIntoView({ behavior: 'smooth' });
-                    }
+                    navigate('/doctors');
                   }}
                   className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 items-center gap-2"
                 >
@@ -104,7 +100,17 @@ const Header = () => {
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border border-blue-600 hover:bg-blue-200 dark:hover:bg-blue-800 transition shadow-sm overflow-hidden ring-2 ring-transparent hover:ring-blue-300 dark:hover:ring-blue-700"
                 title="Account Menu"
               >
-                {user?.name || user?.full_name ? <span className="font-bold text-lg">{(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}</span> : <User size={20} />}
+                {user?.name || user?.full_name ? (
+                  <div className="w-full h-full flex items-center justify-center relative">
+                    <img 
+                      src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover rounded-full" 
+                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} 
+                    />
+                    <span className="hidden font-bold text-lg">{(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}</span>
+                  </div>
+                ) : <User size={20} />}
               </button>
 
               {/* Google-Style Dropdown Menu */}
@@ -126,10 +132,15 @@ const Header = () => {
 
                   {/* Avatar & Greeting Section */}
                   <div className="flex flex-col items-center pt-2 pb-4 px-6">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-white dark:border-slate-800 mb-3 relative">
-                      {(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}
-                      <div className="absolute bottom-0 right-0 bg-white dark:bg-slate-800 rounded-full p-1 shadow-sm border border-slate-200 dark:border-slate-600">
-                        <User size={12} className="text-slate-600 dark:text-slate-300" />
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-white dark:border-slate-800 mb-3 relative overflow-hidden">
+                      <img 
+                        src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} 
+                      />
+                      <div className="hidden absolute inset-0 items-center justify-center">
+                        {(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}
                       </div>
                     </div>
                     <h3 className="text-xl font-medium text-slate-800 dark:text-white mb-4">

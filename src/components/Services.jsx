@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 import { 
   HeartPulse, Ear, Bone, Brain, Activity, 
   Stethoscope, Syringe, Eye, Pill, Microscope, 
-  Baby, Sparkles, Search
+  Baby, Sparkles, Search, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 const socket = io('http://localhost:5000');
@@ -13,6 +13,14 @@ const Services = ({ isPage }) => {
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const scrollRef = React.useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === 'left' ? -350 : 350;
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -90,21 +98,59 @@ const Services = ({ isPage }) => {
             <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredServices.length > 0 ? (
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
-            {filteredServices.map((service, index) => {
-              const IconComponent = getServiceIcon(service.name);
-              return (
-                <div 
-                  key={service.id} 
-                  className="group w-36 h-36 sm:w-48 sm:h-48 bg-white flex flex-col items-center justify-center p-4 cursor-pointer transition-all duration-300 hover:bg-[#3b82f6] shadow-sm hover:shadow-xl hover:-translate-y-2 border border-gray-100"
-                >
-                  <IconComponent className="w-12 h-12 text-[#3b82f6] group-hover:text-white mb-4 transition-colors duration-300" strokeWidth={1.5} />
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-700 group-hover:text-white text-center transition-colors duration-300">
-                    {service.name}
-                  </h3>
-                </div>
-              );
-            })}
+          <div className="relative flex items-center justify-center mt-12">
+            
+            {/* Left Scroll Button */}
+            <button 
+              onClick={() => scroll('left')}
+              className="hidden md:flex absolute -left-4 lg:-left-8 z-20 w-12 h-12 bg-white shadow-lg rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors border border-slate-100"
+            >
+              <ChevronLeft size={28} />
+            </button>
+
+            {/* Scrollable Container */}
+            <div 
+              ref={scrollRef}
+              className="flex overflow-x-auto gap-6 pb-12 pt-4 px-4 snap-x snap-mandatory hide-scrollbar w-full"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {filteredServices.map((service) => {
+                const IconComponent = getServiceIcon(service.name);
+                return (
+                  <div
+                    key={service.id}
+                    className="min-w-[280px] max-w-[320px] flex-shrink-0 snap-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-300 border border-slate-100 dark:border-gray-700/50 flex flex-col items-center text-center group"
+                  >
+                    <div className="relative mb-6">
+                      <div className="w-20 h-20 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-[#0ea5e9] transition-colors duration-300 shadow-sm border-2 border-white dark:border-gray-800">
+                        <IconComponent className="w-10 h-10 text-[#0ea5e9] dark:text-blue-400 group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-[#1e3a8a] dark:text-white mb-2 transition-colors">
+                      {service.name}
+                    </h3>
+                    <p className="text-[#0ea5e9] font-medium text-sm mb-6">
+                      {service.price ? `Starts from LKR ${service.price}` : 'Consult for Pricing'}
+                    </p>
+                    
+                    {/* View Details Button */}
+                    <button 
+                      className="w-full mt-auto py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Scroll Button */}
+            <button 
+              onClick={() => scroll('right')}
+              className="hidden md:flex absolute -right-4 lg:-right-8 z-20 w-12 h-12 bg-white shadow-lg rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors border border-slate-100"
+            >
+              <ChevronRight size={28} />
+            </button>
           </div>
         ) : (
           <div className="text-center py-12">

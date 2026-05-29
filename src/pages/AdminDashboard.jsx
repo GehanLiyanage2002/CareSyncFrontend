@@ -24,6 +24,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [doctorSearchQuery, setDoctorSearchQuery] = useState('');
+  const [doctorStatusFilter, setDoctorStatusFilter] = useState('All');
+
   
   // Filtering and Real-time state
   const [dateFilter, setDateFilter] = useState('All Time');
@@ -165,6 +168,13 @@ const AdminDashboard = () => {
     socket.on('slotBooked', refreshData);
     socket.on('doctorProfileUpdated', refreshData);
     
+    // Listen for doctor availability toggle
+    socket.on('doctorAvailabilityChanged', () => {
+      if (activeTab === 'Doctors') {
+        fetchDoctors();
+      }
+    });
+    
     return () => socket.disconnect();
   }, [activeTab, dateFilter, customDates]);
 
@@ -203,6 +213,23 @@ const AdminDashboard = () => {
       earn.specialization.toLowerCase().includes(query) ||
       earn.consultation_fee.toString().includes(query)
     );
+  });
+
+  const filteredDoctors = doctors.filter(doc => {
+    // Status Filter based on is_available (Accepting patients or not)
+    if (doctorStatusFilter === 'Available' && !doc.is_available) return false;
+    if (doctorStatusFilter === 'Unavailable' && doc.is_available) return false;
+
+    // Search Query Filter
+    const trimmedQuery = doctorSearchQuery.trim().toLowerCase();
+    if (!trimmedQuery) return true;
+    
+    const nameMatch = String(doc.full_name || '').toLowerCase().includes(trimmedQuery);
+    const specMatch = String(doc.specialization || '').toLowerCase().includes(trimmedQuery);
+    const emailMatch = String(doc.email || '').toLowerCase().includes(trimmedQuery);
+    const phoneMatch = String(doc.mobile_number || '').toLowerCase().includes(trimmedQuery);
+    
+    return nameMatch || specMatch || emailMatch || phoneMatch;
   });
 
   return (
@@ -433,21 +460,94 @@ const AdminDashboard = () => {
                 </>
               )}
 
-              {/* DOCTORS TAB (Legacy) */}
+              {/* DOCTORS TAB */}
               {activeTab === 'Doctors' && (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
-                  <div className="p-5 border-b border-blue-50 flex items-center justify-between">
-                    <h3 className="text-xl font-extrabold text-slate-800">Doctor Management</h3>
-                    <button
-                      onClick={() => setShowAddDoctor(true)}
-                      className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                      Add Doctor
-                    </button>
+                <>
+                  {/* Search and Filter for Doctors Tab */}
+                  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                      <h3 className="text-[15px] font-bold text-slate-700 mb-2">
+                        Search doctors
+                        {doctorSearchQuery && (
+                          <span className="ml-2 text-xs font-normal text-blue-500">
+                            — {filteredDoctors.length} result{filteredDoctors.length !== 1 ? 's' : ''} found
+                          </span>
+                        )}
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-full md:w-[380px]">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
+                          <input 
+                            type="text" 
+                            placeholder="Search name / specialization / email"
+                            value={doctorSearchQuery}
+                            onChange={(e) => setDoctorSearchQuery(e.target.value)}
+                            className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white"
+                          />
+                          {doctorSearchQuery && (
+                            <button
+                              onClick={() => setDoctorSearchQuery('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+                      <button 
+                        onClick={() => setDoctorStatusFilter('All')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                          doctorStatusFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'
+                        }`}
+                      >
+                        All
+                      </button>
+                      <button 
+                        onClick={() => setDoctorStatusFilter('Available')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                          doctorStatusFilter === 'Available' 
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm' 
+                            : 'border-transparent text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        Available
+                      </button>
+                      <button 
+                        onClick={() => setDoctorStatusFilter('Unavailable')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                          doctorStatusFilter === 'Unavailable' 
+                            ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-sm' 
+                            : 'border-transparent text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        Unavailable
+                      </button>
+                    </div>
                   </div>
+
+                  <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+                    <div className="p-5 border-b border-blue-50 flex items-center justify-between">
+                      <h3 className="text-xl font-extrabold text-slate-800">Doctor Management</h3>
+                      <button
+                        onClick={() => setShowAddDoctor(true)}
+                        className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Doctor
+                      </button>
+                    </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
+                      <colgroup>
+                        <col style={{width: '22%'}} />
+                        <col style={{width: '24%'}} />
+                        <col style={{width: '22%'}} />
+                        <col style={{width: '16%'}} />
+                        <col style={{width: '16%'}} />
+                      </colgroup>
                       <thead>
                         <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
                           <th className="p-4 px-6 font-bold">Doctor Name</th>
@@ -458,7 +558,7 @@ const AdminDashboard = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-blue-50">
-                        {doctors.map(doctor => (
+                        {filteredDoctors.map(doctor => (
                           <tr key={doctor.id} className="hover:bg-blue-50/30 transition-colors">
                             <td className="p-4 px-6">
                               <p className="font-bold text-slate-700">{doctor.full_name}</p>
@@ -471,35 +571,45 @@ const AdminDashboard = () => {
                             </td>
                             <td className="p-4">
                               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
-                                doctor.is_approved 
-                                  ? 'bg-blue-100 text-blue-700' 
-                                  : 'bg-amber-100 text-amber-700'
+                                doctor.is_available 
+                                  ? 'bg-emerald-100 text-emerald-700' 
+                                  : 'bg-rose-100 text-rose-700'
                               }`}>
-                                {doctor.is_approved ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                                {doctor.is_approved ? 'Approved' : 'Pending'}
+                                {doctor.is_available ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                                {doctor.is_available ? 'Available' : 'Unavailable'}
                               </span>
                             </td>
-                            <td className="p-4 px-6 text-right">
-                              <button
-                                onClick={() => handleApproveDoctor(doctor.id, doctor.is_approved)}
-                                className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${
-                                  doctor.is_approved 
-                                    ? 'bg-rose-50 text-rose-600 hover:bg-rose-100' 
-                                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                                }`}
-                              >
-                                {doctor.is_approved ? 'Suspend' : 'Approve'}
-                              </button>
+                            <td className="p-4 px-6">
+                              <div className="flex items-center justify-end gap-3">
+                                <button 
+                                  onClick={() => handleApproveDoctor(doctor.id, doctor.is_approved)}
+                                  className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 flex-shrink-0 ${
+                                    doctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'
+                                  }`}
+                                >
+                                  <div 
+                                    className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${
+                                      doctor.is_approved ? 'translate-x-5' : 'translate-x-0'
+                                    }`}
+                                  ></div>
+                                </button>
+                                <span className={`text-[12px] font-bold ${
+                                  doctor.is_approved ? 'text-blue-600' : 'text-rose-500'
+                                }`}>
+                                  {doctor.is_approved ? 'Approved' : 'Suspended'}
+                                </span>
+                              </div>
                             </td>
                           </tr>
                         ))}
-                        {doctors.length === 0 && (
-                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No doctors registered yet.</td></tr>
+                        {filteredDoctors.length === 0 && (
+                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No doctors match your search.</td></tr>
                         )}
                       </tbody>
                     </table>
                   </div>
                 </div>
+                </>
               )}
 
               {/* PATIENTS TAB */}

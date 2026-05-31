@@ -254,26 +254,10 @@ const AdminServices = () => {
   };
 
   return (
-    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
-      {!showForm && (
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <Settings className="text-indigo-600 dark:text-indigo-400" /> Medical Services Management
-            </h3>
-            <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Add, edit and manage availability & schedules of medical services.</p>
-          </div>
-          <button 
-            onClick={() => setShowForm(true)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm shadow-indigo-200 dark:shadow-none"
-          >
-            <Plus size={16} /> Add Service
-          </button>
-        </div>
-      )}
-
+    <>
       {showForm && (
-        <div className="mb-10 space-y-8 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 p-6">
+          <div className="mb-10 space-y-8 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
           
           <div className="flex justify-between items-start mb-2">
             <div>
@@ -504,11 +488,12 @@ const AdminServices = () => {
           </div>
 
         </div>
+        </div>
       )}
 
       {/* SERVICES TABLE */}
       {!showForm && (
-        <div className="mt-6">
+        <>
           <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <h3 className="text-[15px] font-bold text-slate-700 mb-2">
@@ -573,8 +558,19 @@ const AdminServices = () => {
             </div>
           </div>
 
-        <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden mt-6">
+            <div className="p-5 border-b border-blue-50 flex items-center justify-between">
+              <h3 className="text-xl font-extrabold text-slate-800">Medical Services Management</h3>
+              <button 
+                onClick={() => setShowForm(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
+              >
+                <Plus size={16} /> Add Service
+              </button>
+            </div>
+            
+            <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-4 mx-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
             {filteredServices.map(service => (
               <div 
                 key={service.id} 
@@ -643,8 +639,9 @@ const AdminServices = () => {
           </div>
         </div>
         </div>
+        </>
       )}
-    </div>
+    </>
   );
 };
 

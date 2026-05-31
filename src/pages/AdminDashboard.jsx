@@ -490,8 +490,16 @@ const AdminDashboard = () => {
               {/* DOCTORS TAB */}
               {activeTab === 'Doctors' && (
                 <>
-                  {/* Search and Filter for Doctors Tab */}
-                  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  {showAddDoctor ? (
+                    <AddDoctorModal
+                      token={token}
+                      onClose={() => setShowAddDoctor(false)}
+                      onSuccess={() => { fetchDoctors(); setShowAddDoctor(false); }}
+                    />
+                  ) : (
+                    <>
+                      {/* Search and Filter for Doctors Tab */}
+                      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                       <h3 className="text-[15px] font-bold text-slate-700 mb-2">
                         Search doctors
@@ -626,6 +634,8 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </div>
+                    </>
+                  )}
                 </>
               )}
 
@@ -767,13 +777,6 @@ const AdminDashboard = () => {
           )}
         </div>
       </main>
-      {showAddDoctor && (
-        <AddDoctorModal
-          token={token}
-          onClose={() => setShowAddDoctor(false)}
-          onSuccess={() => { fetchDoctors(); setShowAddDoctor(false); }}
-        />
-      )}
 
       {/* Selected Doctor Details Modal */}
       {selectedDoctor && (

@@ -25,6 +25,10 @@ const AdminServices = () => {
   // Search and Filter State
   const [serviceSearchQuery, setServiceSearchQuery] = useState('');
   const [serviceStatusFilter, setServiceStatusFilter] = useState('All');
+  
+  // Modals state
+  const [selectedService, setSelectedService] = useState(null);
+  const [serviceToDelete, setServiceToDelete] = useState(null);
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.name.toLowerCase().includes(serviceSearchQuery.toLowerCase()) || 
@@ -235,6 +239,12 @@ const AdminServices = () => {
 
   const toggleAvailability = async (id, currentStatus) => {
     try {
+      // Optimistic update for UI
+      setServices(services.map(s => s.id === id ? { ...s, is_available: !currentStatus } : s));
+      if (selectedService && selectedService.id === id) {
+        setSelectedService({ ...selectedService, is_available: !currentStatus });
+      }
+
       const service = services.find(s => s.id === id);
       const res = await axios.put(`http://localhost:5000/api/services/${id}`, {
         name: service.name,
@@ -247,9 +257,41 @@ const AdminServices = () => {
       if (res.data.success) {
         toast.success('Status updated');
         fetchServices();
+      } else {
+        // Revert on failure
+        setServices(services.map(s => s.id === id ? { ...s, is_available: currentStatus } : s));
+        if (selectedService && selectedService.id === id) {
+          setSelectedService({ ...selectedService, is_available: currentStatus });
+        }
       }
     } catch (error) {
       toast.error('Failed to update status');
+      // Revert on failure
+      setServices(services.map(s => s.id === id ? { ...s, is_available: currentStatus } : s));
+      if (selectedService && selectedService.id === id) {
+        setSelectedService({ ...selectedService, is_available: currentStatus });
+      }
+    }
+  };
+
+  const handleDeleteService = (service) => {
+    setServiceToDelete(service);
+  };
+
+  const confirmDeleteService = async () => {
+    if (!serviceToDelete) return;
+    try {
+      const res = await axios.delete(`http://localhost:5000/api/services/${serviceToDelete.id}`, {
+        headers: { Authorization: token }
+      });
+      if (res.data.success) {
+        toast.success('Service removed successfully');
+        setServices(services.filter(s => s.id !== serviceToDelete.id));
+        setServiceToDelete(null);
+        setSelectedService(null);
+      }
+    } catch (error) {
+      toast.error('Failed to remove service');
     }
   };
 
@@ -574,7 +616,8 @@ const AdminServices = () => {
             {filteredServices.map(service => (
               <div 
                 key={service.id} 
-                className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col gap-4 relative"
+                onClick={() => setSelectedService(service)}
+                className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex gap-4">
@@ -583,7 +626,7 @@ const AdminServices = () => {
                         src={`http://localhost:5000/api/services/${service.id}/image?t=${Date.now()}`} 
                         alt={service.name} 
                         className="w-full h-full object-cover" 
-                        onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = service.name.charAt(0).toUpperCase(); }} 
+                        onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; if(e.target.parentNode) e.target.parentNode.innerText = service.name.charAt(0).toUpperCase(); }} 
                       />
                     </div>
                     <div className="flex flex-col justify-center">
@@ -612,13 +655,13 @@ const AdminServices = () => {
                   
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleEdit(service)}
+                      onClick={(e) => { e.stopPropagation(); handleEdit(service); }}
                       className="px-3 py-1.5 bg-white text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
                     >
                       <Edit2 size={13} /> Edit
                     </button>
                     <button
-                      onClick={() => toggleAvailability(service.id, service.is_available)}
+                      onClick={(e) => { e.stopPropagation(); toggleAvailability(service.id, service.is_available); }}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm border ${
                         service.is_available 
                           ? 'bg-white text-rose-600 border-rose-200 hover:bg-rose-50' 
@@ -640,6 +683,101 @@ const AdminServices = () => {
         </div>
         </div>
         </>
+      )}
+
+      {/* Selected Service Details Modal */}
+      {selectedService && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative h-32 bg-gradient-to-r from-emerald-500 to-teal-600">
+              <button 
+                onClick={() => setSelectedService(null)}
+                className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="px-8 pb-8">
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
+                  <img src={`http://localhost:5000/api/services/${selectedService.id}/image?t=${Date.now()}`} alt={selectedService.name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; if(e.target.parentNode) e.target.parentNode.innerText = selectedService.name.charAt(0).toUpperCase(); }} />
+                </div>
+                
+                {/* Toggle Switch */}
+                <div className="flex flex-col items-end gap-2 mt-4">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Service Status</span>
+                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => toggleAvailability(selectedService.id, selectedService.is_available)}>
+                    <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${selectedService.is_available ? 'bg-blue-500' : 'bg-rose-200'}`}>
+                      <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedService.is_available ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    </div>
+                    <span className={`text-sm font-black uppercase tracking-wider ${selectedService.is_available ? 'text-blue-600' : 'text-rose-500'}`}>
+                      {selectedService.is_available ? 'Available' : 'Unavailable'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-black text-slate-800">{selectedService.name}</h3>
+                <p className="text-teal-600 font-bold text-sm mt-1">{selectedService.location || 'Location Not Set'}</p>
+                
+                <div className="grid grid-cols-1 gap-4 mt-6">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Description</p>
+                    <p className="text-slate-800 font-medium text-sm">{selectedService.description || 'No description provided'}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Consultation Fee</p>
+                    <p className="text-slate-800 font-semibold">LKR {selectedService.price ? parseFloat(selectedService.price).toLocaleString() : '0'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+                <button 
+                  onClick={() => handleDeleteService(selectedService)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold transition-colors"
+                >
+                  <Trash2 size={18} />
+                  Remove Service
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {serviceToDelete && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 mb-2">Remove Service?</h3>
+            <p className="text-slate-500 font-medium text-sm mb-6">
+              Are you sure you want to permanently delete <strong>{serviceToDelete.name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setServiceToDelete(null)}
+                className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteService}
+                className="flex-1 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-colors shadow-sm shadow-rose-200"
+              >
+                Yes, Remove
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

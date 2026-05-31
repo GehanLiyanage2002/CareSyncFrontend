@@ -136,8 +136,9 @@ const BookServicePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <Header />
-      <div className="pt-24 pb-12 max-w-6xl mx-auto px-4">
+      <div className="print:hidden">
+        <Header />
+        <div className="pt-24 pb-12 max-w-6xl mx-auto px-4">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -167,7 +168,7 @@ const BookServicePage = () => {
                 
                 {/* Select Date */}
                 <div>
-                  <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">1. Select Date</h4>
+                  <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">Select Date</h4>
                   {errors.date && <p className="text-rose-500 text-xs mb-2">{errors.date}</p>}
                   {loadingDates ? (
                     <div className="flex justify-center py-4 w-full text-teal-500">
@@ -206,7 +207,7 @@ const BookServicePage = () => {
 
                 {/* Available Time Slots */}
                 <div>
-                  <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-3 transition-colors">2. Select Time</h4>
+                  <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-3 transition-colors">Select Time</h4>
                   {errors.time && <p className="text-rose-500 text-xs mb-2">{errors.time}</p>}
                   {!selectedDateObj ? (
                     <p className="text-sm text-gray-400 dark:text-gray-500 italic bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl text-center">
@@ -277,7 +278,7 @@ const BookServicePage = () => {
 
               {/* Right Column: Receipt Summary & Payment */}
               <div>
-                <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">3. Booking Summary</h4>
+                <h4 className="text-md font-bold text-gray-800 dark:text-gray-200 mb-4 transition-colors">Booking Summary</h4>
                 <div className="bg-gradient-to-br from-teal-50/50 to-blue-50/50 dark:from-gray-900 dark:to-gray-800 border border-teal-100/50 dark:border-gray-700/50 rounded-3xl p-6 space-y-5 transition-colors duration-300 shadow-inner">
                   
                   <div className="border-b border-teal-100 dark:border-gray-700 pb-4">
@@ -339,24 +340,31 @@ const BookServicePage = () => {
                     <span className="text-xl font-black text-teal-600 dark:text-teal-400">Rs. {service.price || 0}</span>
                   </div>
 
-                  <button
-                    type="submit"
-                    className="w-full mt-4 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition duration-300 hover:shadow-xl active:scale-95"
-                  >
-                    <CheckCircle className="w-5 h-5" />
-                    Confirm Booking
-                  </button>
+                  {user?.role !== 'Patient' ? (
+                    <div className="mt-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-2xl text-center text-sm font-bold border border-red-200 dark:border-red-800/30">
+                      Only Patients can book services.
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="w-full mt-4 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition duration-300 hover:shadow-xl active:scale-95"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                      Confirm Booking
+                    </button>
+                  )}
                 </div>
               </div>
 
             </form>
           </div>
         )}
+      </div>
 
-        {/* Success Booking Receipt Modal */}
+      {/* Success Booking Receipt Modal */}
         {showSuccessModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white print:z-50 print:p-0">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-full print:rounded-none">
               <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-8 text-center text-white">
                 <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
                   <CheckCircle className="h-10 w-10 text-white" />
@@ -389,7 +397,7 @@ const BookServicePage = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-3 p-6 pt-0 mt-4 print:hidden">
                   <button
                     onClick={printTicket}
                     className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-2xl flex items-center justify-center gap-1.5 transition"
@@ -412,7 +420,9 @@ const BookServicePage = () => {
         )}
 
       </div>
-      <Footer />
+      <div className="print:hidden">
+        <Footer />
+      </div>
     </div>
   );
 };

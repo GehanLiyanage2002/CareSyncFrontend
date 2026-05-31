@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { Plus, Edit2, CheckCircle, XCircle, Settings } from 'lucide-react';
+import { Plus, Edit2, CheckCircle, XCircle, Settings, Calendar, Clock, MapPin, AlignLeft, Trash2, AlertTriangle, PlusCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminServices = () => {
   const { token } = useSelector(state => state.auth);
   const [services, setServices] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentService, setCurrentService] = useState({ name: '', price: '' });
+  const [currentService, setCurrentService] = useState({ name: '', price: '', description: '', location: '' });
   const [showForm, setShowForm] = useState(false);
+  
+  // Schedule Manager State
+  const [schedules, setSchedules] = useState([]);
+  const [newSchedule, setNewSchedule] = useState({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
 
   const fetchServices = async () => {
     try {
@@ -25,14 +29,27 @@ const AdminServices = () => {
     }
   };
 
+  const fetchSchedules = async (serviceId) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/services/${serviceId}/schedules`, {
+        headers: { Authorization: token }
+      });
+      if (res.data.success) {
+        setSchedules(res.data.schedules);
+      }
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+    }
+  };
+
   useEffect(() => {
     fetchServices();
   }, [token]);
 
-  const handleSubmit = async (e) => {
+  const handleSaveInfo = async (e) => {
     e.preventDefault();
-    if (!currentService.name || !currentService.price) {
-      toast.error('Please fill all fields');
+    if (!currentService.name) {
+      toast.error('Please provide a service name');
       return;
     }
 
@@ -40,50 +57,126 @@ const AdminServices = () => {
       if (isEditing) {
         const res = await axios.put(`http://localhost:5000/api/services/${currentService.id}`, {
           name: currentService.name,
-          price: Number(currentService.price),
-          is_available: currentService.is_available || currentService.isAvailable
+          description: currentService.description,
+          location: currentService.location,
+          price: Number(currentService.price || 0),
+          is_available: currentService.is_available !== undefined ? currentService.is_available : currentService.isAvailable
         }, { headers: { Authorization: token } });
         
         if (res.data.success) {
-          toast.success('Service updated successfully');
+          toast.success('Service info updated');
           fetchServices();
         }
       } else {
         const res = await axios.post('http://localhost:5000/api/services', {
           name: currentService.name,
-          price: Number(currentService.price)
+          description: currentService.description,
+          location: currentService.location,
+          price: 0
         }, { headers: { Authorization: token } });
         
         if (res.data.success) {
-          toast.success('New service added');
+          toast.success('Service info created. You can now set the fee and schedule.');
           fetchServices();
+          setCurrentService({
+            ...res.data.service,
+            isAvailable: res.data.service.is_available
+          });
+          setIsEditing(true);
         }
       }
-
-      setCurrentService({ name: '', price: '' });
-      setShowForm(false);
-      setIsEditing(false);
     } catch (error) {
-      console.error('Error saving service:', error);
-      toast.error(error.response?.data?.message || 'Failed to save service');
+      console.error('Error saving service info:', error);
+      toast.error(error.response?.data?.message || 'Failed to save info');
+    }
+  };
+
+  const handleSaveFee = async (e) => {
+    e.preventDefault();
+    if (!isEditing) return;
+    
+    try {
+      const res = await axios.put(`http://localhost:5000/api/services/${currentService.id}`, {
+        name: currentService.name,
+        description: currentService.description,
+        location: currentService.location,
+        price: Number(currentService.price || 0),
+        is_available: currentService.is_available !== undefined ? currentService.is_available : currentService.isAvailable
+      }, { headers: { Authorization: token } });
+      
+      if (res.data.success) {
+        toast.success('Fee updated successfully');
+        fetchServices();
+        closeForm();
+      }
+    } catch (error) {
+      console.error('Error saving fee:', error);
+      toast.error('Failed to save fee');
+    }
+  };
+
+  const handleAddSchedule = async (e) => {
+    e.preventDefault();
+    if (!newSchedule.schedule_date || !newSchedule.start_time || !newSchedule.end_time || !newSchedule.slot_duration_minutes) {
+      toast.error('Please fill all schedule fields');
+      return;
+    }
+    try {
+      const res = await axios.post(`http://localhost:5000/api/services/${currentService.id}/schedules`, newSchedule, {
+        headers: { Authorization: token }
+      });
+      if (res.data.success) {
+        toast.success('Schedule added successfully');
+        fetchSchedules(currentService.id);
+        setNewSchedule({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add schedule');
+    }
+  };
+
+  const handleDeleteSchedule = async (scheduleId) => {
+    try {
+      const res = await axios.delete(`http://localhost:5000/api/services/schedules/${scheduleId}`, {
+        headers: { Authorization: token }
+      });
+      if (res.data.success) {
+        toast.success('Schedule removed');
+        fetchSchedules(currentService.id);
+      }
+    } catch (error) {
+      toast.error('Failed to remove schedule');
     }
   };
 
   const handleEdit = (service) => {
     setCurrentService({
       ...service,
-      isAvailable: service.is_available
+      isAvailable: service.is_available,
+      description: service.description || '',
+      location: service.location || '',
+      price: service.price || ''
     });
     setIsEditing(true);
     setShowForm(true);
+    fetchSchedules(service.id);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setIsEditing(false);
+    setCurrentService({ name: '', price: '', description: '', location: '' });
+    setSchedules([]);
+    setNewSchedule({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
   };
 
   const toggleAvailability = async (id, currentStatus) => {
     try {
-      // Find the service to get name and price
       const service = services.find(s => s.id === id);
       const res = await axios.put(`http://localhost:5000/api/services/${id}`, {
         name: service.name,
+        description: service.description,
+        location: service.location,
         price: service.price,
         is_available: !currentStatus
       }, { headers: { Authorization: token } });
@@ -93,110 +186,307 @@ const AdminServices = () => {
         fetchServices();
       }
     } catch (error) {
-      console.error('Error toggling availability:', error);
       toast.error('Failed to update status');
     }
   };
 
   return (
     <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <Settings className="text-indigo-600 dark:text-indigo-400" /> Medical Services Management
-          </h3>
-          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Add, edit and manage availability of medical services.</p>
-        </div>
-        <button 
-          onClick={() => { setShowForm(!showForm); setIsEditing(false); setCurrentService({ name: '', price: '' }); }}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm shadow-indigo-200 dark:shadow-none"
-        >
-          {showForm ? 'Cancel' : <><Plus size={16} /> Add Service</>}
-        </button>
-      </div>
-
-      {showForm && (
-        <form onSubmit={handleSubmit} className="mb-8 bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
-          <h4 className="font-semibold text-slate-800 dark:text-white mb-4">{isEditing ? 'Edit Service' : 'Add New Service'}</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Service Name</label>
-              <input 
-                type="text" 
-                value={currentService.name}
-                onChange={e => setCurrentService({...currentService, name: e.target.value})}
-                placeholder="e.g. Blood Test" 
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white transition-colors"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Price (LKR)</label>
-              <input 
-                type="number" 
-                value={currentService.price}
-                onChange={e => setCurrentService({...currentService, price: e.target.value})}
-                placeholder="e.g. 1500" 
-                min="0"
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white transition-colors"
-                required
-              />
-            </div>
+      {!showForm && (
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <Settings className="text-indigo-600 dark:text-indigo-400" /> Medical Services Management
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Add, edit and manage availability & schedules of medical services.</p>
           </div>
-          <button type="submit" className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-sm transition-colors">
-            {isEditing ? 'Update Service' : 'Save Service'}
+          <button 
+            onClick={() => setShowForm(true)}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm shadow-indigo-200 dark:shadow-none"
+          >
+            <Plus size={16} /> Add Service
           </button>
-        </form>
+        </div>
       )}
 
-      <div className="overflow-x-auto">
+      {showForm && (
+        <div className="mb-10 space-y-8 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+          
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h2 className="text-[22px] font-extrabold text-slate-800">{isEditing ? 'Edit Service' : 'Add New Service'}</h2>
+              <p className="text-[13px] text-slate-500 mt-1">Fill in the service's profile, schedule, and consultation fee details.</p>
+            </div>
+            <button 
+              onClick={closeForm}
+              className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-full text-[13px] font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+            >
+              <XCircle size={15} className="text-slate-400" /> Cancel
+            </button>
+          </div>
+
+          {/* GENERAL INFO FORM */}
+          <form onSubmit={handleSaveInfo} className="bg-white p-6 rounded-[20px] border border-slate-200 shadow-sm">
+            <h3 className="text-[16px] font-bold text-[#1f2937] mb-6">Basic Information</h3>
+            
+            <div className="flex items-center gap-4 mb-8">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-black">
+                  {currentService.name ? currentService.name.charAt(0).toUpperCase() : 'S'}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-800 text-[14px]">{currentService.name || 'New Service'}</h4>
+                <p className="text-[12px] text-slate-400 font-medium">Service Account</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Click the camera icon to upload a photo</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Service Name *</label>
+                  <input 
+                    type="text" 
+                    value={currentService.name}
+                    onChange={e => setCurrentService({...currentService, name: e.target.value})}
+                    placeholder="e.g. Full Body Checkup" 
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Clinic Location</label>
+                  <input 
+                    type="text" 
+                    value={currentService.location}
+                    onChange={e => setCurrentService({...currentService, location: e.target.value})}
+                    placeholder="e.g. Ground Floor, Room 102" 
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">About this Service</label>
+                  <textarea 
+                    value={currentService.description}
+                    onChange={e => setCurrentService({...currentService, description: e.target.value})}
+                    placeholder="Describe the medical service..." 
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] h-[106px] resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-slate-100">
+              <button type="submit" className="px-6 py-2.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white rounded-xl text-[14px] font-semibold shadow-sm transition-colors">
+                {isEditing ? 'Save Details' : 'Create Service Account'}
+              </button>
+            </div>
+          </form>
+
+          {/* SCHEDULE MANAGER */}
+          <div className="bg-white p-6 rounded-[20px] border border-slate-200 shadow-sm">
+            <h3 className="text-[18px] font-bold text-[#1f2937] mb-5">Schedule Manager</h3>
+            
+            {!isEditing && (
+              <div className="bg-[#fffbeb] border border-[#fef08a] rounded-xl p-3 mb-6 flex items-center gap-2">
+                <AlertTriangle size={18} className="text-[#f59e0b]" />
+                <span className="text-[13px] font-medium text-[#b45309]">Create the service account above first, then save the schedule.</span>
+              </div>
+            )}
+            
+            <form onSubmit={handleAddSchedule}>
+              <div className="bg-[#f8fafc] border border-slate-100 rounded-xl p-5 mb-5">
+                <h5 className="flex items-center gap-2 text-[14px] font-bold text-slate-700 mb-4">
+                  <Calendar size={16} className="text-blue-500" /> Working Day 1
+                </h5>
+                
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Date</label>
+                    <input 
+                      type="date" 
+                      value={newSchedule.schedule_date}
+                      onChange={e => setNewSchedule({...newSchedule, schedule_date: e.target.value})}
+                      className="w-full max-w-xl px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-6 max-w-xl">
+                    <div className="flex-1">
+                      <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Start Time</label>
+                      <input 
+                        type="time" 
+                        value={newSchedule.start_time}
+                        onChange={e => setNewSchedule({...newSchedule, start_time: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+                        required
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">End Time</label>
+                      <input 
+                        type="time" 
+                        value={newSchedule.end_time}
+                        onChange={e => setNewSchedule({...newSchedule, end_time: e.target.value})}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="max-w-xl">
+                    <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Appointment Slot Duration</label>
+                    <select 
+                      value={newSchedule.slot_duration_minutes}
+                      onChange={e => setNewSchedule({...newSchedule, slot_duration_minutes: e.target.value})}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] bg-white"
+                      required
+                    >
+                      <option value="5">5 minutes per slot</option>
+                      <option value="10">10 minutes per slot</option>
+                      <option value="15">15 minutes per slot</option>
+                      <option value="20">20 minutes per slot</option>
+                      <option value="30">30 minutes per slot</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center mb-6">
+                <button type="submit" className="w-full border border-dashed border-slate-300 text-slate-500 hover:text-blue-600 hover:border-blue-400 py-3 rounded-xl flex items-center justify-center gap-2 text-[14px] font-semibold transition-colors bg-white">
+                  <Plus size={16} /> Add Schedule Day
+                </button>
+              </div>
+            </form>
+
+            {schedules.length > 0 && (
+              <div className="mt-6 mb-6">
+                <h5 className="font-bold text-slate-700 text-sm mb-3">Saved Schedules</h5>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {schedules.map(sch => (
+                    <div key={sch.id} className="p-4 bg-[#f8fafc] border border-slate-200 rounded-xl flex justify-between items-center group">
+                      <div>
+                        <p className="font-bold text-slate-800 text-[14px]">{sch.schedule_date}</p>
+                        <p className="text-[13px] text-slate-500 font-medium">{sch.start_time} - {sch.end_time}</p>
+                        <span className="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full mt-1 inline-block">{sch.slot_duration_minutes}m slots</span>
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteSchedule(sch.id)}
+                        className="p-2 text-rose-500 hover:bg-rose-100 rounded-lg transition-colors"
+                        title="Delete Schedule"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+          </div>
+
+          {/* FEE MANAGER */}
+          <div className="bg-white p-6 rounded-[20px] border border-slate-200 shadow-sm">
+            <h3 className="text-[18px] font-bold text-[#1f2937] mb-5">Consultation Fee Manager</h3>
+            
+            {!isEditing && (
+              <div className="bg-[#fffbeb] border border-[#fef08a] rounded-xl p-3 mb-6 flex items-center gap-2">
+                <AlertTriangle size={18} className="text-[#f59e0b]" />
+                <span className="text-[13px] font-medium text-[#b45309]">Create the service account above first, then set the fee.</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveFee}>
+              <div className="max-w-md">
+                <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Service Fee (Rs.)</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[14px]">Rs.</span>
+                  <input 
+                    type="number"
+                    value={currentService.price}
+                    onChange={e => setCurrentService({...currentService, price: e.target.value})}
+                    placeholder="1500"
+                    min="0"
+                    className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 bg-[#f8fafc] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[15px] font-bold text-slate-700 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center mt-10 pt-4 border-t border-slate-100">
+                <button type="button" onClick={closeForm} className="text-[14px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" className="px-6 py-2.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white rounded-xl text-[14px] font-semibold shadow-sm transition-colors">
+                  Save Fee & Complete Setup
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      )}
+
+      {/* SERVICES TABLE */}
+      <div className="overflow-x-auto bg-white rounded-[20px] border border-slate-100 shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm uppercase tracking-wider">
-              <th className="p-4 font-semibold">Service Name</th>
-              <th className="p-4 font-semibold text-right">Price (LKR)</th>
-              <th className="p-4 font-semibold">Status</th>
-              <th className="p-4 font-semibold text-right">Actions</th>
+            <tr className="bg-[#f8fafc] border-b border-slate-100 text-slate-500 text-[11px] uppercase tracking-wider">
+              <th className="p-4 font-bold">Service Details</th>
+              <th className="p-4 font-bold text-right">Fee (LKR)</th>
+              <th className="p-4 font-bold text-center">Status</th>
+              <th className="p-4 font-bold text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+          <tbody className="divide-y divide-slate-100">
             {services.map(service => (
-              <tr key={service.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                <td className="p-4 font-semibold text-slate-800 dark:text-white">{service.name}</td>
-                <td className="p-4 text-right font-medium text-slate-600 dark:text-slate-300">{parseFloat(service.price).toLocaleString()}</td>
+              <tr key={service.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="p-4">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                  <p className="font-bold text-slate-800 text-[14px]">{service.name}</p>
+                  <p className="text-[12px] text-slate-500 mt-0.5 max-w-md truncate">{service.description || 'No description'}</p>
+                  <p className="text-[10px] font-bold text-indigo-500 mt-1 uppercase tracking-wider flex items-center gap-1">
+                    <MapPin size={10}/> {service.location || 'Location Not Set'}
+                  </p>
+                </td>
+                <td className="p-4 text-right font-black text-emerald-600">
+                  {parseFloat(service.price).toLocaleString()}
+                </td>
+                <td className="p-4 text-center">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                     service.is_available 
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      ? 'bg-emerald-100 text-emerald-700' 
+                      : 'bg-red-100 text-red-700'
                   }`}>
-                    {service.is_available ? <CheckCircle size={14} /> : <XCircle size={14} />}
                     {service.is_available ? 'Available' : 'Unavailable'}
                   </span>
                 </td>
                 <td className="p-4 text-right space-x-2">
                   <button
-                    onClick={() => toggleAvailability(service.id, service.is_available)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                      service.is_available 
-                        ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40' 
-                        : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40'
-                    }`}
+                    onClick={() => handleEdit(service)}
+                    className="px-4 py-1.5 bg-[#f8fafc] text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
                   >
-                    {service.is_available ? 'Mark Unavailable' : 'Mark Available'}
+                    <Edit2 size={13} /> Edit Details
                   </button>
                   <button
-                    onClick={() => handleEdit(service)}
-                    className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-lg transition-colors inline-flex align-middle"
-                    title="Edit Service"
+                    onClick={() => toggleAvailability(service.id, service.is_available)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm border ${
+                      service.is_available 
+                        ? 'bg-white text-rose-600 border-rose-200 hover:bg-rose-50' 
+                        : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'
+                    }`}
                   >
-                    <Edit2 size={16} />
+                    {service.is_available ? 'Hide' : 'Show'}
                   </button>
                 </td>
               </tr>
             ))}
             {services.length === 0 && (
-              <tr><td colSpan="4" className="p-8 text-center text-slate-500">No services added yet.</td></tr>
+              <tr><td colSpan="4" className="p-12 text-center text-slate-500 font-medium">No medical services configured yet.</td></tr>
             )}
           </tbody>
         </table>

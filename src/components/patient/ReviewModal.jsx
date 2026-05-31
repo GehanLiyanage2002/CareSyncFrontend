@@ -96,11 +96,13 @@ const ReviewModal = ({ appointment, onClose, onReviewSubmitted }) => {
                 </button>
               ))}
             </div>
-            {(hovered || rating) > 0 && (
-              <span className="text-sm font-bold text-amber-500">
-                {starLabels[hovered || rating]}
+            <div className="min-h-[24px] flex items-center justify-center">
+              <span className={`text-sm font-bold text-amber-500 transition-opacity duration-200 ${
+                (hovered || rating) > 0 ? 'opacity-100' : 'opacity-0'
+              }`}>
+                {starLabels[hovered || rating] || 'Rate'}
               </span>
-            )}
+            </div>
           </div>
 
           {/* Comment */}

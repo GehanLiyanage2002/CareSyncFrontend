@@ -11,6 +11,12 @@ const AdminServices = () => {
   const [currentService, setCurrentService] = useState({ name: '', price: '', description: '', location: '' });
   const [showForm, setShowForm] = useState(false);
   
+  // Avatar state
+  const fileInputRef = React.useRef(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  
   // Schedule Manager State
   const [schedules, setSchedules] = useState([]);
   const [newSchedule, setNewSchedule] = useState({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
@@ -45,6 +51,32 @@ const AdminServices = () => {
   useEffect(() => {
     fetchServices();
   }, [token]);
+
+  const handleAvatarPick = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error('Image must be less than 10MB'); return; }
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadAvatar = async (serviceId) => {
+    if (!avatarFile) return;
+    const fd = new FormData();
+    fd.append('image', avatarFile);
+    setUploadingImage(true);
+    try {
+      await axios.put(`http://localhost:5000/api/services/${serviceId}/image`, fd, {
+        headers: { Authorization: token, 'Content-Type': 'multipart/form-data' }
+      });
+    } catch (err) {
+      toast.error('Service photo upload failed.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleSaveInfo = async (e) => {
     e.preventDefault();
@@ -83,6 +115,11 @@ const AdminServices = () => {
             isAvailable: res.data.service.is_available
           });
           setIsEditing(true);
+          
+          if (avatarFile) {
+            await uploadAvatar(res.data.service.id);
+            fetchServices();
+          }
         }
       }
     } catch (error) {
@@ -157,6 +194,8 @@ const AdminServices = () => {
       location: service.location || '',
       price: service.price || ''
     });
+    setAvatarPreview(`http://localhost:5000/api/services/${service.id}/image?t=${Date.now()}`);
+    setAvatarFile(null);
     setIsEditing(true);
     setShowForm(true);
     fetchSchedules(service.id);
@@ -168,6 +207,8 @@ const AdminServices = () => {
     setCurrentService({ name: '', price: '', description: '', location: '' });
     setSchedules([]);
     setNewSchedule({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
+    setAvatarFile(null);
+    setAvatarPreview(null);
   };
 
   const toggleAvailability = async (id, currentStatus) => {
@@ -230,10 +271,21 @@ const AdminServices = () => {
             <h3 className="text-[16px] font-bold text-[#1f2937] mb-6">Basic Information</h3>
             
             <div className="flex items-center gap-4 mb-8">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl font-black">
-                  {currentService.name ? currentService.name.charAt(0).toUpperCase() : 'S'}
+              <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-bold shadow-inner overflow-hidden border-2 border-white">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<span>' + (currentService.name ? currentService.name.charAt(0).toUpperCase() : 'S') + '</span>'; }} />
+                  ) : (
+                    <span>{currentService.name ? currentService.name.charAt(0).toUpperCase() : 'S'}</span>
+                  )}
                 </div>
+                <button type="button"
+                  className="absolute bottom-0 right-[-4px] p-1.5 bg-white rounded-full shadow-md border border-slate-200 text-slate-600 hover:text-blue-600 transition-colors"
+                  title="Upload Photo">
+                  {uploadingImage ? <svg className="animate-spin h-3.5 w-3.5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>}
+                </button>
+                <input type="file" ref={fileInputRef} onChange={handleAvatarPick}
+                  accept="image/png, image/jpeg" className="hidden" />
               </div>
               <div>
                 <h4 className="font-bold text-slate-800 text-[14px]">{currentService.name || 'New Service'}</h4>
@@ -433,64 +485,78 @@ const AdminServices = () => {
       )}
 
       {/* SERVICES TABLE */}
-      <div className="overflow-x-auto bg-white rounded-[20px] border border-slate-100 shadow-sm">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-[#f8fafc] border-b border-slate-100 text-slate-500 text-[11px] uppercase tracking-wider">
-              <th className="p-4 font-bold">Service Details</th>
-              <th className="p-4 font-bold text-right">Fee (LKR)</th>
-              <th className="p-4 font-bold text-center">Status</th>
-              <th className="p-4 font-bold text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {services.map(service => (
-              <tr key={service.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="p-4">
-                  <p className="font-bold text-slate-800 text-[14px]">{service.name}</p>
-                  <p className="text-[12px] text-slate-500 mt-0.5 max-w-md truncate">{service.description || 'No description'}</p>
-                  <p className="text-[10px] font-bold text-indigo-500 mt-1 uppercase tracking-wider flex items-center gap-1">
-                    <MapPin size={10}/> {service.location || 'Location Not Set'}
-                  </p>
-                </td>
-                <td className="p-4 text-right font-black text-emerald-600">
-                  {parseFloat(service.price).toLocaleString()}
-                </td>
-                <td className="p-4 text-center">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    service.is_available 
-                      ? 'bg-emerald-100 text-emerald-700' 
-                      : 'bg-red-100 text-red-700'
-                  }`}>
-                    {service.is_available ? 'Available' : 'Unavailable'}
-                  </span>
-                </td>
-                <td className="p-4 text-right space-x-2">
-                  <button
-                    onClick={() => handleEdit(service)}
-                    className="px-4 py-1.5 bg-[#f8fafc] text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
-                  >
-                    <Edit2 size={13} /> Edit Details
-                  </button>
-                  <button
-                    onClick={() => toggleAvailability(service.id, service.is_available)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm border ${
-                      service.is_available 
-                        ? 'bg-white text-rose-600 border-rose-200 hover:bg-rose-50' 
-                        : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'
-                    }`}
-                  >
-                    {service.is_available ? 'Hide' : 'Show'}
-                  </button>
-                </td>
+      {!showForm && (
+        <div className="overflow-x-auto bg-white rounded-[20px] border border-slate-100 shadow-sm">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-[#f8fafc] border-b border-slate-100 text-slate-500 text-[11px] uppercase tracking-wider">
+                <th className="p-4 font-bold">Service Details</th>
+                <th className="p-4 font-bold text-right">Fee (LKR)</th>
+                <th className="p-4 font-bold text-center">Status</th>
+                <th className="p-4 font-bold text-right">Actions</th>
               </tr>
-            ))}
-            {services.length === 0 && (
-              <tr><td colSpan="4" className="p-12 text-center text-slate-500 font-medium">No medical services configured yet.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {services.map(service => (
+                <tr key={service.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-[1rem] bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 font-black overflow-hidden shadow-sm flex-shrink-0">
+                        <img 
+                          src={`http://localhost:5000/api/services/${service.id}/image?t=${Date.now()}`} 
+                          alt={service.name} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = service.name.charAt(0).toUpperCase(); }} 
+                        />
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-800 text-[14px]">{service.name}</p>
+                        <p className="text-[12px] text-slate-500 mt-0.5 max-w-md truncate">{service.description || 'No description'}</p>
+                        <p className="text-[10px] font-bold text-indigo-500 mt-1 uppercase tracking-wider flex items-center gap-1">
+                          <MapPin size={10}/> {service.location || 'Location Not Set'}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4 text-right font-black text-emerald-600">
+                    {parseFloat(service.price).toLocaleString()}
+                  </td>
+                  <td className="p-4 text-center">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      service.is_available 
+                        ? 'bg-emerald-100 text-emerald-700' 
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {service.is_available ? 'Available' : 'Unavailable'}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right space-x-2">
+                    <button
+                      onClick={() => handleEdit(service)}
+                      className="px-4 py-1.5 bg-[#f8fafc] text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
+                    >
+                      <Edit2 size={13} /> Edit Details
+                    </button>
+                    <button
+                      onClick={() => toggleAvailability(service.id, service.is_available)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm border ${
+                        service.is_available 
+                          ? 'bg-white text-rose-600 border-rose-200 hover:bg-rose-50' 
+                          : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'
+                      }`}
+                    >
+                      {service.is_available ? 'Hide' : 'Show'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {services.length === 0 && (
+                <tr><td colSpan="4" className="p-12 text-center text-slate-500 font-medium">No medical services configured yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

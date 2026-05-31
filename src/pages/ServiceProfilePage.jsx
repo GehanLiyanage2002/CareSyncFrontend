@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Activity, MapPin, Check, Calendar, Star, DollarSign, Info } from 'lucide-react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import { useSelector } from 'react-redux';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -10,6 +11,7 @@ const socket = io('http://localhost:5000');
 const ServiceProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useSelector(state => state.auth);
   const initialService = location.state?.service;
 
   const [service, setService] = useState(initialService || {});

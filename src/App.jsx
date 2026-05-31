@@ -85,7 +85,7 @@ function App() {
           <Route 
             path="/book-service" 
             element={
-              <ProtectedRoute allowedRoles={['Patient']}>
+              <ProtectedRoute>
                 <BookServicePage />
               </ProtectedRoute>
             } 

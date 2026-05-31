@@ -574,22 +574,22 @@ const AdminDashboard = () => {
                         Add Doctor
                       </button>
                     </div>
-                  <div className="bg-[#f2fcf8]/50 p-6 rounded-3xl border border-emerald-50">
+                  <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
                       {filteredDoctors.map(doctor => (
                         <div 
                           key={doctor.id} 
                           onClick={() => setSelectedDoctor(doctor)}
-                          className="bg-[#eafff5] rounded-[1.2rem] p-5 shadow-sm border border-emerald-100/50 hover:shadow-md hover:border-emerald-300 hover:bg-[#e0fcf0] cursor-pointer transition-all flex flex-col gap-4 relative"
+                          className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
                         >
                           <div className="flex justify-between items-start">
                             <div className="flex gap-4">
-                              <div className="w-[70px] h-[70px] rounded-2xl bg-white flex items-center justify-center text-teal-700 font-bold overflow-hidden border border-emerald-100 flex-shrink-0 shadow-inner">
+                              <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
                                  <img src={`http://localhost:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
                               </div>
                               <div className="flex flex-col justify-center">
                                 <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                  <h4 className="font-extrabold text-[#1a5b4c] text-[17px]">Dr. {doctor.full_name}</h4>
+                                  <h4 className="font-extrabold text-indigo-900 text-[17px]">Dr. {doctor.full_name}</h4>
                                   <span className={`flex items-center gap-1.5 text-[11px] font-bold ${doctor.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
                                     <span className={`w-2 h-2 rounded-full ${doctor.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
                                     {doctor.is_available ? 'Available' : 'Unavailable'}
@@ -598,28 +598,28 @@ const AdminDashboard = () => {
                                     {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
                                   </span>
                                 </div>
-                                <p className="text-[#2c7a65] text-[13px] font-semibold">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+                                <p className="text-slate-500 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
                               </div>
                             </div>
                             
                             <div className="flex flex-col items-end gap-1">
-                              <div className="flex items-center gap-1 text-[#1a5b4c] font-bold text-sm mt-1">
-                                 <span className="text-emerald-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
+                              <div className="flex items-center gap-1 text-indigo-900 font-bold text-sm mt-1">
+                                 <span className="text-yellow-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center flex-wrap justify-between mt-1 ml-[86px]">
-                            <div className="flex items-center gap-2 text-teal-600/80 text-[13px] font-bold">
+                          <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
+                            <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
                               <span>Patients</span>
-                              <span className="flex items-center gap-1 text-[#1a5b4c]">
-                                <Users size={14} className="text-[#2c7a65]" /> {doctor.total_patients || 0}
+                              <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
+                                <Users size={14} className="text-indigo-400" /> {doctor.total_patients || 0}
                               </span>
                             </div>
                             
-                            <div className="flex items-center gap-2 text-[#1a5b4c] font-extrabold text-[14px]">
-                              <span className="text-[#1a5b4c] font-bold">Fees :</span>
-                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-emerald-100 shadow-sm text-[#2c7a65]">
+                            <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
+                              <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
+                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
                                 LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
                               </span>
                             </div>
@@ -627,7 +627,7 @@ const AdminDashboard = () => {
                         </div>
                       ))}
                       {filteredDoctors.length === 0 && (
-                        <div className="col-span-full p-10 text-center text-[#2c7a65] font-medium bg-white rounded-2xl border border-emerald-100 border-dashed">
+                        <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
                           No doctors match your search.
                         </div>
                       )}

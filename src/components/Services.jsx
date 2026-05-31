@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { useNavigate } from 'react-router-dom';
 import { 
   HeartPulse, Ear, Bone, Brain, Activity, 
   Stethoscope, Syringe, Eye, Pill, Microscope, 
@@ -10,6 +11,7 @@ import {
 const socket = io('http://localhost:5000');
 
 const Services = ({ isPage }) => {
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -38,14 +40,21 @@ const Services = ({ isPage }) => {
 
     fetchServices();
 
-    const handleServiceAdded = () => {
-      fetchServices();
-    };
+    const handleServiceAdded = () => fetchServices();
+    const handleServiceUpdated = () => fetchServices();
+    const handleServiceDeleted = () => fetchServices();
+    const handleServiceImageUpdated = () => fetchServices(); // Though images won't need to re-fetch if we use cache busting, but let's just refresh list for simplicity, or we can use an imgKey state.
 
     socket.on('serviceAdded', handleServiceAdded);
+    socket.on('serviceUpdated', handleServiceUpdated);
+    socket.on('serviceDeleted', handleServiceDeleted);
+    socket.on('serviceImageUpdated', handleServiceImageUpdated);
 
     return () => {
       socket.off('serviceAdded', handleServiceAdded);
+      socket.off('serviceUpdated', handleServiceUpdated);
+      socket.off('serviceDeleted', handleServiceDeleted);
+      socket.off('serviceImageUpdated', handleServiceImageUpdated);
     };
   }, []);
 
@@ -135,6 +144,7 @@ const Services = ({ isPage }) => {
                     
                     {/* View Details Button */}
                     <button 
+                      onClick={() => navigate('/service-profile', { state: { service } })}
                       className="w-full mt-auto py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
                     >
                       View Details

@@ -21,6 +21,8 @@ import ReceptionistDashboard from './pages/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EditProfilePage from './pages/EditProfilePage';
 import BookAppointmentPage from './pages/BookAppointmentPage';
+import ServiceProfilePage from './pages/ServiceProfilePage';
+import BookServicePage from './pages/BookServicePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -74,6 +76,17 @@ function App() {
             element={
               <ProtectedRoute>
                 <BookAppointmentPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route path="/service-profile" element={<ServiceProfilePage />} />
+          
+          <Route 
+            path="/book-service" 
+            element={
+              <ProtectedRoute allowedRoles={['Patient']}>
+                <BookServicePage />
               </ProtectedRoute>
             } 
           />

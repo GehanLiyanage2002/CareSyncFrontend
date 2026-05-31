@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { Plus, Edit2, CheckCircle, XCircle, Settings, Calendar, Clock, MapPin, AlignLeft, Trash2, AlertTriangle, PlusCircle } from 'lucide-react';
+import { io } from 'socket.io-client';
+import { Plus, Edit2, CheckCircle, XCircle, Settings, Calendar, Clock, MapPin, AlignLeft, Trash2, AlertTriangle, PlusCircle, Search, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminServices = () => {
@@ -20,6 +21,19 @@ const AdminServices = () => {
   // Schedule Manager State
   const [schedules, setSchedules] = useState([]);
   const [newSchedule, setNewSchedule] = useState({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
+
+  // Search and Filter State
+  const [serviceSearchQuery, setServiceSearchQuery] = useState('');
+  const [serviceStatusFilter, setServiceStatusFilter] = useState('All');
+
+  const filteredServices = services.filter(service => {
+    const matchesSearch = service.name.toLowerCase().includes(serviceSearchQuery.toLowerCase()) || 
+                          (service.description && service.description.toLowerCase().includes(serviceSearchQuery.toLowerCase()));
+    
+    if (serviceStatusFilter === 'Available') return matchesSearch && service.is_available;
+    if (serviceStatusFilter === 'Unavailable') return matchesSearch && !service.is_available;
+    return matchesSearch;
+  });
 
   const fetchServices = async () => {
     try {
@@ -50,6 +64,14 @@ const AdminServices = () => {
 
   useEffect(() => {
     fetchServices();
+    
+    const socket = io('http://localhost:5000', { reconnection: true });
+    
+    socket.on('serviceAdded', fetchServices);
+    socket.on('serviceUpdated', fetchServices);
+    socket.on('serviceImageUpdated', fetchServices);
+    
+    return () => socket.disconnect();
   }, [token]);
 
   const handleAvatarPick = (e) => {
@@ -486,56 +508,118 @@ const AdminServices = () => {
 
       {/* SERVICES TABLE */}
       {!showForm && (
-        <div className="overflow-x-auto bg-white rounded-[20px] border border-slate-100 shadow-sm">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#f8fafc] border-b border-slate-100 text-slate-500 text-[11px] uppercase tracking-wider">
-                <th className="p-4 font-bold">Service Details</th>
-                <th className="p-4 font-bold text-right">Fee (LKR)</th>
-                <th className="p-4 font-bold text-center">Status</th>
-                <th className="p-4 font-bold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {services.map(service => (
-                <tr key={service.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-[1rem] bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 font-black overflow-hidden shadow-sm flex-shrink-0">
-                        <img 
-                          src={`http://localhost:5000/api/services/${service.id}/image?t=${Date.now()}`} 
-                          alt={service.name} 
-                          className="w-full h-full object-cover" 
-                          onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = service.name.charAt(0).toUpperCase(); }} 
-                        />
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-800 text-[14px]">{service.name}</p>
-                        <p className="text-[12px] text-slate-500 mt-0.5 max-w-md truncate">{service.description || 'No description'}</p>
-                        <p className="text-[10px] font-bold text-indigo-500 mt-1 uppercase tracking-wider flex items-center gap-1">
-                          <MapPin size={10}/> {service.location || 'Location Not Set'}
-                        </p>
-                      </div>
+        <div className="mt-6">
+          <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h3 className="text-[15px] font-bold text-slate-700 mb-2">
+                Search services
+                {serviceSearchQuery && (
+                  <span className="ml-2 text-xs font-normal text-blue-500">
+                    — {filteredServices.length} result{filteredServices.length !== 1 ? 's' : ''} found
+                  </span>
+                )}
+              </h3>
+              <div className="flex items-center gap-3">
+                <div className="relative w-full md:w-[380px]">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Search name / description"
+                    value={serviceSearchQuery}
+                    onChange={(e) => setServiceSearchQuery(e.target.value)}
+                    className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white"
+                  />
+                  {serviceSearchQuery && (
+                    <button
+                      onClick={() => setServiceSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+              <button 
+                onClick={() => setServiceStatusFilter('All')}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                  serviceStatusFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                All
+              </button>
+              <button 
+                onClick={() => setServiceStatusFilter('Available')}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                  serviceStatusFilter === 'Available' 
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm' 
+                    : 'border-transparent text-slate-500 hover:bg-slate-50'
+                }`}
+              >
+                Available
+              </button>
+              <button 
+                onClick={() => setServiceStatusFilter('Unavailable')}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                  serviceStatusFilter === 'Unavailable' 
+                    ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-sm' 
+                    : 'border-transparent text-slate-500 hover:bg-slate-50'
+                }`}
+              >
+                Unavailable
+              </button>
+            </div>
+          </div>
+
+        <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+            {filteredServices.map(service => (
+              <div 
+                key={service.id} 
+                className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col gap-4 relative"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex gap-4">
+                    <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
+                      <img 
+                        src={`http://localhost:5000/api/services/${service.id}/image?t=${Date.now()}`} 
+                        alt={service.name} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = service.name.charAt(0).toUpperCase(); }} 
+                      />
                     </div>
-                  </td>
-                  <td className="p-4 text-right font-black text-emerald-600">
-                    {parseFloat(service.price).toLocaleString()}
-                  </td>
-                  <td className="p-4 text-center">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      service.is_available 
-                        ? 'bg-emerald-100 text-emerald-700' 
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {service.is_available ? 'Available' : 'Unavailable'}
+                    <div className="flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-1 flex-wrap">
+                        <h4 className="font-extrabold text-indigo-900 text-[17px]">{service.name}</h4>
+                        <span className={`flex items-center gap-1.5 text-[11px] font-bold ${service.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
+                          <span className={`w-2 h-2 rounded-full ${service.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                          {service.is_available ? 'Available' : 'Unavailable'}
+                        </span>
+                      </div>
+                      <p className="text-slate-500 text-[12px] font-medium max-w-[200px] truncate">{service.description || 'No description provided'}</p>
+                      <p className="text-[10px] font-bold text-indigo-500 mt-1 uppercase tracking-wider flex items-center gap-1">
+                        <MapPin size={10}/> {service.location || 'Location Not Set'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
+                    <span className="text-slate-600 font-bold text-[13px]">Fee:</span>
+                    <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+                      LKR {service.price ? parseFloat(service.price).toLocaleString() : '0'}
                     </span>
-                  </td>
-                  <td className="p-4 text-right space-x-2">
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEdit(service)}
-                      className="px-4 py-1.5 bg-[#f8fafc] text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
+                      className="px-3 py-1.5 bg-white text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
                     >
-                      <Edit2 size={13} /> Edit Details
+                      <Edit2 size={13} /> Edit
                     </button>
                     <button
                       onClick={() => toggleAvailability(service.id, service.is_available)}
@@ -547,14 +631,17 @@ const AdminServices = () => {
                     >
                       {service.is_available ? 'Hide' : 'Show'}
                     </button>
-                  </td>
-                </tr>
-              ))}
-              {services.length === 0 && (
-                <tr><td colSpan="4" className="p-12 text-center text-slate-500 font-medium">No medical services configured yet.</td></tr>
-              )}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {filteredServices.length === 0 && (
+              <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                No medical services match your search.
+              </div>
+            )}
+          </div>
+        </div>
         </div>
       )}
     </div>

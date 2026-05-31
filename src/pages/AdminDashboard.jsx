@@ -7,7 +7,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-f
 import { 
   LayoutDashboard, Users, UserRound, Calendar, DollarSign, 
   LogOut, Activity, TrendingUp, CheckCircle, XCircle, Stethoscope,
-  Search, X, Filter
+  Search, X, Filter, Trash2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
@@ -33,6 +33,8 @@ const AdminDashboard = () => {
   const [customDates, setCustomDates] = useState({ start: '', end: '' });
   const [socketConnected, setSocketConnected] = useState(false);
   const [showAddDoctor, setShowAddDoctor] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
 
   const { token, user } = useSelector(state => state.auth);
   const navigate = useNavigate();
@@ -166,14 +168,18 @@ const AdminDashboard = () => {
 
     socket.on('appointmentStatusChanged', refreshData);
     socket.on('slotBooked', refreshData);
-    socket.on('doctorProfileUpdated', refreshData);
     
-    // Listen for doctor availability toggle
-    socket.on('doctorAvailabilityChanged', () => {
+    // Listen for doctor updates to refresh the doctors list
+    const refreshDoctors = () => {
       if (activeTab === 'Doctors') {
         fetchDoctors();
       }
-    });
+      refreshData();
+    };
+
+    socket.on('doctorProfileUpdated', refreshDoctors);
+    socket.on('doctorFeeChanged', refreshDoctors);
+    socket.on('doctorAvailabilityChanged', refreshDoctors);
     
     return () => socket.disconnect();
   }, [activeTab, dateFilter, customDates]);
@@ -191,8 +197,29 @@ const AdminDashboard = () => {
       }, config);
       toast.success(res.data.message);
       fetchDoctors(); // Refresh list
+      if (selectedDoctor && selectedDoctor.id === id) {
+         setSelectedDoctor({ ...selectedDoctor, is_approved: !currentStatus });
+      }
     } catch (err) {
       toast.error('Failed to update doctor status');
+      console.error(err);
+    }
+  };
+
+  const handleDeleteDoctor = (doctor) => {
+    setDoctorToDelete(doctor);
+  };
+
+  const confirmDeleteDoctor = async () => {
+    if (!doctorToDelete) return;
+    try {
+      const res = await axios.delete(`http://localhost:5000/api/admin/doctors/${doctorToDelete.id}`, config);
+      toast.success(res.data.message);
+      setDoctorToDelete(null);
+      setSelectedDoctor(null);
+      fetchDoctors();
+    } catch (err) {
+      toast.error('Failed to delete doctor');
       console.error(err);
     }
   };
@@ -539,74 +566,64 @@ const AdminDashboard = () => {
                         Add Doctor
                       </button>
                     </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <colgroup>
-                        <col style={{width: '22%'}} />
-                        <col style={{width: '24%'}} />
-                        <col style={{width: '22%'}} />
-                        <col style={{width: '16%'}} />
-                        <col style={{width: '16%'}} />
-                      </colgroup>
-                      <thead>
-                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                          <th className="p-4 px-6 font-bold">Doctor Name</th>
-                          <th className="p-4 font-bold">Email</th>
-                          <th className="p-4 font-bold">Specialization</th>
-                          <th className="p-4 font-bold">Status</th>
-                          <th className="p-4 px-6 font-bold text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-50">
-                        {filteredDoctors.map(doctor => (
-                          <tr key={doctor.id} className="hover:bg-blue-50/30 transition-colors">
-                            <td className="p-4 px-6">
-                              <p className="font-bold text-slate-700">{doctor.full_name}</p>
-                              <p className="text-xs text-slate-400 font-medium">{doctor.mobile_number || 'No phone'}</p>
-                            </td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">{doctor.email}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">
-                              <p>{doctor.specialization}</p>
-                              <p className="text-xs text-slate-400">{doctor.experience} Exp.</p>
-                            </td>
-                            <td className="p-4">
-                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
-                                doctor.is_available 
-                                  ? 'bg-emerald-100 text-emerald-700' 
-                                  : 'bg-rose-100 text-rose-700'
-                              }`}>
-                                {doctor.is_available ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                                {doctor.is_available ? 'Available' : 'Unavailable'}
-                              </span>
-                            </td>
-                            <td className="p-4 px-6">
-                              <div className="flex items-center justify-end gap-3">
-                                <button 
-                                  onClick={() => handleApproveDoctor(doctor.id, doctor.is_approved)}
-                                  className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 flex-shrink-0 ${
-                                    doctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'
-                                  }`}
-                                >
-                                  <div 
-                                    className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${
-                                      doctor.is_approved ? 'translate-x-5' : 'translate-x-0'
-                                    }`}
-                                  ></div>
-                                </button>
-                                <span className={`text-[12px] font-bold ${
-                                  doctor.is_approved ? 'text-blue-600' : 'text-rose-500'
-                                }`}>
-                                  {doctor.is_approved ? 'Approved' : 'Suspended'}
-                                </span>
+                  <div className="bg-[#f2fcf8]/50 p-6 rounded-3xl border border-emerald-50">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+                      {filteredDoctors.map(doctor => (
+                        <div 
+                          key={doctor.id} 
+                          onClick={() => setSelectedDoctor(doctor)}
+                          className="bg-[#eafff5] rounded-[1.2rem] p-5 shadow-sm border border-emerald-100/50 hover:shadow-md hover:border-emerald-300 hover:bg-[#e0fcf0] cursor-pointer transition-all flex flex-col gap-4 relative"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex gap-4">
+                              <div className="w-[70px] h-[70px] rounded-2xl bg-white flex items-center justify-center text-teal-700 font-bold overflow-hidden border border-emerald-100 flex-shrink-0 shadow-inner">
+                                 <img src={`http://localhost:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
                               </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {filteredDoctors.length === 0 && (
-                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No doctors match your search.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
+                              <div className="flex flex-col justify-center">
+                                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                  <h4 className="font-extrabold text-[#1a5b4c] text-[17px]">Dr. {doctor.full_name}</h4>
+                                  <span className={`flex items-center gap-1.5 text-[11px] font-bold ${doctor.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                    <span className={`w-2 h-2 rounded-full ${doctor.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                                    {doctor.is_available ? 'Available' : 'Unavailable'}
+                                  </span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${doctor.is_approved ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}`}>
+                                    {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
+                                  </span>
+                                </div>
+                                <p className="text-[#2c7a65] text-[13px] font-semibold">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1 text-[#1a5b4c] font-bold text-sm mt-1">
+                                 <span className="text-emerald-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center flex-wrap justify-between mt-1 ml-[86px]">
+                            <div className="flex items-center gap-2 text-teal-600/80 text-[13px] font-bold">
+                              <span>Patients</span>
+                              <span className="flex items-center gap-1 text-[#1a5b4c]">
+                                <Users size={14} className="text-[#2c7a65]" /> {doctor.total_patients || 0}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-[#1a5b4c] font-extrabold text-[14px]">
+                              <span className="text-[#1a5b4c] font-bold">Fees :</span>
+                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-emerald-100 shadow-sm text-[#2c7a65]">
+                                LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {filteredDoctors.length === 0 && (
+                        <div className="col-span-full p-10 text-center text-[#2c7a65] font-medium bg-white rounded-2xl border border-emerald-100 border-dashed">
+                          No doctors match your search.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 </>
@@ -756,6 +773,106 @@ const AdminDashboard = () => {
           onClose={() => setShowAddDoctor(false)}
           onSuccess={() => { fetchDoctors(); setShowAddDoctor(false); }}
         />
+      )}
+
+      {/* Selected Doctor Details Modal */}
+      {selectedDoctor && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative h-32 bg-gradient-to-r from-emerald-500 to-teal-600">
+              <button 
+                onClick={() => setSelectedDoctor(null)}
+                className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="px-8 pb-8">
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
+                  <img src={`http://localhost:5000/api/users/profile-image/${selectedDoctor.id}?t=${Date.now()}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
+                </div>
+                
+                {/* Toggle Switch */}
+                <div className="flex flex-col items-end gap-2 mt-4">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Account Status</span>
+                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleApproveDoctor(selectedDoctor.id, selectedDoctor.is_approved)}>
+                    <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${selectedDoctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'}`}>
+                      <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedDoctor.is_approved ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    </div>
+                    <span className={`text-sm font-black uppercase tracking-wider ${selectedDoctor.is_approved ? 'text-blue-600' : 'text-rose-500'}`}>
+                      {selectedDoctor.is_approved ? 'Approved' : 'Suspended'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-black text-slate-800">Dr. {selectedDoctor.full_name}</h3>
+                <p className="text-teal-600 font-bold text-sm mt-1">{selectedDoctor.specialization}</p>
+                
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Experience</p>
+                    <p className="text-slate-800 font-semibold">{parseInt(selectedDoctor.experience) || 0} Years</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Consultation Fee</p>
+                    <p className="text-slate-800 font-semibold">LKR {selectedDoctor.consultation_fee ? parseFloat(selectedDoctor.consultation_fee).toLocaleString() : '0'}</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Email</p>
+                    <p className="text-slate-800 font-semibold text-sm truncate" title={selectedDoctor.email}>{selectedDoctor.email}</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Phone</p>
+                    <p className="text-slate-800 font-semibold text-sm">{selectedDoctor.mobile_number || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+                <button 
+                  onClick={() => handleDeleteDoctor(selectedDoctor)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold transition-colors"
+                >
+                  <Trash2 size={18} />
+                  Remove Doctor
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {doctorToDelete && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={32} />
+            </div>
+            <h3 className="text-xl font-black text-slate-800 mb-2">Remove Doctor?</h3>
+            <p className="text-slate-500 font-medium text-sm mb-6">
+              Are you sure you want to permanently delete <strong>Dr. {doctorToDelete.full_name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setDoctorToDelete(null)}
+                className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteDoctor}
+                className="flex-1 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-colors shadow-sm shadow-rose-200"
+              >
+                Yes, Remove
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

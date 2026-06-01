@@ -2,6 +2,7 @@ import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Services from '../components/Services';
+import Testimonials from '../components/Testimonials';
 
 const ServicesPage = () => {
   return (
@@ -13,6 +14,7 @@ const ServicesPage = () => {
         <Services isPage={true} />
       </section>
 
+      <Testimonials />
       <Footer />
     </div>
   );

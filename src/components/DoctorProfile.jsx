@@ -236,7 +236,8 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
         reviews={reviews} 
         reviewStats={reviewStats} 
         loadingReviews={loadingReviews} 
-        imgKey={imgKey} 
+        imgKey={imgKey}
+        doctorName={doctor.user?.full_name || doctor.full_name || 'THIS DOCTOR'}
       />
 
       

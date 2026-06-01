@@ -10,7 +10,7 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
-const DoctorKanbanBoard = () => {
+const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   const { token, user } = useSelector((state) => state.auth);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [data, setData] = useState({
@@ -41,7 +41,7 @@ const DoctorKanbanBoard = () => {
         // Fetch both profile and appointments
         const [profileRes, appointmentsRes] = await Promise.all([
           axios.get('http://localhost:5000/api/doctor/profile', { headers: { Authorization: token } }),
-          axios.get('http://localhost:5000/api/doctor/appointments', { headers: { Authorization: token } })
+          axios.get(`http://localhost:5000/api/doctor/appointments?filter=${dateFilter}`, { headers: { Authorization: token } })
         ]);
 
         if (profileRes.data.success) {
@@ -101,7 +101,7 @@ const DoctorKanbanBoard = () => {
     };
     
     if (token) fetchData();
-  }, [token, refreshTrigger]);
+  }, [token, refreshTrigger, dateFilter]);
 
     useEffect(() => {
       const handleSlotBooked = (bookingData) => {

@@ -218,9 +218,7 @@ const AdminDashboard = () => {
 
 
   const handleLogout = () => {
-    // Navigate to landing page first, then dispatch logout
-    // This prevents ProtectedRoute from intercepting the logout and redirecting to /login
-    navigate('/', { replace: true });
+    navigate('/login', { state: { role: 'Admin' }, replace: true });
     setTimeout(() => {
       dispatch(logout());
     }, 10);

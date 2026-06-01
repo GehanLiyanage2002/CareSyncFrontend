@@ -87,11 +87,17 @@ const BookServicePage = () => {
     if (!schedule) return [];
     const slots = [];
     let [currHour, currMin] = schedule.start_time.split(':').map(Number);
-    const [endHour, endMin] = schedule.end_time.split(':').map(Number);
-    const duration = schedule.slot_duration_minutes;
+    let [endHour, endMin] = schedule.end_time.split(':').map(Number);
+    const duration = Number(schedule.slot_duration_minutes);
+
+    // Handle overnight shifts where end time is on the next day
+    if (endHour < currHour || (endHour === currHour && endMin < currMin)) {
+      endHour += 24;
+    }
 
     while (currHour < endHour || (currHour === endHour && currMin < endMin)) {
-      const hh = currHour.toString().padStart(2, '0');
+      const displayHour = currHour % 24;
+      const hh = displayHour.toString().padStart(2, '0');
       const mm = currMin.toString().padStart(2, '0');
       slots.push(`${hh}:${mm}`);
       

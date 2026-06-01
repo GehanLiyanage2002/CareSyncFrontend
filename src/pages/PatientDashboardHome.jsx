@@ -256,7 +256,11 @@ const PatientDashboardHome = () => {
                     </div>
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
-                    {app.status === 'pending' && (
+                    {app.status === 'pending' && (() => {
+                      const createdAt = new Date(app.created_at);
+                      const minutesSinceBooking = (Date.now() - createdAt.getTime()) / (1000 * 60);
+                      return minutesSinceBooking <= 60;
+                    })() && (
                       <button onClick={() => openRescheduleModal(app)} className="flex-1 md:flex-none px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded-xl transition-colors">Reschedule</button>
                     )}
                     {(app.status === 'pending' || app.status === 'confirmed') && (

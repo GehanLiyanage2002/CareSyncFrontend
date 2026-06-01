@@ -35,6 +35,9 @@ const AdminDashboard = () => {
   const [showAddDoctor, setShowAddDoctor] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
+  const [serviceBookings, setServiceBookings] = useState([]);
+  const [appointmentFilter, setAppointmentFilter] = useState('All');
 
   const { token, user } = useSelector(state => state.auth);
   const navigate = useNavigate();
@@ -48,6 +51,22 @@ const AdminDashboard = () => {
 
   const config = {
     headers: { Authorization: token }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!appointmentToCancel) return;
+    try {
+      const res = await axios.put(`http://localhost:5000/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
+      if (res.data.success) {
+        toast.success(res.data.message);
+        setAppointments(prev => prev.map(appt => appt.id === appointmentToCancel ? { ...appt, status: 'Cancelled' } : appt));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to cancel appointment');
+    } finally {
+      setAppointmentToCancel(null);
+    }
   };
 
   const getFilterDates = () => {
@@ -99,6 +118,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchServiceBookings = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/services/bookings', config);
+      setServiceBookings(res.data.bookings);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchPatients = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/admin/patients', config);
@@ -141,7 +169,10 @@ const AdminDashboard = () => {
       }
       if (activeTab === 'Doctors') await fetchDoctors();
       if (activeTab === 'Patients') await fetchPatients();
-      if (activeTab === 'Appointments') await fetchAppointments();
+      if (activeTab === 'Appointments') {
+        await fetchAppointments();
+        await fetchServiceBookings();
+      }
       if (activeTab === 'Earnings') await fetchEarnings();
       setLoading(false);
     };
@@ -154,7 +185,7 @@ const AdminDashboard = () => {
       setSocketConnected(true);
       // Refresh data on reconnect (e.g. after server restart)
       if (activeTab === 'Overview') { fetchStats(); fetchEarnings(); }
-      if (activeTab === 'Appointments') fetchAppointments();
+      if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
     });
     socket.on('disconnect', () => setSocketConnected(false));
     
@@ -163,7 +194,7 @@ const AdminDashboard = () => {
         fetchStats();
         fetchEarnings();
       }
-      if (activeTab === 'Appointments') fetchAppointments();
+      if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
     };
 
     socket.on('appointmentStatusChanged', refreshData);
@@ -683,47 +714,166 @@ const AdminDashboard = () => {
 
               {/* APPOINTMENTS TAB */}
               {activeTab === 'Appointments' && (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
-                  <div className="p-5 border-b border-blue-50">
-                    <h3 className="text-xl font-extrabold text-slate-800">All Appointments</h3>
+                <div className="bg-[#f8eaff]/30 rounded-3xl p-4 sm:p-6 border border-indigo-50 mt-2">
+                  <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-2xl font-extrabold text-indigo-900">Clinic Appointments</h3>
+                      <p className="text-indigo-600 font-medium text-sm mt-1">Manage all scheduled appointments and bookings</p>
+                    </div>
+                    <div className="bg-white rounded-full p-1 border border-indigo-100 shadow-sm flex inline-flex">
+                      {['All', 'Doctor', 'Services'].map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => setAppointmentFilter(filter)}
+                          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                            appointmentFilter === filter 
+                            ? 'bg-[#1e293b] text-white shadow-md' 
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                          <th className="p-4 px-6 font-bold">Patient</th>
-                          <th className="p-4 font-bold">Doctor</th>
-                          <th className="p-4 font-bold">Date & Time</th>
-                          <th className="p-4 font-bold">Status</th>
-                          <th className="p-4 px-6 font-bold">Reason</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-50">
-                        {appointments.map(appt => (
-                          <tr key={appt.id} className="hover:bg-blue-50/30 transition-colors">
-                            <td className="p-4 px-6 font-bold text-slate-700">{appt.patient_name}</td>
-                            <td className="p-4 font-bold text-slate-700">{appt.doctor_name}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">
-                              {new Date(appt.date).toLocaleDateString()} at {appt.time}
-                            </td>
-                            <td className="p-4">
-                              <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                appt.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
-                                appt.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' :
-                                'bg-amber-100 text-amber-700'
-                              }`}>
-                                {appt.status}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {(appointmentFilter === 'All' || appointmentFilter === 'Doctor') && appointments.map(appt => (
+                      <div key={appt.id} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                        <div className="mb-3">
+                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{appt.patient_name}</h4>
+                          <p className="text-indigo-600 font-bold text-[12px]">
+                            {appt.age ? `${appt.age} yrs : ` : ''}{appt.gender ? `${appt.gender} : ` : ''}{appt.mobile_number || 'No Mobile'}
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-50">
+                          <p className="text-slate-600 font-bold text-[13px]">
+                            Dr. {appt.doctor_name}
+                          </p>
+                          <p className="text-indigo-500 font-medium text-[12px] mt-0.5">
+                            {appt.doctor_specialization || 'Not Specified'}
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 flex items-center justify-between">
+                          <p className="text-slate-500 font-bold text-[13px]">Fees:</p>
+                          <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
+                            <span className="text-indigo-600 text-[10px] mr-0.5">LKR</span> 
+                            {appt.fees ? parseFloat(appt.fees).toLocaleString() : '0'}
+                          </p>
+                        </div>
+
+                        <div className="mt-auto flex flex-col gap-4">
+                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                            <span className="flex items-center gap-1.5 text-indigo-600 font-bold text-[11px] bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
+                              <Calendar size={13} className="text-indigo-500" />
+                              {new Date(appt.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {appt.time}
+                            </span>
+                            
+                            {appt.status === 'Pending' && (
+                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                PENDING
                               </span>
-                            </td>
-                            <td className="p-4 px-6 text-sm text-slate-500 font-medium max-w-xs truncate">{appt.reason || 'N/A'}</td>
-                          </tr>
-                        ))}
-                        {appointments.length === 0 && (
-                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No appointments scheduled yet.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            {appt.status === 'Completed' ? (
+                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                COMPLETED
+                              </span>
+                            ) : appt.status === 'Cancelled' ? (
+                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                CANCELED
+                              </span>
+                            ) : (
+                              <span className="bg-transparent text-transparent px-4 py-1.5">
+                                {/* Placeholder */}
+                              </span>
+                            )}
+                            
+                            {appt.status === 'Cancelled' ? (
+                              <span className="text-rose-400 font-bold text-[11px]">Admin Cancelled</span>
+                            ) : appt.status === 'Pending' ? (
+                              <button 
+                                onClick={() => setAppointmentToCancel(appt.id)}
+                                className="text-rose-500 font-bold text-[11px] hover:text-white hover:bg-rose-500 px-3 py-1.5 rounded-full transition-colors border border-rose-100 hover:border-rose-500"
+                              >
+                                Admin Cancel
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {(appointmentFilter === 'All' || appointmentFilter === 'Services') && serviceBookings.map(booking => (
+                      <div key={`service-${booking.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                        <div className="mb-3">
+                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{booking.patientName}</h4>
+                          <p className="text-indigo-600 font-bold text-[12px]">
+                            Medical Service Booking
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
+                          <p className="text-slate-600 font-bold text-[13px]">
+                            {booking.serviceName}
+                          </p>
+                          <p className="text-blue-500 font-medium text-[12px] mt-0.5">
+                            Lab & Diagnostic
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 flex items-center justify-between">
+                          <p className="text-slate-500 font-bold text-[13px]">Amount:</p>
+                          <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
+                            <span className="text-blue-600 text-[10px] mr-0.5">LKR</span> 
+                            {booking.price ? parseFloat(booking.price).toLocaleString() : '0'}
+                          </p>
+                        </div>
+
+                        <div className="mt-auto flex flex-col gap-4">
+                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                            <span className="flex items-center gap-1.5 text-blue-600 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100">
+                              <Calendar size={13} className="text-blue-500" />
+                              {new Date(booking.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {booking.time}
+                            </span>
+                            
+                            {booking.status === 'Pending' && (
+                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                PENDING
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            {booking.status === 'Completed' || booking.status === 'Confirmed' ? (
+                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                {booking.status.toUpperCase()}
+                              </span>
+                            ) : booking.status === 'Cancelled' ? (
+                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                CANCELED
+                              </span>
+                            ) : (
+                              <span className="bg-transparent text-transparent px-4 py-1.5">
+                                {/* Placeholder */}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                  {((appointmentFilter === 'All' && appointments.length === 0 && serviceBookings.length === 0) ||
+                    (appointmentFilter === 'Doctor' && appointments.length === 0) ||
+                    (appointmentFilter === 'Services' && serviceBookings.length === 0)) && (
+                    <div className="p-10 text-center bg-white rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm">
+                      <p className="text-indigo-600 font-medium">No appointments found for this filter.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -851,32 +1001,62 @@ const AdminDashboard = () => {
 
       {/* Custom Confirmation Modal */}
       {doctorToDelete && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trash2 size={32} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-100 mb-4 mx-auto">
+              <Trash2 className="text-rose-600" size={24} />
             </div>
-            <h3 className="text-xl font-black text-slate-800 mb-2">Remove Doctor?</h3>
-            <p className="text-slate-500 font-medium text-sm mb-6">
-              Are you sure you want to permanently delete <strong>Dr. {doctorToDelete.full_name}</strong>? This action cannot be undone.
+            <h3 className="text-lg font-bold text-center text-slate-800 mb-2">Delete Doctor?</h3>
+            <p className="text-center text-slate-500 text-sm mb-6">
+              Are you sure you want to delete <span className="font-bold text-slate-700">Dr. {doctorToDelete.full_name}</span>? This action cannot be undone.
             </p>
-            <div className="flex gap-3">
-              <button 
+            <div className="flex justify-between gap-3">
+              <button
                 onClick={() => setDoctorToDelete(null)}
-                className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+                className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors"
               >
                 Cancel
               </button>
-              <button 
-                onClick={confirmDeleteDoctor}
-                className="flex-1 px-4 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-colors shadow-sm shadow-rose-200"
+              <button
+                onClick={() => confirmDeleteDoctor(doctorToDelete.id)}
+                className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg font-medium hover:bg-rose-700 shadow-md shadow-rose-200 transition-colors"
               >
-                Yes, Remove
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Appointment Cancellation Confirmation Modal */}
+      {appointmentToCancel && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-rose-100 transform transition-all scale-100 opacity-100">
+            <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <XCircle className="w-8 h-8 text-rose-500" />
+            </div>
+            <h3 className="text-2xl font-extrabold text-slate-800 text-center mb-2">Cancel Appointment</h3>
+            <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">
+              Are you absolutely sure you want to cancel this appointment? This action cannot be undone.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={() => setAppointmentToCancel(null)}
+                className="px-6 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex-1"
+              >
+                No, Keep it
+              </button>
+              <button 
+                onClick={handleCancelAppointment}
+                className="px-6 py-2.5 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex-1"
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

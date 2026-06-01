@@ -7,6 +7,9 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Header from '../components/Header';
 import { Video, Calendar, Clock, X, ChevronUp, ChevronDown } from 'lucide-react';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const CalendarIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
@@ -29,6 +32,7 @@ const PatientDashboardHome = () => {
   const navigate = useNavigate();
   const [upcomingTelemedicine, setUpcomingTelemedicine] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [newDate, setNewDate] = useState('');
@@ -103,7 +107,21 @@ const PatientDashboardHome = () => {
       }
     };
     if (token) fetchAppointments();
-  }, [token]);
+  }, [token, refreshTrigger]);
+
+  useEffect(() => {
+    const handleStatusChanged = (data) => {
+      if (data.patient_id === user?.id) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+    
+    socket.on('appointmentStatusChanged', handleStatusChanged);
+    
+    return () => {
+      socket.off('appointmentStatusChanged', handleStatusChanged);
+    };
+  }, [user]);
 
   const handleCancel = async (id) => {
     if (!window.confirm('Are you sure you want to cancel this appointment? Cancellations are only allowed up to 1 hour before.')) return;
@@ -242,9 +260,9 @@ const PatientDashboardHome = () => {
             <Calendar className="w-6 h-6 text-blue-600" />
             Your Appointments
           </h3>
-          {appointments.filter(app => app.status !== 'completed').length > 0 ? (
+          {appointments.filter(app => app.status === 'pending').length > 0 ? (
             <div className="space-y-4">
-              {appointments.filter(app => app.status !== 'completed').map(app => (
+              {appointments.filter(app => app.status === 'pending').map(app => (
                 <div key={app.id} className="flex flex-col md:flex-row items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow">
                   <div className="flex-1 mb-4 md:mb-0">
                     <p className="font-bold text-lg text-slate-800">Dr. {app.doctor_name}</p>

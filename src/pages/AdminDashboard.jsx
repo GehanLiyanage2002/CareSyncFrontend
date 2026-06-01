@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
 import AdminServices from '../components/admin/AdminServices';
 import AddDoctorModal from '../components/admin/AddDoctorModal';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('Overview');
@@ -217,8 +218,12 @@ const AdminDashboard = () => {
 
 
   const handleLogout = () => {
-    dispatch(logout());
-    navigate('/');
+    // Navigate to landing page first, then dispatch logout
+    // This prevents ProtectedRoute from intercepting the logout and redirecting to /login
+    navigate('/', { replace: true });
+    setTimeout(() => {
+      dispatch(logout());
+    }, 10);
   };
 
   const handleApproveDoctor = async (id, currentStatus) => {
@@ -343,7 +348,7 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               
               {/* OVERVIEW TAB */}
-              {activeTab === 'Overview' && stats && (
+              {activeTab === 'Overview' && (
                 <>
                   <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
                     <div>
@@ -380,7 +385,7 @@ const AdminDashboard = () => {
                     {[
                       { 
                         title: 'Total Doctors', 
-                        value: stats.totalDoctors, 
+                        value: stats?.totalDoctors || 0, 
                         icon: <UserRound size={24} />, 
                         iconColor: 'bg-teal-100 text-teal-600', 
                         tagColor: 'bg-teal-50 text-teal-700 border-teal-100', 
@@ -388,7 +393,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Registered Users', 
-                        value: stats.totalPatients, 
+                        value: stats?.totalPatients || 0, 
                         icon: <Users size={24} />, 
                         iconColor: 'bg-purple-100 text-purple-600', 
                         tagColor: 'bg-purple-50 text-purple-700 border-purple-100', 
@@ -396,7 +401,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Total Appointments', 
-                        value: stats.totalAppointments, 
+                        value: stats?.totalAppointments || 0, 
                         icon: <Calendar size={24} />, 
                         iconColor: 'bg-amber-100 text-amber-600', 
                         tagColor: 'bg-amber-50 text-amber-700 border-amber-100', 
@@ -404,7 +409,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Completed Consultations', 
-                        value: stats.totalCompleted || 0, 
+                        value: stats?.totalCompleted || 0, 
                         icon: <CheckCircle size={24} />, 
                         iconColor: 'bg-blue-100 text-blue-600', 
                         tagColor: 'bg-blue-50 text-blue-700 border-blue-100', 
@@ -412,7 +417,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Canceled Appointments', 
-                        value: stats.totalCancelled || 0, 
+                        value: stats?.totalCancelled || 0, 
                         icon: <XCircle size={24} />, 
                         iconColor: 'bg-rose-100 text-rose-600', 
                         tagColor: 'bg-rose-50 text-rose-700 border-rose-100', 
@@ -420,7 +425,7 @@ const AdminDashboard = () => {
                       },
                       { 
                         title: 'Total Earnings', 
-                        value: `LKR ${(stats.totalRevenue || 0).toLocaleString()}`, 
+                        value: `LKR ${(stats?.totalRevenue || 0).toLocaleString()}`, 
                         icon: <DollarSign size={24} />, 
                         iconColor: 'bg-emerald-100 text-emerald-600', 
                         tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-100', 
@@ -1061,4 +1066,10 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default function AdminDashboardWithErrorBoundary(props) {
+  return (
+    <ErrorBoundary>
+      <AdminDashboard {...props} />
+    </ErrorBoundary>
+  );
+}

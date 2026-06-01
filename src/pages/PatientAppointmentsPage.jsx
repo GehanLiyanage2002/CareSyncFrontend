@@ -37,19 +37,24 @@ const PatientAppointmentsPage = () => {
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
   const [appointments, setAppointments] = useState([]);
+  const [serviceBookings, setServiceBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [appointmentTypeFilter, setAppointmentTypeFilter] = useState('All');
   const [reviewTarget, setReviewTarget] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await axios.get(
-          'http://localhost:5000/api/appointments/patient/my-appointments',
-          { headers: { Authorization: token } }
-        );
-        if (response.data.success) {
-          setAppointments(response.data.appointments);
+        const [appRes, servRes] = await Promise.all([
+          axios.get('http://localhost:5000/api/appointments/patient/my-appointments', { headers: { Authorization: token } }),
+          axios.get('http://localhost:5000/api/services/bookings', { headers: { Authorization: token } })
+        ]);
+        if (appRes.data.success) {
+          setAppointments(appRes.data.appointments);
+        }
+        if (servRes.data.success) {
+          setServiceBookings(servRes.data.bookings);
         }
       } catch (error) {
         console.error('Error fetching appointments:', error);
@@ -93,7 +98,23 @@ const PatientAppointmentsPage = () => {
     { key: 'cancelled', label: 'Cancelled' },
   ];
 
-  const filtered = filter === 'all' ? appointments : appointments.filter((a) => a.status === filter);
+  const standardizedAppointments = appointments.map(a => ({ ...a, itemType: 'Doctor' }));
+  const standardizedServices = serviceBookings.map(s => ({ 
+    ...s, 
+    itemType: 'Services',
+    status: s.status ? s.status.toLowerCase() : 'confirmed'
+  }));
+
+  const allItems = [...standardizedAppointments, ...standardizedServices];
+
+  const typeFilteredItems = allItems.filter(item => {
+    if (appointmentTypeFilter === 'All') return true;
+    return item.itemType === appointmentTypeFilter;
+  });
+
+  const filtered = filter === 'all' 
+    ? typeFilteredItems 
+    : typeFilteredItems.filter((a) => a.status === filter);
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-GB', {
@@ -116,11 +137,40 @@ const PatientAppointmentsPage = () => {
       <main className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10">
 
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900">My Appointments</h1>
-          <p className="text-slate-500 mt-1 text-sm font-medium">
-            Track and manage all your past and upcoming visits.
-          </p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-900">My Appointments</h1>
+            <p className="text-slate-500 mt-1 text-sm font-medium">
+              Track and manage all your past and upcoming visits.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-1 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+            <button 
+              onClick={() => setAppointmentTypeFilter('All')}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                appointmentTypeFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              All
+            </button>
+            <button 
+              onClick={() => setAppointmentTypeFilter('Doctor')}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                appointmentTypeFilter === 'Doctor' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              Doctor
+            </button>
+            <button 
+              onClick={() => setAppointmentTypeFilter('Services')}
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                appointmentTypeFilter === 'Services' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              Services
+            </button>
+          </div>
         </div>
 
         {/* Filter Tabs */}
@@ -140,7 +190,7 @@ const PatientAppointmentsPage = () => {
                 <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-black ${
                   filter === f.key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  {appointments.filter((a) => a.status === f.key).length}
+                  {typeFilteredItems.filter((a) => a.status === f.key).length}
                 </span>
               )}
             </button>
@@ -173,9 +223,53 @@ const PatientAppointmentsPage = () => {
               const status = statusConfig[apt.status] || statusConfig.pending;
               const StatusIcon = status.icon;
 
+              if (apt.itemType === 'Services') {
+                return (
+                  <div
+                    key={`service-${apt.id}`}
+                    className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
+                  >
+                    <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-extrabold text-xl shadow-md flex-shrink-0">
+                        {apt.serviceName ? apt.serviceName.charAt(0).toUpperCase() : 'S'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <h3 className="font-extrabold text-slate-800 text-lg leading-tight">
+                            {apt.serviceName || 'Service'}
+                          </h3>
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${status.color}`}>
+                            <StatusIcon size={11} />
+                            {status.label}
+                          </span>
+                        </div>
+                        <p className="text-sm text-indigo-600 font-semibold flex items-center gap-1.5 mb-2">
+                          <Stethoscope size={13} />
+                          Medical Service
+                        </p>
+                        <div className="flex flex-wrap gap-3 text-xs text-slate-500 font-semibold">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar size={13} className="text-slate-400" />
+                            {formatDate(apt.date)}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Clock size={13} className="text-slate-400" />
+                            {formatTime(apt.time)}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <CreditCard size={13} className="text-slate-400" />
+                            Rs. {apt.price}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div
-                  key={apt.id}
+                  key={`doctor-${apt.id}`}
                   className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
                 >
                   <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">

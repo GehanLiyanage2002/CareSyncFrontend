@@ -271,26 +271,26 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
       {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Header / Success Animation */}
-            <div className="bg-gradient-to-r from-blue-600 to-teal-500 p-6 text-center text-white relative">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30 animate-bounce">
-                <CheckCircle className="h-9 w-9 text-white" />
+            <div className="bg-gradient-to-r from-blue-600 to-teal-500 p-3 text-center text-white relative">
+              <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
+                <CheckCircle className="h-5 w-5 text-white" />
               </div>
-              <h4 className="text-xl font-bold">Booking Confirmed!</h4>
-              <p className="text-xs text-blue-100 mt-1">Your appointment is scheduled successfully.</p>
+              <h4 className="text-base font-bold">Booking Confirmed!</h4>
+              <p className="text-[10px] text-blue-100">Your appointment is scheduled successfully.</p>
             </div>
 
             {/* Ticket Content */}
-            <div className="p-6 space-y-4">
+            <div className="p-4 space-y-2">
               {/* Token Number */}
-              <div className="bg-teal-50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/60 rounded-2xl p-4 text-center">
-                <span className="block text-xs text-teal-600 dark:text-teal-400 font-bold uppercase tracking-widest mb-1">Queue Token</span>
-                <span className="text-4xl font-extrabold text-teal-800 dark:text-teal-400 tracking-wider font-mono">{tokenNumber}</span>
+              <div className="bg-teal-50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/60 rounded-xl py-2 px-3 text-center">
+                <span className="block text-[10px] text-teal-600 dark:text-teal-400 font-bold uppercase tracking-widest mb-1">Queue Token</span>
+                <span className="text-2xl font-extrabold text-teal-800 dark:text-teal-400 tracking-wider font-mono">{tokenNumber}</span>
               </div>
 
               {/* Receipt Body */}
-              <div className="border-2 border-dashed border-gray-100 dark:border-gray-700 p-4 rounded-2xl space-y-3 bg-gray-50/50 dark:bg-gray-900/20">
+              <div className="border-2 border-dashed border-gray-100 dark:border-gray-700 p-3 rounded-xl space-y-1.5 bg-gray-50/50 dark:bg-gray-900/20">
                 <div className="flex justify-between text-xs">
                   <span className="text-gray-400 font-semibold">Doctor</span>
                   <span className="text-gray-800 dark:text-gray-200 font-bold">{doctor.name}</span>
@@ -317,18 +317,28 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
                     {paymentMethod === 'Cash' ? 'Pay Cash at Counter' : 'Online Paid'}
                   </span>
                 </div>
-                <div className="border-t border-gray-100 dark:border-gray-700 pt-3 flex justify-between text-sm font-bold">
+                <div className="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between text-sm font-bold">
                   <span className="text-gray-500">Paid Amount</span>
-                  <span className="text-blue-900 dark:text-blue-400">Rs. {isTelemedicine ? 2500 : doctor.consultationFee}</span>
+                  <span className="text-blue-900 dark:text-blue-400">Rs. {actualIsTelemedicine ? 2500 : doctor.consultationFee}</span>
                 </div>
               </div>
 
+              {/* Reschedule Window Notice */}
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl p-3 my-1 flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-xs text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
+                  You can reschedule this appointment within <span className="font-bold">1 hour</span> of booking. After that, rescheduling will no longer be available.
+                </p>
+              </div>
+
               {/* Action Buttons */}
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-2 mt-3 print:hidden">
                 <button
                   type="button"
                   onClick={printTicket}
-                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-3 rounded-2xl flex items-center justify-center gap-1.5 transition"
+                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
                 >
                   <Printer className="h-4 w-4" />
                   <span>Print</span>

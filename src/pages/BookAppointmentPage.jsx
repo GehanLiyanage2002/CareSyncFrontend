@@ -39,8 +39,6 @@ const BookAppointmentPage = () => {
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
 
-
-
   useEffect(() => {
     const handleFeeChanged = (data) => {
       if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
@@ -627,6 +625,7 @@ const BookAppointmentPage = () => {
         </div>
       )}
       </div>
+
       <div className="print:hidden">
         <Footer />
       </div>

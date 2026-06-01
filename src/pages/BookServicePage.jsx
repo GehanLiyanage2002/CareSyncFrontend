@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import PatientReviewsList from '../components/PatientReviewsList';
 
 const BookServicePage = () => {
   const location = useLocation();
@@ -23,6 +24,25 @@ const BookServicePage = () => {
   
   const [errors, setErrors] = useState({});
   const [loadingDates, setLoadingDates] = useState(false);
+  
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({ average_rating: 0, total_reviews: 0 });
+  const [loadingReviews, setLoadingReviews] = useState(true);
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/reviews/public/recent')
+      .then(res => {
+        if (res.data.success && res.data.reviews) {
+          setReviews(res.data.reviews);
+          // compute mock stats for clinic
+          const total = res.data.reviews.length;
+          const avg = total > 0 ? res.data.reviews.reduce((acc, r) => acc + r.rating, 0) / total : 0;
+          setReviewStats({ average_rating: (Math.round(avg * 10) / 10).toFixed(1), total_reviews: total });
+        }
+      })
+      .catch(err => console.error('Failed to fetch clinic reviews:', err))
+      .finally(() => setLoadingReviews(false));
+  }, []);
 
   // Pagination for slots
   const [slotPage, setSlotPage] = useState(0);
@@ -420,6 +440,17 @@ const BookServicePage = () => {
         )}
 
       </div>
+      
+      <div className="max-w-6xl mx-auto px-4 mt-8 mb-12">
+        <PatientReviewsList 
+          title="Patient Feedback"
+          subtitle="What patients say about our clinic"
+          reviews={reviews} 
+          reviewStats={reviewStats} 
+          loadingReviews={loadingReviews} 
+        />
+      </div>
+
       <div className="print:hidden">
         <Footer />
       </div>

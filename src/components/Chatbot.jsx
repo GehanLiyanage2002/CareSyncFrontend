@@ -6,11 +6,6 @@ import axios from 'axios';
 const Chatbot = () => {
   const { user } = useSelector((state) => state.auth);
   
-  // Only accessible to guest users or registered roles EXCLUDING admin
-  if (user?.role === 'Admin') {
-    return null;
-  }
-
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hello! I am the CareSync system assistant. How can I help you today?' }
@@ -26,6 +21,11 @@ const Chatbot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Only accessible to guest users or registered roles EXCLUDING admin
+  if (user?.role === 'Admin') {
+    return null;
+  }
 
   const handleSend = async (e) => {
     e.preventDefault();

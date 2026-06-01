@@ -71,7 +71,8 @@ const DoctorKanbanBoard = () => {
               gender: apt.patient_gender,
               contact: apt.patient_contact,
               status: apt.status,
-              paymentMethod: apt.payment_method
+              paymentMethod: apt.payment_method,
+              is_rescheduled: apt.is_rescheduled
             };
 
             const status = apt.status?.toLowerCase() || 'pending';
@@ -301,6 +302,11 @@ const DoctorKanbanBoard = () => {
                                     <Hash size={10} />
                                     {task.tokenNumber || 'NO-TOKEN'}
                                   </span>
+                                  {task.is_rescheduled && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 ml-2 mb-3 text-[10px] font-black uppercase tracking-widest bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-800/50 shadow-sm">
+                                      🔄 Rescheduled
+                                    </span>
+                                  )}
                                   <h4 className="font-extrabold text-slate-800 dark:text-white leading-tight text-lg">{task.patientName}</h4>
                                 </div>
                                 {task.status === 'completed' && (

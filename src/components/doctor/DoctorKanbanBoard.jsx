@@ -102,28 +102,37 @@ const DoctorKanbanBoard = () => {
     if (token) fetchData();
   }, [token, refreshTrigger]);
 
-  useEffect(() => {
-    const handleSlotBooked = (bookingData) => {
-      if (bookingData.doctor_id === user?.id) {
-        toast.success('New appointment booked! Updating board...', { icon: '🔔' });
-        setRefreshTrigger(prev => prev + 1);
-      }
-    };
+    useEffect(() => {
+      const handleSlotBooked = (bookingData) => {
+        if (bookingData.doctor_id === user?.id) {
+          toast.success('New appointment booked! Updating board...', { icon: '📅' });
+          setRefreshTrigger(prev => prev + 1);
+        }
+      };
+  
+      const handleStatusChanged = (data) => {
+        if (data.doctor_id === user?.id) {
+          setRefreshTrigger(prev => prev + 1);
+        }
+      };
 
-    const handleStatusChanged = (data) => {
-      if (data.doctor_id === user?.id) {
-        setRefreshTrigger(prev => prev + 1);
-      }
-    };
-
-    socket.on('slotBooked', handleSlotBooked);
-    socket.on('appointmentStatusChanged', handleStatusChanged);
-
-    return () => {
-      socket.off('slotBooked', handleSlotBooked);
-      socket.off('appointmentStatusChanged', handleStatusChanged);
-    };
-  }, [user]);
+      const handleRescheduled = (data) => {
+        if (data.doctor_id === user?.id) {
+          toast.success('Appointment rescheduled! Updating board...', { icon: '🔄' });
+          setRefreshTrigger(prev => prev + 1);
+        }
+      };
+  
+      socket.on('slotBooked', handleSlotBooked);
+      socket.on('appointmentStatusChanged', handleStatusChanged);
+      socket.on('appointmentRescheduled', handleRescheduled);
+  
+      return () => {
+        socket.off('slotBooked', handleSlotBooked);
+        socket.off('appointmentStatusChanged', handleStatusChanged);
+        socket.off('appointmentRescheduled', handleRescheduled);
+      };
+    }, [user]);
 
   // Derived stats
   const totalAppointments = Object.keys(data.tasks).length;

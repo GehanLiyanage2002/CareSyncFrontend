@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Doctors from '../components/Doctors';
 import Services from '../components/Services';
-import RoleLogin from '../components/RoleLogin';
 import Footer from '../components/Footer';
 import DoctorProfile from '../components/DoctorProfile';
 import About from '../components/About';
@@ -46,7 +45,6 @@ const LandingPage = () => {
             <Doctors onBookNow={(doctor) => setSelectedDoctor(doctor)} />
             <Services />
             <Testimonials />
-            <RoleLogin />
           </>
         )}
       </main>

@@ -26,6 +26,7 @@ import BookServicePage from './pages/BookServicePage';
 import TelemedicineVideoRoom from './pages/TelemedicineVideoRoom';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
+import Chatbot from './components/Chatbot';
 
 const Unauthorized = () => (
   <div className="flex h-screen items-center justify-center bg-gray-50">
@@ -58,6 +59,7 @@ function App() {
     <div className="antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans">
       <Toaster position="top-right" />
       <ScrollToTop />
+      <Chatbot />
       <Router>
         <Routes>
           {/* Public Routes */}
@@ -88,6 +90,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <BookServicePage />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/telemedicine/:id" 
             element={

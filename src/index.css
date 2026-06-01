@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Poppins", sans-serif;
+}
 @custom-variant dark (&:where(.dark, .dark *));
 
 @keyframes blob {
@@ -9,8 +12,88 @@
   100% { transform: translate(0px, 0px) scale(1); }
 }
 
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(calc(-100% - var(--gap))); }
+}
+
+@keyframes marquee-vertical {
+  0% { transform: translateY(0%); }
+  100% { transform: translateY(calc(-100% - var(--gap))); }
+}
+
+@keyframes magic-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 100%; }
+  100% { left: 100%; }
+}
+
 .animate-blob {
   animation: blob 7s infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-marquee {
+  animation: marquee var(--duration, 40s) linear infinite;
+}
+
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration, 40s) linear infinite;
+}
+
+.magic-border-card {
+  position: relative;
+  background: white;
+  border-radius: 1.5rem;
+  z-index: 1;
+}
+
+.magic-border-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 1.6rem;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6, #10b981);
+  background-size: 300% 300%;
+  animation: magic-border 4s linear infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.magic-border-card:hover::before {
+  opacity: 1;
+}
+
+.magic-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.magic-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-20deg);
+  animation: shine 3s infinite;
 }
 
 .animation-delay-2000 {

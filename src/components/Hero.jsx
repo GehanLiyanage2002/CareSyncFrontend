@@ -6,15 +6,12 @@ const Hero = () => {
   const navigate = useNavigate();
 
   return (
-    <section id="hero" className="relative bg-[#edf4fa] min-h-screen flex items-center overflow-hidden pt-20">
-      {/* Faint topographical background pattern */}
-      <div 
-        className="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%233b82f6' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-          backgroundSize: '400px 400px'
-        }}
-      ></div>
+    <section id="hero" className="relative bg-slate-50 dark:bg-slate-900 min-h-screen flex items-center overflow-hidden pt-20 transition-colors duration-500">
+      
+      {/* Magic UI Background Blobs */}
+      <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob dark:opacity-20"></div>
+      <div className="absolute top-0 -right-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000 dark:opacity-20"></div>
+      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-teal-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000 dark:opacity-20"></div>
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 w-full relative z-10 flex flex-col md:flex-row items-center">
         
@@ -27,32 +24,59 @@ const Hero = () => {
             </span>
           </div>
           
-          <h1 className="text-5xl md:text-6xl lg:text-[75px] font-extrabold text-[#111827] leading-[1.1] mb-6 tracking-tight">
+          <h1 className="text-5xl md:text-6xl lg:text-[75px] font-extrabold text-slate-900 dark:text-white leading-[1.1] mb-6 tracking-tight drop-shadow-sm">
             WE CARE ABOUT <br />
-            YOUR <span className="text-[#1e3a8a]">HEALTH</span>
+            YOUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-400">HEALTH</span>
           </h1>
           
-          <p className="text-gray-600 text-base md:text-lg mb-10 max-w-lg leading-relaxed font-medium">
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat is aute irure.
+          <p className="text-slate-600 dark:text-slate-300 text-base md:text-lg mb-10 max-w-lg leading-relaxed font-medium">
+            Experience the future of healthcare. AI-powered diagnostics, seamless telemedicine, and world-class specialists at your fingertips.
           </p>
           
-          <button 
-            onClick={() => navigate('/#doctors')}
-            className="flex items-center justify-center gap-3 bg-[#3b82f6] text-white px-8 py-3.5 rounded-md font-semibold text-sm hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
-          >
-            Appointment <ArrowRight size={16} />
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={() => navigate('/#doctors')}
+              className="relative overflow-hidden group flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-8 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 hover:-translate-y-1"
+            >
+              <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></span>
+              <span className="relative flex items-center gap-2">Book Appointment <ArrowRight size={16} /></span>
+            </button>
+          </div>
         </div>
 
-        {/* Right Image */}
-        <div className="w-full md:w-1/2 mt-16 md:mt-0 relative z-10 flex justify-end">
-          <img 
-            src="https://themewagon.github.io/live-doc/v1.0.0/assets/img/gallery/hero.png" 
-            alt="Doctor with patients" 
-            className="w-[130%] max-w-none transform md:translate-x-20 lg:translate-x-32"
-            style={{ objectFit: 'contain' }}
-            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1638202993928-7267aad84c31?q=80&w=1000&auto=format&fit=crop' }}
-          />
+        {/* Right Image with Glassmorphism Float */}
+        <div className="w-full md:w-1/2 mt-16 md:mt-0 relative z-10 flex justify-center md:justify-end">
+          <div className="relative w-full max-w-lg lg:max-w-none">
+            <img 
+              src="https://themewagon.github.io/live-doc/v1.0.0/assets/img/gallery/hero.png" 
+              alt="Doctor with patients" 
+              className="w-full lg:w-[130%] max-w-none transform md:translate-x-10 lg:translate-x-24 drop-shadow-2xl hover:scale-[1.02] transition-transform duration-500"
+              style={{ objectFit: 'contain' }}
+              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1638202993928-7267aad84c31?q=80&w=1000&auto=format&fit=crop' }}
+            />
+            
+            {/* Glassmorphism Floating Card */}
+            <div className="absolute top-1/4 -left-10 md:-left-20 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/20 dark:border-slate-700/50 p-4 rounded-2xl shadow-xl animate-float" style={{ animationDuration: '3s' }}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
+                  <span className="text-2xl">✨</span>
+                </div>
+                <div>
+                  <p className="text-slate-900 dark:text-white font-bold text-lg">10,000+</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase">Happy Patients</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="absolute bottom-1/4 right-0 lg:-right-10 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/20 dark:border-slate-700/50 p-4 rounded-2xl shadow-xl animate-float" style={{ animationDuration: '4s', animationDelay: '1s' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+                  24/7
+                </div>
+                <p className="text-slate-900 dark:text-white font-bold text-sm">Online Support</p>
+              </div>
+            </div>
+          </div>
         </div>
         
       </div>

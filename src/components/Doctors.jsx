@@ -1,64 +1,39 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchDoctors, updateDoctorAvailability, updateDoctorFee } from '../features/doctors/doctorsSlice';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
-const Doctors = ({ onBookNow, hideHeader }) => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
 const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
+  const navigate = useNavigate();
   const [selectedSpecialization, setSelectedSpecialization] = useState(defaultSearchTerm === 'Psychology' ? 'Psychology' : 'All');
   const [searchTerm, setSearchTerm] = useState(defaultSearchTerm === 'Psychology' ? '' : defaultSearchTerm);
-  const [doctors, setDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { doctors, loading, error } = useSelector((state) => state.doctors);
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/users/doctors');
-        if (response.data.success) {
-          setDoctors(response.data.doctors);
-        }
-      } catch (error) {
-        console.error("Error fetching doctors:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDoctors();
-  }, []);
+    if (doctors.length === 0) {
+      dispatch(fetchDoctors());
+    }
+  }, [dispatch, doctors.length]);
 
   useEffect(() => {
-    socket.on('doctorAvailabilityChanged', (data) => {
-      setDoctors(prevDoctors => 
-        prevDoctors.map(doc => 
-          (doc.doctor_id === data.doctor_id || doc.id === data.doctor_id)
-            ? { ...doc, is_available: data.is_available }
-            : doc
-        )
-      );
-    });
+    const handleAvailability = (data) => dispatch(updateDoctorAvailability(data));
+    const handleFee = (data) => dispatch(updateDoctorFee(data));
 
-    socket.on('doctorFeeChanged', (data) => {
-      setDoctors(prevDoctors => 
-        prevDoctors.map(doc => 
-          (doc.doctor_id === data.doctor_id || doc.id === data.doctor_id)
-            ? { ...doc, consultationFee: data.consultation_fee }
-            : doc
-        )
-      );
-    });
+    socket.on('doctorAvailabilityChanged', handleAvailability);
+    socket.on('doctorFeeChanged', handleFee);
 
     return () => {
-      socket.off('doctorAvailabilityChanged');
-      socket.off('doctorFeeChanged');
+      socket.off('doctorAvailabilityChanged', handleAvailability);
+      socket.off('doctorFeeChanged', handleFee);
     };
-  }, []);
+  }, [dispatch]);
 
   const specializations = ['All', ...new Set(doctors.map(d => d.specialization || 'General Practitioner'))];
 

@@ -3,6 +3,7 @@ import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse, Histo
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
+import NotificationBell from './NotificationBell';
 
 const Header = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -108,6 +109,10 @@ const Header = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
               </button>
+
+              {/* Notification Bell */}
+              <NotificationBell />
+
               <div className="relative" ref={dropdownRef}>
                 <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}

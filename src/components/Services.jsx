@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchServices } from '../features/services/servicesSlice';
 import { 
   HeartPulse, Ear, Bone, Brain, Activity, 
   Stethoscope, Syringe, Eye, Pill, Microscope, 
@@ -15,11 +15,10 @@ const socket = io('http://localhost:5000');
 const Services = ({ isPage }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const [services, setServices] = useState([]);
+  const dispatch = useDispatch();
+  const { services, loading, error } = useSelector((state) => state.services);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   const scrollRef = React.useRef(null);
-  const navigate = useNavigate();
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -29,38 +28,26 @@ const Services = ({ isPage }) => {
   };
 
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/services');
-        if (response.data.success) {
-          setServices(response.data.services);
-        }
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (services.length === 0) {
+      dispatch(fetchServices());
+    }
+  }, [dispatch, services.length]);
 
-    fetchServices();
+  useEffect(() => {
+    const handleServiceEvent = () => dispatch(fetchServices());
 
-    const handleServiceAdded = () => fetchServices();
-    const handleServiceUpdated = () => fetchServices();
-    const handleServiceDeleted = () => fetchServices();
-    const handleServiceImageUpdated = () => fetchServices(); // Though images won't need to re-fetch if we use cache busting, but let's just refresh list for simplicity, or we can use an imgKey state.
-
-    socket.on('serviceAdded', handleServiceAdded);
-    socket.on('serviceUpdated', handleServiceUpdated);
-    socket.on('serviceDeleted', handleServiceDeleted);
-    socket.on('serviceImageUpdated', handleServiceImageUpdated);
+    socket.on('serviceAdded', handleServiceEvent);
+    socket.on('serviceUpdated', handleServiceEvent);
+    socket.on('serviceDeleted', handleServiceEvent);
+    socket.on('serviceImageUpdated', handleServiceEvent);
 
     return () => {
-      socket.off('serviceAdded', handleServiceAdded);
-      socket.off('serviceUpdated', handleServiceUpdated);
-      socket.off('serviceDeleted', handleServiceDeleted);
-      socket.off('serviceImageUpdated', handleServiceImageUpdated);
+      socket.off('serviceAdded', handleServiceEvent);
+      socket.off('serviceUpdated', handleServiceEvent);
+      socket.off('serviceDeleted', handleServiceEvent);
+      socket.off('serviceImageUpdated', handleServiceEvent);
     };
-  }, []);
+  }, [dispatch]);
 
   const getServiceIcon = (name) => {
     const n = name.toLowerCase();
@@ -132,12 +119,22 @@ const Services = ({ isPage }) => {
                 return (
                   <div
                     key={service.id}
-                    className="min-w-[280px] max-w-[320px] flex-shrink-0 snap-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-300 border border-slate-100 dark:border-gray-700/50 flex flex-col items-center text-center group"
+                    className="magic-border-card min-w-[280px] max-w-[320px] flex-shrink-0 snap-center bg-white dark:bg-gray-800 p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col items-center text-center group"
                   >
                     <div className="relative mb-6">
-                      <div className="w-20 h-20 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-[#0ea5e9] transition-colors duration-300 shadow-sm border-2 border-white dark:border-gray-800">
-                        <IconComponent className="w-10 h-10 text-[#0ea5e9] dark:text-blue-400 group-hover:text-white transition-colors duration-300" strokeWidth={2} />
-                      </div>
+                      {service.has_image ? (
+                        <div className="w-20 h-20 rounded-full border-2 border-white dark:border-gray-800 shadow-sm overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                          <img 
+                            src={`http://localhost:5000/api/services/${service.id}/image`} 
+                            alt={service.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-[#0ea5e9] transition-colors duration-300 shadow-sm border-2 border-white dark:border-gray-800">
+                          <IconComponent className="w-10 h-10 text-[#0ea5e9] dark:text-blue-400 group-hover:text-white transition-colors duration-300" strokeWidth={2} />
+                        </div>
+                      )}
                     </div>
                     <h3 className="text-xl font-bold text-[#1e3a8a] dark:text-white mb-2 transition-colors">
                       {service.name}
@@ -146,30 +143,23 @@ const Services = ({ isPage }) => {
                       {service.price ? `Starts from LKR ${service.price}` : 'Consult for Pricing'}
                     </p>
                     
-                    <div className="w-full space-y-3 mt-auto">
+                    <div className="w-full space-y-3 mt-auto relative z-10">
                       {/* View Details Button */}
                       <button 
                         onClick={() => navigate('/service-profile', { state: { service } })}
-                        className="w-full py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
+                        className="w-full py-2.5 rounded-full font-bold text-sm border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-transparent hover:border-[#0ea5e9] hover:text-[#0ea5e9] transition-all duration-300"
                       >
                         View Details
                       </button>
                       
-                      {/* Book Now Button */}
+                      {/* Magic Shine Button */}
                       <button 
                         onClick={() => navigate('/book-service', { state: { service } })}
-                        className="w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all duration-300"
+                        className="magic-shine w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-400 text-white shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 hover:-translate-y-1 border-none"
                       >
                         Book Now
                       </button>
                     </div>
-                    {/* View Details Button */}
-                    <button 
-                      onClick={() => navigate('/doctors', { state: { service: service.name } })}
-                      className="w-full mt-auto py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
-                    >
-                      Book Now
-                    </button>
                   </div>
                 );
               })}

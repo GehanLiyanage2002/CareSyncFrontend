@@ -20,7 +20,7 @@ const AdminServices = () => {
   
   // Schedule Manager State
   const [schedules, setSchedules] = useState([]);
-  const [newSchedule, setNewSchedule] = useState({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
+  const [newSchedule, setNewSchedule] = useState({ type: 'date', schedule_date: '', day_of_week: [], start_time: '', end_time: '' });
 
   // Search and Filter State
   const [serviceSearchQuery, setServiceSearchQuery] = useState('');
@@ -123,6 +123,9 @@ const AdminServices = () => {
         
         if (res.data.success) {
           toast.success('Service info updated');
+          if (avatarFile) {
+            await uploadAvatar(currentService.id);
+          }
           fetchServices();
         }
       } else {
@@ -180,19 +183,46 @@ const AdminServices = () => {
 
   const handleAddSchedule = async (e) => {
     e.preventDefault();
-    if (!newSchedule.schedule_date || !newSchedule.start_time || !newSchedule.end_time || !newSchedule.slot_duration_minutes) {
+    if (!currentService.id) {
+      toast.error('Please create the service account first before adding schedules');
+      return;
+    }
+    if (!newSchedule.start_time || !newSchedule.end_time) {
       toast.error('Please fill all schedule fields');
       return;
     }
+    if (newSchedule.type === 'date' && !newSchedule.schedule_date) {
+      toast.error('Please select a date');
+      return;
+    }
+    if (newSchedule.type === 'weekday' && (!newSchedule.day_of_week || newSchedule.day_of_week.length === 0)) {
+      toast.error('Please select at least one day of the week');
+      return;
+    }
     try {
-      const res = await axios.post(`http://localhost:5000/api/services/${currentService.id}/schedules`, newSchedule, {
-        headers: { Authorization: token }
-      });
-      if (res.data.success) {
-        toast.success('Schedule added successfully');
-        fetchSchedules(currentService.id);
-        setNewSchedule({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
+      if (newSchedule.type === 'date') {
+        const payload = {
+          start_time: newSchedule.start_time,
+          end_time: newSchedule.end_time,
+          schedule_date: newSchedule.schedule_date
+        };
+        await axios.post(`http://localhost:5000/api/services/${currentService.id}/schedules`, payload, {
+          headers: { Authorization: token }
+        });
+      } else {
+        const promises = newSchedule.day_of_week.map(day => {
+          return axios.post(`http://localhost:5000/api/services/${currentService.id}/schedules`, {
+            start_time: newSchedule.start_time,
+            end_time: newSchedule.end_time,
+            day_of_week: day
+          }, { headers: { Authorization: token } });
+        });
+        await Promise.all(promises);
       }
+      
+      toast.success('Schedule added successfully');
+      fetchSchedules(currentService.id);
+      setNewSchedule({ type: 'date', schedule_date: '', day_of_week: [], start_time: '', end_time: '' });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to add schedule');
     }
@@ -220,7 +250,11 @@ const AdminServices = () => {
       location: service.location || '',
       price: service.price || ''
     });
-    setAvatarPreview(`http://localhost:5000/api/services/${service.id}/image?t=${Date.now()}`);
+    if (service.has_image) {
+      setAvatarPreview(`http://localhost:5000/api/services/${service.id}/image?t=${Date.now()}`);
+    } else {
+      setAvatarPreview(null);
+    }
     setAvatarFile(null);
     setIsEditing(true);
     setShowForm(true);
@@ -232,7 +266,7 @@ const AdminServices = () => {
     setIsEditing(false);
     setCurrentService({ name: '', price: '', description: '', location: '' });
     setSchedules([]);
-    setNewSchedule({ schedule_date: '', start_time: '', end_time: '', slot_duration_minutes: '15' });
+    setNewSchedule({ type: 'date', schedule_date: '', day_of_week: [], start_time: '', end_time: '' });
     setAvatarFile(null);
     setAvatarPreview(null);
   };
@@ -405,16 +439,64 @@ const AdminServices = () => {
                 </h5>
                 
                 <div className="space-y-5">
-                  <div>
-                    <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Date</label>
-                    <input 
-                      type="date" 
-                      value={newSchedule.schedule_date}
-                      onChange={e => setNewSchedule({...newSchedule, schedule_date: e.target.value})}
-                      className="w-full max-w-xl px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
-                      required
-                    />
+                  <div className="flex gap-4 mb-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="scheduleType"
+                        checked={newSchedule.type === 'date'} 
+                        onChange={() => setNewSchedule({...newSchedule, type: 'date'})} 
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-[13px] font-semibold text-slate-700">Specific Date</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="scheduleType"
+                        checked={newSchedule.type === 'weekday'} 
+                        onChange={() => setNewSchedule({...newSchedule, type: 'weekday'})} 
+                        className="text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-[13px] font-semibold text-slate-700">Recurring Week Day</span>
+                    </label>
                   </div>
+
+                  {newSchedule.type === 'date' ? (
+                    <div>
+                      <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Date</label>
+                      <input 
+                        type="date" 
+                        value={newSchedule.schedule_date}
+                        onChange={e => setNewSchedule({...newSchedule, schedule_date: e.target.value})}
+                        className="w-full max-w-xl px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+                        required={newSchedule.type === 'date'}
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-[13px] font-semibold text-slate-600 mb-2">Select Days</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                          <label key={day} className={`px-4 py-2 rounded-full border text-[13px] font-semibold cursor-pointer transition-colors shadow-sm select-none ${newSchedule.day_of_week.includes(day) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'}`}>
+                            <input 
+                              type="checkbox" 
+                              className="hidden" 
+                              checked={newSchedule.day_of_week.includes(day)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setNewSchedule({...newSchedule, day_of_week: [...newSchedule.day_of_week, day]});
+                                } else {
+                                  setNewSchedule({...newSchedule, day_of_week: newSchedule.day_of_week.filter(d => d !== day)});
+                                }
+                              }} 
+                            />
+                            {day}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="flex flex-wrap gap-6 max-w-xl">
                     <div className="flex-1">
@@ -438,22 +520,6 @@ const AdminServices = () => {
                       />
                     </div>
                   </div>
-
-                  <div className="max-w-xl">
-                    <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Appointment Slot Duration</label>
-                    <select 
-                      value={newSchedule.slot_duration_minutes}
-                      onChange={e => setNewSchedule({...newSchedule, slot_duration_minutes: e.target.value})}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] bg-white"
-                      required
-                    >
-                      <option value="5">5 minutes per slot</option>
-                      <option value="10">10 minutes per slot</option>
-                      <option value="15">15 minutes per slot</option>
-                      <option value="20">20 minutes per slot</option>
-                      <option value="30">30 minutes per slot</option>
-                    </select>
-                  </div>
                 </div>
               </div>
 
@@ -471,9 +537,10 @@ const AdminServices = () => {
                   {schedules.map(sch => (
                     <div key={sch.id} className="p-4 bg-[#f8fafc] border border-slate-200 rounded-xl flex justify-between items-center group">
                       <div>
-                        <p className="font-bold text-slate-800 text-[14px]">{sch.schedule_date}</p>
+                        <p className="font-bold text-slate-800 text-[14px]">
+                          {sch.day_of_week ? `Every ${sch.day_of_week}` : sch.schedule_date}
+                        </p>
                         <p className="text-[13px] text-slate-500 font-medium">{sch.start_time} - {sch.end_time}</p>
-                        <span className="text-[11px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full mt-1 inline-block">{sch.slot_duration_minutes}m slots</span>
                       </div>
                       <button 
                         onClick={() => handleDeleteSchedule(sch.id)}

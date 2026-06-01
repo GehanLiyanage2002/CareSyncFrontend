@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Quote, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { Marquee } from './magicui/Marquee';
 
 const socket = io('http://localhost:5000');
 
@@ -19,21 +20,7 @@ const Testimonials = () => {
   };
 
   useEffect(() => {
-    // Auto-scroll logic for carousel
-    if (reviews.length <= 3) return; // don't auto-scroll if few reviews
-    
-    const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        if (scrollLeft + clientWidth >= scrollWidth - 10) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollBy({ left: 380, behavior: 'smooth' });
-        }
-      }
-    }, 4000);
-
-    return () => clearInterval(interval);
+    // We removed manual JS auto-scroll in favor of Magic UI CSS Marquee!
   }, [reviews]);
 
   const fallbackTestimonials = [
@@ -129,33 +116,21 @@ const Testimonials = () => {
           </h2>
         </div>
 
-        {/* Testimonials Carousel */}
-        <div className="relative flex items-center justify-center min-h-[350px]">
-          {/* Left Scroll Button */}
-          <button 
-            onClick={() => scroll('left')}
-            className="hidden md:flex absolute -left-4 lg:-left-12 z-20 w-12 h-12 bg-white shadow-lg rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors border border-slate-100"
-          >
-            <ChevronLeft size={28} />
-          </button>
-
-          <div 
-            ref={scrollRef}
-            className="flex overflow-x-auto gap-8 pb-12 pt-4 px-4 snap-x snap-mandatory hide-scrollbar w-full"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {loading ? (
-              <div className="w-full flex justify-center items-center min-h-[300px]">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : (
-              reviews.map((testimonial, index) => {
+        {/* Magic UI Marquee Carousel */}
+        <div className="relative flex items-center min-h-[350px] overflow-hidden w-full max-w-[100vw] [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
+          {loading ? (
+            <div className="w-full flex justify-center items-center min-h-[300px]">
+              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <Marquee pauseOnHover className="py-4" repeat={4}>
+              {reviews.map((testimonial, index) => {
                 const profileImg = testimonial.patient_id 
                   ? `http://localhost:5000/api/users/profile-image/${testimonial.patient_id}?t=${imgKey}`
                   : (testimonial.image || placeholderImages[index % placeholderImages.length]);
 
                 return (
-                  <div key={testimonial.id || index} className="min-w-[300px] max-w-[350px] flex-shrink-0 snap-center bg-white rounded-3xl p-8 shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 border border-white hover:border-blue-100 group relative">
+                  <div key={`${testimonial.id || index}-${index}`} className="magic-border-card min-w-[300px] max-w-[350px] flex-shrink-0 bg-white rounded-3xl p-8 shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 group relative">
                     
                     {/* Profile Image with Badge */}
                     <div className="relative mb-6">
@@ -197,17 +172,9 @@ const Testimonials = () => {
                     </p>
                   </div>
                 );
-              })
-            )}
-          </div>
-
-          {/* Right Scroll Button */}
-          <button 
-            onClick={() => scroll('right')}
-            className="hidden md:flex absolute -right-4 lg:-right-12 z-20 w-12 h-12 bg-white shadow-lg rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors border border-slate-100"
-          >
-            <ChevronRight size={28} />
-          </button>
+              })}
+            </Marquee>
+          )}
         </div>
 
       </div>

@@ -41,8 +41,6 @@ const BookAppointmentPage = () => {
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
 
-
-
   useEffect(() => {
     const handleFeeChanged = (data) => {
       if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
@@ -232,8 +230,9 @@ const BookAppointmentPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <Header />
-      <div className="pt-24 pb-12 max-w-6xl mx-auto px-4">
+      <div className="print:hidden">
+        <Header />
+        <div className="pt-24 pb-12 max-w-6xl mx-auto px-4">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -533,12 +532,18 @@ const BookAppointmentPage = () => {
               </div>
 
               {/* Confirm Booking Button */}
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md transition duration-300 hover:shadow-lg active:scale-98"
-              >
-                Confirm Booking
-              </button>
+              {user?.role !== 'Patient' ? (
+                <div className="w-full mt-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-2xl text-center text-sm font-bold border border-red-200 dark:border-red-800/30">
+                  Only Patients can book appointments.
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  className="w-full mt-4 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md transition duration-300 hover:shadow-lg active:scale-98"
+                >
+                  Confirm Booking
+                </button>
+              )}
             </div>
 
           </div>
@@ -546,12 +551,12 @@ const BookAppointmentPage = () => {
         </form>
         </div>
       )}
-
+      </div>
 
 {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white print:z-50 print:p-0">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-full print:rounded-none">
             {/* Header / Success Animation */}
             <div className="bg-gradient-to-r from-blue-600 to-teal-500 p-6 text-center text-white relative">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30 animate-bounce">
@@ -608,7 +613,7 @@ const BookAppointmentPage = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-6 print:hidden">
                 <button
                   type="button"
                   onClick={printTicket}
@@ -633,7 +638,10 @@ const BookAppointmentPage = () => {
         </div>
       )}
       </div>
-      <Footer />
+
+      <div className="print:hidden">
+        <Footer />
+      </div>
     </div>
   );
 };

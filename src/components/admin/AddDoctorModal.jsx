@@ -181,9 +181,8 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-50 overflow-y-auto">
-      <div className="min-h-screen flex items-start justify-center py-10 px-4">
-        <div className="w-full max-w-4xl">
+    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-6">
+      <div className="w-full">
 
           {/* Modal header — matches EditProfilePage heading style */}
           <div className="flex items-start justify-between mb-8">
@@ -451,7 +450,6 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
 
         </div>
       </div>
-    </div>
   );
 };
 

@@ -7,7 +7,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-f
 import { 
   LayoutDashboard, Users, UserRound, Calendar, DollarSign, 
   LogOut, Activity, TrendingUp, CheckCircle, XCircle, Stethoscope,
-  Search, X, Filter
+  Search, X, Filter, Trash2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
@@ -33,6 +33,11 @@ const AdminDashboard = () => {
   const [customDates, setCustomDates] = useState({ start: '', end: '' });
   const [socketConnected, setSocketConnected] = useState(false);
   const [showAddDoctor, setShowAddDoctor] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
+  const [serviceBookings, setServiceBookings] = useState([]);
+  const [appointmentFilter, setAppointmentFilter] = useState('All');
 
   const { token, user } = useSelector(state => state.auth);
   const navigate = useNavigate();
@@ -46,6 +51,22 @@ const AdminDashboard = () => {
 
   const config = {
     headers: { Authorization: token }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!appointmentToCancel) return;
+    try {
+      const res = await axios.put(`http://localhost:5000/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
+      if (res.data.success) {
+        toast.success(res.data.message);
+        setAppointments(prev => prev.map(appt => appt.id === appointmentToCancel ? { ...appt, status: 'Cancelled' } : appt));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to cancel appointment');
+    } finally {
+      setAppointmentToCancel(null);
+    }
   };
 
   const getFilterDates = () => {
@@ -97,6 +118,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchServiceBookings = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/services/bookings', config);
+      setServiceBookings(res.data.bookings);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchPatients = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/admin/patients', config);
@@ -139,7 +169,10 @@ const AdminDashboard = () => {
       }
       if (activeTab === 'Doctors') await fetchDoctors();
       if (activeTab === 'Patients') await fetchPatients();
-      if (activeTab === 'Appointments') await fetchAppointments();
+      if (activeTab === 'Appointments') {
+        await fetchAppointments();
+        await fetchServiceBookings();
+      }
       if (activeTab === 'Earnings') await fetchEarnings();
       setLoading(false);
     };
@@ -152,7 +185,7 @@ const AdminDashboard = () => {
       setSocketConnected(true);
       // Refresh data on reconnect (e.g. after server restart)
       if (activeTab === 'Overview') { fetchStats(); fetchEarnings(); }
-      if (activeTab === 'Appointments') fetchAppointments();
+      if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
     });
     socket.on('disconnect', () => setSocketConnected(false));
     
@@ -161,19 +194,23 @@ const AdminDashboard = () => {
         fetchStats();
         fetchEarnings();
       }
-      if (activeTab === 'Appointments') fetchAppointments();
+      if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
     };
 
     socket.on('appointmentStatusChanged', refreshData);
     socket.on('slotBooked', refreshData);
-    socket.on('doctorProfileUpdated', refreshData);
     
-    // Listen for doctor availability toggle
-    socket.on('doctorAvailabilityChanged', () => {
+    // Listen for doctor updates to refresh the doctors list
+    const refreshDoctors = () => {
       if (activeTab === 'Doctors') {
         fetchDoctors();
       }
-    });
+      refreshData();
+    };
+
+    socket.on('doctorProfileUpdated', refreshDoctors);
+    socket.on('doctorFeeChanged', refreshDoctors);
+    socket.on('doctorAvailabilityChanged', refreshDoctors);
     
     return () => socket.disconnect();
   }, [activeTab, dateFilter, customDates]);
@@ -191,8 +228,29 @@ const AdminDashboard = () => {
       }, config);
       toast.success(res.data.message);
       fetchDoctors(); // Refresh list
+      if (selectedDoctor && selectedDoctor.id === id) {
+         setSelectedDoctor({ ...selectedDoctor, is_approved: !currentStatus });
+      }
     } catch (err) {
       toast.error('Failed to update doctor status');
+      console.error(err);
+    }
+  };
+
+  const handleDeleteDoctor = (doctor) => {
+    setDoctorToDelete(doctor);
+  };
+
+  const confirmDeleteDoctor = async () => {
+    if (!doctorToDelete) return;
+    try {
+      const res = await axios.delete(`http://localhost:5000/api/admin/doctors/${doctorToDelete.id}`, config);
+      toast.success(res.data.message);
+      setDoctorToDelete(null);
+      setSelectedDoctor(null);
+      fetchDoctors();
+    } catch (err) {
+      toast.error('Failed to delete doctor');
       console.error(err);
     }
   };
@@ -463,8 +521,16 @@ const AdminDashboard = () => {
               {/* DOCTORS TAB */}
               {activeTab === 'Doctors' && (
                 <>
-                  {/* Search and Filter for Doctors Tab */}
-                  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  {showAddDoctor ? (
+                    <AddDoctorModal
+                      token={token}
+                      onClose={() => setShowAddDoctor(false)}
+                      onSuccess={() => { fetchDoctors(); setShowAddDoctor(false); }}
+                    />
+                  ) : (
+                    <>
+                      {/* Search and Filter for Doctors Tab */}
+                      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                       <h3 className="text-[15px] font-bold text-slate-700 mb-2">
                         Search doctors
@@ -539,76 +605,68 @@ const AdminDashboard = () => {
                         Add Doctor
                       </button>
                     </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <colgroup>
-                        <col style={{width: '22%'}} />
-                        <col style={{width: '24%'}} />
-                        <col style={{width: '22%'}} />
-                        <col style={{width: '16%'}} />
-                        <col style={{width: '16%'}} />
-                      </colgroup>
-                      <thead>
-                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                          <th className="p-4 px-6 font-bold">Doctor Name</th>
-                          <th className="p-4 font-bold">Email</th>
-                          <th className="p-4 font-bold">Specialization</th>
-                          <th className="p-4 font-bold">Status</th>
-                          <th className="p-4 px-6 font-bold text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-50">
-                        {filteredDoctors.map(doctor => (
-                          <tr key={doctor.id} className="hover:bg-blue-50/30 transition-colors">
-                            <td className="p-4 px-6">
-                              <p className="font-bold text-slate-700">{doctor.full_name}</p>
-                              <p className="text-xs text-slate-400 font-medium">{doctor.mobile_number || 'No phone'}</p>
-                            </td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">{doctor.email}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">
-                              <p>{doctor.specialization}</p>
-                              <p className="text-xs text-slate-400">{doctor.experience} Exp.</p>
-                            </td>
-                            <td className="p-4">
-                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
-                                doctor.is_available 
-                                  ? 'bg-emerald-100 text-emerald-700' 
-                                  : 'bg-rose-100 text-rose-700'
-                              }`}>
-                                {doctor.is_available ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                                {doctor.is_available ? 'Available' : 'Unavailable'}
-                              </span>
-                            </td>
-                            <td className="p-4 px-6">
-                              <div className="flex items-center justify-end gap-3">
-                                <button 
-                                  onClick={() => handleApproveDoctor(doctor.id, doctor.is_approved)}
-                                  className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 flex-shrink-0 ${
-                                    doctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'
-                                  }`}
-                                >
-                                  <div 
-                                    className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${
-                                      doctor.is_approved ? 'translate-x-5' : 'translate-x-0'
-                                    }`}
-                                  ></div>
-                                </button>
-                                <span className={`text-[12px] font-bold ${
-                                  doctor.is_approved ? 'text-blue-600' : 'text-rose-500'
-                                }`}>
-                                  {doctor.is_approved ? 'Approved' : 'Suspended'}
-                                </span>
+                  <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+                      {filteredDoctors.map(doctor => (
+                        <div 
+                          key={doctor.id} 
+                          onClick={() => setSelectedDoctor(doctor)}
+                          className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex gap-4">
+                              <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
+                                 <img src={`http://localhost:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
                               </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {filteredDoctors.length === 0 && (
-                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No doctors match your search.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
+                              <div className="flex flex-col justify-center">
+                                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                  <h4 className="font-extrabold text-indigo-900 text-[17px]">Dr. {doctor.full_name}</h4>
+                                  <span className={`flex items-center gap-1.5 text-[11px] font-bold ${doctor.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                    <span className={`w-2 h-2 rounded-full ${doctor.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                                    {doctor.is_available ? 'Available' : 'Unavailable'}
+                                  </span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${doctor.is_approved ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}`}>
+                                    {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
+                                  </span>
+                                </div>
+                                <p className="text-slate-500 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1 text-indigo-900 font-bold text-sm mt-1">
+                                 <span className="text-yellow-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
+                            <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
+                              <span>Patients</span>
+                              <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
+                                <Users size={14} className="text-indigo-400" /> {doctor.total_patients || 0}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
+                              <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
+                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+                                LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {filteredDoctors.length === 0 && (
+                        <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                          No doctors match your search.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+                    </>
+                  )}
                 </>
               )}
 
@@ -656,47 +714,166 @@ const AdminDashboard = () => {
 
               {/* APPOINTMENTS TAB */}
               {activeTab === 'Appointments' && (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
-                  <div className="p-5 border-b border-blue-50">
-                    <h3 className="text-xl font-extrabold text-slate-800">All Appointments</h3>
+                <div className="bg-[#f8eaff]/30 rounded-3xl p-4 sm:p-6 border border-indigo-50 mt-2">
+                  <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-2xl font-extrabold text-indigo-900">Clinic Appointments</h3>
+                      <p className="text-indigo-600 font-medium text-sm mt-1">Manage all scheduled appointments and bookings</p>
+                    </div>
+                    <div className="bg-white rounded-full p-1 border border-indigo-100 shadow-sm flex inline-flex">
+                      {['All', 'Doctor', 'Services'].map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => setAppointmentFilter(filter)}
+                          className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                            appointmentFilter === filter 
+                            ? 'bg-[#1e293b] text-white shadow-md' 
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                          <th className="p-4 px-6 font-bold">Patient</th>
-                          <th className="p-4 font-bold">Doctor</th>
-                          <th className="p-4 font-bold">Date & Time</th>
-                          <th className="p-4 font-bold">Status</th>
-                          <th className="p-4 px-6 font-bold">Reason</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-50">
-                        {appointments.map(appt => (
-                          <tr key={appt.id} className="hover:bg-blue-50/30 transition-colors">
-                            <td className="p-4 px-6 font-bold text-slate-700">{appt.patient_name}</td>
-                            <td className="p-4 font-bold text-slate-700">{appt.doctor_name}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">
-                              {new Date(appt.date).toLocaleDateString()} at {appt.time}
-                            </td>
-                            <td className="p-4">
-                              <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                appt.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
-                                appt.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' :
-                                'bg-amber-100 text-amber-700'
-                              }`}>
-                                {appt.status}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {(appointmentFilter === 'All' || appointmentFilter === 'Doctor') && appointments.map(appt => (
+                      <div key={appt.id} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                        <div className="mb-3">
+                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{appt.patient_name}</h4>
+                          <p className="text-indigo-600 font-bold text-[12px]">
+                            {appt.age ? `${appt.age} yrs : ` : ''}{appt.gender ? `${appt.gender} : ` : ''}{appt.mobile_number || 'No Mobile'}
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-50">
+                          <p className="text-slate-600 font-bold text-[13px]">
+                            Dr. {appt.doctor_name}
+                          </p>
+                          <p className="text-indigo-500 font-medium text-[12px] mt-0.5">
+                            {appt.doctor_specialization || 'Not Specified'}
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 flex items-center justify-between">
+                          <p className="text-slate-500 font-bold text-[13px]">Fees:</p>
+                          <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
+                            <span className="text-indigo-600 text-[10px] mr-0.5">LKR</span> 
+                            {appt.fees ? parseFloat(appt.fees).toLocaleString() : '0'}
+                          </p>
+                        </div>
+
+                        <div className="mt-auto flex flex-col gap-4">
+                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                            <span className="flex items-center gap-1.5 text-indigo-600 font-bold text-[11px] bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
+                              <Calendar size={13} className="text-indigo-500" />
+                              {new Date(appt.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {appt.time}
+                            </span>
+                            
+                            {appt.status === 'Pending' && (
+                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                PENDING
                               </span>
-                            </td>
-                            <td className="p-4 px-6 text-sm text-slate-500 font-medium max-w-xs truncate">{appt.reason || 'N/A'}</td>
-                          </tr>
-                        ))}
-                        {appointments.length === 0 && (
-                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No appointments scheduled yet.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            {appt.status === 'Completed' ? (
+                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                COMPLETED
+                              </span>
+                            ) : appt.status === 'Cancelled' ? (
+                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                CANCELED
+                              </span>
+                            ) : (
+                              <span className="bg-transparent text-transparent px-4 py-1.5">
+                                {/* Placeholder */}
+                              </span>
+                            )}
+                            
+                            {appt.status === 'Cancelled' ? (
+                              <span className="text-rose-400 font-bold text-[11px]">Admin Cancelled</span>
+                            ) : appt.status === 'Pending' ? (
+                              <button 
+                                onClick={() => setAppointmentToCancel(appt.id)}
+                                className="text-rose-500 font-bold text-[11px] hover:text-white hover:bg-rose-500 px-3 py-1.5 rounded-full transition-colors border border-rose-100 hover:border-rose-500"
+                              >
+                                Admin Cancel
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {(appointmentFilter === 'All' || appointmentFilter === 'Services') && serviceBookings.map(booking => (
+                      <div key={`service-${booking.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                        <div className="mb-3">
+                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{booking.patientName}</h4>
+                          <p className="text-indigo-600 font-bold text-[12px]">
+                            Medical Service Booking
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
+                          <p className="text-slate-600 font-bold text-[13px]">
+                            {booking.serviceName}
+                          </p>
+                          <p className="text-blue-500 font-medium text-[12px] mt-0.5">
+                            Lab & Diagnostic
+                          </p>
+                        </div>
+                        
+                        <div className="mb-4 flex items-center justify-between">
+                          <p className="text-slate-500 font-bold text-[13px]">Amount:</p>
+                          <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
+                            <span className="text-blue-600 text-[10px] mr-0.5">LKR</span> 
+                            {booking.price ? parseFloat(booking.price).toLocaleString() : '0'}
+                          </p>
+                        </div>
+
+                        <div className="mt-auto flex flex-col gap-4">
+                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                            <span className="flex items-center gap-1.5 text-blue-600 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100">
+                              <Calendar size={13} className="text-blue-500" />
+                              {new Date(booking.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {booking.time}
+                            </span>
+                            
+                            {booking.status === 'Pending' && (
+                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                PENDING
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            {booking.status === 'Completed' || booking.status === 'Confirmed' ? (
+                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                {booking.status.toUpperCase()}
+                              </span>
+                            ) : booking.status === 'Cancelled' ? (
+                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                CANCELED
+                              </span>
+                            ) : (
+                              <span className="bg-transparent text-transparent px-4 py-1.5">
+                                {/* Placeholder */}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                  {((appointmentFilter === 'All' && appointments.length === 0 && serviceBookings.length === 0) ||
+                    (appointmentFilter === 'Doctor' && appointments.length === 0) ||
+                    (appointmentFilter === 'Services' && serviceBookings.length === 0)) && (
+                    <div className="p-10 text-center bg-white rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm">
+                      <p className="text-indigo-600 font-medium">No appointments found for this filter.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -750,13 +927,136 @@ const AdminDashboard = () => {
           )}
         </div>
       </main>
-      {showAddDoctor && (
-        <AddDoctorModal
-          token={token}
-          onClose={() => setShowAddDoctor(false)}
-          onSuccess={() => { fetchDoctors(); setShowAddDoctor(false); }}
-        />
+
+      {/* Selected Doctor Details Modal */}
+      {selectedDoctor && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative h-32 bg-gradient-to-r from-emerald-500 to-teal-600">
+              <button 
+                onClick={() => setSelectedDoctor(null)}
+                className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="px-8 pb-8">
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
+                  <img src={`http://localhost:5000/api/users/profile-image/${selectedDoctor.id}?t=${Date.now()}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
+                </div>
+                
+                {/* Toggle Switch */}
+                <div className="flex flex-col items-end gap-2 mt-4">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Account Status</span>
+                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleApproveDoctor(selectedDoctor.id, selectedDoctor.is_approved)}>
+                    <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${selectedDoctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'}`}>
+                      <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedDoctor.is_approved ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    </div>
+                    <span className={`text-sm font-black uppercase tracking-wider ${selectedDoctor.is_approved ? 'text-blue-600' : 'text-rose-500'}`}>
+                      {selectedDoctor.is_approved ? 'Approved' : 'Suspended'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-black text-slate-800">Dr. {selectedDoctor.full_name}</h3>
+                <p className="text-teal-600 font-bold text-sm mt-1">{selectedDoctor.specialization}</p>
+                
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Experience</p>
+                    <p className="text-slate-800 font-semibold">{parseInt(selectedDoctor.experience) || 0} Years</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Consultation Fee</p>
+                    <p className="text-slate-800 font-semibold">LKR {selectedDoctor.consultation_fee ? parseFloat(selectedDoctor.consultation_fee).toLocaleString() : '0'}</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Email</p>
+                    <p className="text-slate-800 font-semibold text-sm truncate" title={selectedDoctor.email}>{selectedDoctor.email}</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Phone</p>
+                    <p className="text-slate-800 font-semibold text-sm">{selectedDoctor.mobile_number || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+                <button 
+                  onClick={() => handleDeleteDoctor(selectedDoctor)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold transition-colors"
+                >
+                  <Trash2 size={18} />
+                  Remove Doctor
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
+
+      {/* Custom Confirmation Modal */}
+      {doctorToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-100 mb-4 mx-auto">
+              <Trash2 className="text-rose-600" size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-center text-slate-800 mb-2">Delete Doctor?</h3>
+            <p className="text-center text-slate-500 text-sm mb-6">
+              Are you sure you want to delete <span className="font-bold text-slate-700">Dr. {doctorToDelete.full_name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-between gap-3">
+              <button
+                onClick={() => setDoctorToDelete(null)}
+                className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => confirmDeleteDoctor(doctorToDelete.id)}
+                className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg font-medium hover:bg-rose-700 shadow-md shadow-rose-200 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Appointment Cancellation Confirmation Modal */}
+      {appointmentToCancel && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-rose-100 transform transition-all scale-100 opacity-100">
+            <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <XCircle className="w-8 h-8 text-rose-500" />
+            </div>
+            <h3 className="text-2xl font-extrabold text-slate-800 text-center mb-2">Cancel Appointment</h3>
+            <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">
+              Are you absolutely sure you want to cancel this appointment? This action cannot be undone.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={() => setAppointmentToCancel(null)}
+                className="px-6 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex-1"
+              >
+                No, Keep it
+              </button>
+              <button 
+                onClick={handleCancelAppointment}
+                className="px-6 py-2.5 rounded-xl font-bold text-white bg-rose-500 hover:bg-rose-600 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex-1"
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { 
   HeartPulse, Ear, Bone, Brain, Activity, 
   Stethoscope, Syringe, Eye, Pill, Microscope, 
@@ -11,6 +13,8 @@ import {
 const socket = io('http://localhost:5000');
 
 const Services = ({ isPage }) => {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   const [services, setServices] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -40,14 +44,21 @@ const Services = ({ isPage }) => {
 
     fetchServices();
 
-    const handleServiceAdded = () => {
-      fetchServices();
-    };
+    const handleServiceAdded = () => fetchServices();
+    const handleServiceUpdated = () => fetchServices();
+    const handleServiceDeleted = () => fetchServices();
+    const handleServiceImageUpdated = () => fetchServices(); // Though images won't need to re-fetch if we use cache busting, but let's just refresh list for simplicity, or we can use an imgKey state.
 
     socket.on('serviceAdded', handleServiceAdded);
+    socket.on('serviceUpdated', handleServiceUpdated);
+    socket.on('serviceDeleted', handleServiceDeleted);
+    socket.on('serviceImageUpdated', handleServiceImageUpdated);
 
     return () => {
       socket.off('serviceAdded', handleServiceAdded);
+      socket.off('serviceUpdated', handleServiceUpdated);
+      socket.off('serviceDeleted', handleServiceDeleted);
+      socket.off('serviceImageUpdated', handleServiceImageUpdated);
     };
   }, []);
 
@@ -135,6 +146,23 @@ const Services = ({ isPage }) => {
                       {service.price ? `Starts from LKR ${service.price}` : 'Consult for Pricing'}
                     </p>
                     
+                    <div className="w-full space-y-3 mt-auto">
+                      {/* View Details Button */}
+                      <button 
+                        onClick={() => navigate('/service-profile', { state: { service } })}
+                        className="w-full py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
+                      >
+                        View Details
+                      </button>
+                      
+                      {/* Book Now Button */}
+                      <button 
+                        onClick={() => navigate('/book-service', { state: { service } })}
+                        className="w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all duration-300"
+                      >
+                        Book Now
+                      </button>
+                    </div>
                     {/* View Details Button */}
                     <button 
                       onClick={() => navigate('/doctors', { state: { service: service.name } })}

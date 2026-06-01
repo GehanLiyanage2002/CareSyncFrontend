@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
+const Doctors = ({ onBookNow, hideHeader }) => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
 const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   const [selectedSpecialization, setSelectedSpecialization] = useState(defaultSearchTerm === 'Psychology' ? 'Psychology' : 'All');
   const [searchTerm, setSearchTerm] = useState(defaultSearchTerm === 'Psychology' ? '' : defaultSearchTerm);
@@ -192,13 +196,22 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
                     <p>{doctor.experience || '5'} years experience</p>
                   </div>
 
-                  {/* View Profile / Book Now Button */}
-                  <button 
-                    onClick={() => onBookNow && onBookNow(doctor)}
-                    className="w-full mt-auto py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
-                  >
-                    View Profile
-                  </button>
+                  <div className="w-full space-y-3 mt-auto">
+                    {/* View Profile Button */}
+                    <button 
+                      onClick={() => onBookNow && onBookNow(doctor)}
+                      className="w-full py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
+                    >
+                      View Profile
+                    </button>
+                    {/* Book Now Button */}
+                    <button 
+                      onClick={() => navigate('/book-appointment', { state: { doctor } })}
+                      className="w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all duration-300"
+                    >
+                      Book Now
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

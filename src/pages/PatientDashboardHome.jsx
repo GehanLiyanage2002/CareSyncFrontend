@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
+import { Video } from 'lucide-react';
 
 const CalendarIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
@@ -19,7 +22,29 @@ const ClipboardIcon = ({ className = "w-5 h-5" }) => (
 );
 
 const PatientDashboardHome = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const [upcomingTelemedicine, setUpcomingTelemedicine] = useState(null);
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:5000/api/appointments/patient/my-appointments',
+          { headers: { Authorization: token } }
+        );
+        if (response.data.success) {
+          const upcoming = response.data.appointments.find(a => 
+            (a.status === 'pending' || a.status === 'confirmed') && a.is_telemedicine
+          );
+          setUpcomingTelemedicine(upcoming);
+        }
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+    if (token) fetchAppointments();
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-100 flex flex-col">
@@ -41,6 +66,28 @@ const PatientDashboardHome = () => {
           <div className="absolute -top-32 -right-32 w-80 h-80 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
           <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
         </div>
+
+        {upcomingTelemedicine && (
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 mb-8 text-white flex flex-col md:flex-row items-center justify-between shadow-xl">
+            <div className="flex items-center gap-4 mb-4 md:mb-0">
+              <div className="bg-white/20 p-4 rounded-full">
+                <Video className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">Upcoming Telemedicine Consultation</h3>
+                <p className="text-blue-100">
+                  With {upcomingTelemedicine.doctor_name} on {new Date(upcomingTelemedicine.appointment_date).toLocaleDateString()} at {upcomingTelemedicine.start_time}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate(`/telemedicine/${upcomingTelemedicine.id}`)}
+              className="px-6 py-3 bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl shadow-lg transition"
+            >
+              Join Video Call
+            </button>
+          </div>
+        )}
 
         {/* Summary Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

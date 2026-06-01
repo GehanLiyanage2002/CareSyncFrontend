@@ -13,6 +13,8 @@ const BookAppointmentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const initialDoctor = location.state?.doctor;
+  const isPsychology = initialDoctor?.specialization?.toLowerCase().includes('psychology') || initialDoctor?.specialization?.toLowerCase().includes('psychiatry');
+  const isTelemedicine = location.state?.isTelemedicine || isPsychology || false;
 
   const [doctor, setDoctor] = useState(initialDoctor || {});
   const { user, token } = useSelector(state => state.auth);
@@ -193,7 +195,8 @@ const BookAppointmentPage = () => {
           mobile_number: formData.mobileNumber,
           gender: formData.gender,
           email: formData.email,
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          is_telemedicine: isTelemedicine
         }, {
           headers: { Authorization: token }
         });
@@ -249,10 +252,16 @@ const BookAppointmentPage = () => {
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 md:p-8 shadow-lg border border-blue-50/50 dark:border-gray-700/50 transition-colors duration-300 mt-8">
-          <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-8 flex items-center gap-2 transition-colors">
+          <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-2 flex items-center gap-2 transition-colors">
             <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             Book Appointment with {doctor.name}
           </h3>
+          {isTelemedicine && (
+            <div className="inline-block bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-full text-sm mb-6">
+              Telemedicine Video Consultation
+            </div>
+          )}
+          {!isTelemedicine && <div className="mb-8"></div>}
 
           <form onSubmit={handleBookingSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -493,7 +502,7 @@ const BookAppointmentPage = () => {
 
               <div className="border-t border-blue-100 dark:border-gray-700 pt-3 flex justify-between items-center">
                 <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Consultation Fee</span>
-                <span className="text-md font-bold text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
+                <span className="text-md font-bold text-blue-900 dark:text-blue-400">Rs. {isTelemedicine ? 2500 : doctor.consultationFee}</span>
               </div>
 
               {/* Payment Methods */}
@@ -588,6 +597,10 @@ const BookAppointmentPage = () => {
                   <span className="text-gray-800 dark:text-gray-200 font-bold">{formData.mobileNumber}</span>
                 </div>
                 <div className="flex justify-between text-xs">
+                  <span className="text-gray-400 font-semibold">Service</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-bold">{isTelemedicine ? 'Telemedicine' : 'In-Person'}</span>
+                </div>
+                <div className="flex justify-between text-xs">
                   <span className="text-gray-400 font-semibold">Payment Status</span>
                   <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                     {paymentMethod === 'Cash' ? 'Pay Cash at Counter' : 'Online Paid'}
@@ -595,7 +608,7 @@ const BookAppointmentPage = () => {
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-3 flex justify-between text-sm font-bold">
                   <span className="text-gray-500">Paid Amount</span>
-                  <span className="text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
+                  <span className="text-blue-900 dark:text-blue-400">Rs. {isTelemedicine ? 2500 : doctor.consultationFee}</span>
                 </div>
               </div>
 

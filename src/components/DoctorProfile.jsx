@@ -8,10 +8,14 @@ import PatientReviewsList from './PatientReviewsList';
 
 const socket = io('http://localhost:5000');
 
-const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
+const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   const [doctor, setDoctor] = useState(initialDoctor);
   const { user, token } = useSelector(state => state.auth);
   const navigate = useNavigate();
+  
+  const isPsychology = doctor?.specialization?.toLowerCase().includes('psychology') || doctor?.specialization?.toLowerCase().includes('psychiatry');
+  const actualIsTelemedicine = isTelemedicine || isPsychology;
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash'); // 'Cash' or 'Online'
@@ -206,7 +210,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
                 <Clock className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                 <div>
                   <span className="block text-xs text-gray-500 dark:text-gray-400 font-semibold">Consultation Fee</span>
-                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Rs. {doctor.consultationFee}</span>
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Rs. {actualIsTelemedicine ? 2500 : doctor.consultationFee}</span>
                 </div>
               </div>
 
@@ -242,7 +246,11 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
 
       
       {/* Appointment Booking Button */}
-      {doctor.is_available === false ? (
+      {user?.role === 'Doctor' ? (
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-3xl p-8 shadow-sm border border-blue-100 dark:border-blue-800/30 text-center mt-8 mb-8">
+          <p className="text-blue-700 dark:text-blue-300 font-bold">You are logged in as a Doctor. You cannot book appointments.</p>
+        </div>
+      ) : doctor.is_available === false ? (
         <div className="bg-rose-50 dark:bg-rose-900/20 rounded-3xl p-8 shadow-sm border border-rose-100 dark:border-rose-800/30 text-center transition-colors duration-300 mt-8 mb-8">
           <Calendar className="h-12 w-12 text-rose-400 dark:text-rose-500 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-rose-900 dark:text-rose-400 mb-2">Currently Unavailable</h3>
@@ -251,7 +259,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
       ) : (
         <div className="flex justify-center mt-10 mb-10">
           <button
-            onClick={() => navigate('/book-appointment', { state: { doctor } })}
+            onClick={() => navigate('/book-appointment', { state: { doctor, isTelemedicine: actualIsTelemedicine } })}
             className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-extrabold text-lg py-4 px-10 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2"
           >
             <Calendar className="w-6 h-6" />
@@ -311,7 +319,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack }) => {
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-3 flex justify-between text-sm font-bold">
                   <span className="text-gray-500">Paid Amount</span>
-                  <span className="text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
+                  <span className="text-blue-900 dark:text-blue-400">Rs. {isTelemedicine ? 2500 : doctor.consultationFee}</span>
                 </div>
               </div>
 

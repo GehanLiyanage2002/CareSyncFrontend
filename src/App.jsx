@@ -23,6 +23,7 @@ import EditProfilePage from './pages/EditProfilePage';
 import BookAppointmentPage from './pages/BookAppointmentPage';
 import ServiceProfilePage from './pages/ServiceProfilePage';
 import BookServicePage from './pages/BookServicePage';
+import TelemedicineVideoRoom from './pages/TelemedicineVideoRoom';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -87,6 +88,11 @@ function App() {
             element={
               <ProtectedRoute>
                 <BookServicePage />
+          <Route 
+            path="/telemedicine/:id" 
+            element={
+              <ProtectedRoute allowedRoles={['Patient', 'Doctor']}>
+                <TelemedicineVideoRoom />
               </ProtectedRoute>
             } 
           />

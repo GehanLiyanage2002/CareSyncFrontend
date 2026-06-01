@@ -322,18 +322,26 @@ const PatientAppointmentsPage = () => {
                     </div>
 
                     {/* Action Button */}
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 flex flex-col gap-2">
+                      {apt.is_telemedicine && apt.status !== 'completed' && apt.status !== 'cancelled' && (
+                         <button
+                          onClick={() => navigate(`/telemedicine/${apt.id}`)}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow hover:shadow-md transition-all duration-200 whitespace-nowrap"
+                        >
+                          Join Video Call
+                        </button>
+                      )}
                       {apt.status === 'completed' && !apt.has_review && (
                         <button
                           onClick={() => setReviewTarget(apt)}
-                          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-bold rounded-xl text-sm shadow hover:shadow-md transition-all duration-200 whitespace-nowrap"
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-bold rounded-xl text-sm shadow hover:shadow-md transition-all duration-200 whitespace-nowrap"
                         >
                           <Star size={15} className="fill-white" />
                           Write Review
                         </button>
                       )}
                       {apt.status === 'completed' && apt.has_review && (
-                        <span className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-50 text-emerald-700 font-bold rounded-xl text-sm border border-emerald-200 whitespace-nowrap">
+                        <span className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-50 text-emerald-700 font-bold rounded-xl text-sm border border-emerald-200 whitespace-nowrap">
                           <CheckCircle size={14} />
                           Reviewed
                         </span>

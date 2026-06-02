@@ -57,7 +57,6 @@
 
 .magic-border-card {
   position: relative;
-  background: white;
   border-radius: 1.5rem;
   z-index: 1;
 }
@@ -67,16 +66,34 @@
   position: absolute;
   inset: -2px;
   border-radius: 1.6rem;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6, #10b981);
+  background: linear-gradient(90deg, #60a5fa, #34d399, #818cf8, #60a5fa);
   background-size: 300% 300%;
-  animation: magic-border 4s linear infinite;
-  z-index: -1;
+  animation: magic-border 5s linear infinite;
+  z-index: -2;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
+}
+
+.magic-border-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1.5rem;
+  background-color: inherit;
+  z-index: -1;
+  transition: background 0.4s ease, background-color 0.4s ease;
 }
 
 .magic-border-card:hover::before {
-  opacity: 1;
+  opacity: 0.6;
+}
+
+.magic-border-card:hover::after {
+  background: linear-gradient(135deg, #f0f9ff, #ffffff);
+}
+
+.dark .magic-border-card:hover::after {
+  background: linear-gradient(135deg, #1e293b, #111827);
 }
 
 .magic-shine {

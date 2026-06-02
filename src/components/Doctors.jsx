@@ -138,13 +138,13 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
             {/* Scrollable Container */}
             <div 
               ref={scrollRef}
-              className="flex overflow-x-auto gap-6 pb-12 snap-x snap-mandatory hide-scrollbar w-full"
+              className="flex overflow-x-auto gap-6 pb-12 pt-4 px-4 snap-x snap-mandatory hide-scrollbar w-full"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {filteredDoctors.map((doctor, index) => (
                 <div
                   key={index}
-                  className="min-w-[280px] max-w-[320px] flex-shrink-0 snap-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-300 border border-slate-100 dark:border-gray-700/50 flex flex-col items-center text-center group"
+                  className="magic-border-card min-w-[280px] max-w-[320px] flex-shrink-0 snap-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col items-center text-center group"
                 >
                   {/* Image & Badge */}
                   <div className="relative mb-6">
@@ -182,7 +182,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
                     {/* Book Now Button */}
                     <button 
                       onClick={() => navigate('/book-appointment', { state: { doctor } })}
-                      className="w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all duration-300"
+                      className="magic-shine w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-none"
                     >
                       Book Now
                     </button>

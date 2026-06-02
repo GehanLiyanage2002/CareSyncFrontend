@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Doctors from '../components/Doctors';
 import DoctorProfile from '../components/DoctorProfile';
+import Testimonials from '../components/Testimonials';
 
 const DoctorsPage = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -41,6 +42,7 @@ const DoctorsPage = () => {
         )}
       </section>
 
+      <Testimonials />
       <Footer />
     </div>
   );

@@ -10,7 +10,7 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
 
-const DoctorKanbanBoard = () => {
+const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   const { token, user } = useSelector((state) => state.auth);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [data, setData] = useState({
@@ -41,7 +41,7 @@ const DoctorKanbanBoard = () => {
         // Fetch both profile and appointments
         const [profileRes, appointmentsRes] = await Promise.all([
           axios.get('http://localhost:5000/api/doctor/profile', { headers: { Authorization: token } }),
-          axios.get('http://localhost:5000/api/doctor/appointments', { headers: { Authorization: token } })
+          axios.get(`http://localhost:5000/api/doctor/appointments?filter=${dateFilter}`, { headers: { Authorization: token } })
         ]);
 
         if (profileRes.data.success) {
@@ -63,15 +63,20 @@ const DoctorKanbanBoard = () => {
             newTasks[apt.id] = {
               id: apt.id,
               tokenNumber: apt.token_number,
-              patientName: apt.patient_name,
+              patientName: apt.patient_name || 'Unknown Patient',
               patient_id: apt.patient_id,
-              time: apt.start_time,
-              date: apt.appointment_date,
+              date: new Date(apt.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              time: apt.start_time.substring(0, 5),
+              type: apt.is_telemedicine ? 'Telemedicine' : 'In-person',
+              token: apt.token_number,
               age: apt.patient_age,
               gender: apt.patient_gender,
               contact: apt.patient_contact,
               status: apt.status,
-              paymentMethod: apt.payment_method
+              paymentMethod: apt.payment_method,
+              is_rescheduled: apt.is_rescheduled,
+              raw_date: apt.appointment_date,
+              raw_time: apt.start_time
             };
 
             const status = apt.status?.toLowerCase() || 'pending';
@@ -80,14 +85,36 @@ const DoctorKanbanBoard = () => {
             }
           });
 
+          // Ensure we sort everything before initial render to be foolproof
+          const sortTaskIdsChronologically = (taskIdsToUpdate, currentTasks) => {
+            return [...taskIdsToUpdate].sort((aId, bId) => {
+              const a = currentTasks[aId];
+              const b = currentTasks[bId];
+              
+              const dateA = new Date(a.raw_date).getTime();
+              const dateB = new Date(b.raw_date).getTime();
+              
+              // If both dates are valid and different, sort by date
+              if (!isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
+                return dateA - dateB;
+              }
+              
+              // Fallback to time sorting
+              const timeA = a.raw_time || a.time || "";
+              const timeB = b.raw_time || b.time || "";
+              
+              return timeA.localeCompare(timeB);
+            });
+          };
+
           setData(prev => ({
             ...prev,
             tasks: newTasks,
             columns: {
-              'pending': { ...prev.columns['pending'], taskIds: cols['pending'] },
-              'confirmed': { ...prev.columns['confirmed'], taskIds: cols['confirmed'] },
-              'completed': { ...prev.columns['completed'], taskIds: cols['completed'] },
-              'cancelled': { ...prev.columns['cancelled'], taskIds: cols['cancelled'] },
+              'pending': { ...prev.columns['pending'], taskIds: sortTaskIdsChronologically(cols['pending'], newTasks) },
+              'confirmed': { ...prev.columns['confirmed'], taskIds: sortTaskIdsChronologically(cols['confirmed'], newTasks) },
+              'completed': { ...prev.columns['completed'], taskIds: sortTaskIdsChronologically(cols['completed'], newTasks) },
+              'cancelled': { ...prev.columns['cancelled'], taskIds: sortTaskIdsChronologically(cols['cancelled'], newTasks) },
             }
           }));
         }
@@ -100,36 +127,66 @@ const DoctorKanbanBoard = () => {
     };
     
     if (token) fetchData();
-  }, [token, refreshTrigger]);
+  }, [token, refreshTrigger, dateFilter]);
 
-  useEffect(() => {
-    const handleSlotBooked = (bookingData) => {
-      if (bookingData.doctor_id === user?.id) {
-        toast.success('New appointment booked! Updating board...', { icon: '🔔' });
-        setRefreshTrigger(prev => prev + 1);
-      }
-    };
+    useEffect(() => {
+      const handleSlotBooked = (bookingData) => {
+        if (bookingData.doctor_id === user?.id) {
+          toast.success('New appointment booked! Updating board...', { icon: '📅' });
+          setRefreshTrigger(prev => prev + 1);
+        }
+      };
+  
+      const handleStatusChanged = (data) => {
+        if (data.doctor_id === user?.id) {
+          setRefreshTrigger(prev => prev + 1);
+        }
+      };
 
-    const handleStatusChanged = (data) => {
-      if (data.doctor_id === user?.id) {
-        setRefreshTrigger(prev => prev + 1);
-      }
-    };
-
-    socket.on('slotBooked', handleSlotBooked);
-    socket.on('appointmentStatusChanged', handleStatusChanged);
-
-    return () => {
-      socket.off('slotBooked', handleSlotBooked);
-      socket.off('appointmentStatusChanged', handleStatusChanged);
-    };
-  }, [user]);
+      const handleRescheduled = (data) => {
+        if (data.doctor_id === user?.id) {
+          toast.success('Appointment rescheduled! Updating board...', { icon: '🔄' });
+          setRefreshTrigger(prev => prev + 1);
+        }
+      };
+  
+      socket.on('slotBooked', handleSlotBooked);
+      socket.on('appointmentStatusChanged', handleStatusChanged);
+      socket.on('appointmentRescheduled', handleRescheduled);
+  
+      return () => {
+        socket.off('slotBooked', handleSlotBooked);
+        socket.off('appointmentStatusChanged', handleStatusChanged);
+        socket.off('appointmentRescheduled', handleRescheduled);
+      };
+    }, [user]);
 
   // Derived stats
   const totalAppointments = Object.keys(data.tasks).length;
   const completedCount = data.columns['completed'].taskIds.length;
   const cancelledCount = data.columns['cancelled'].taskIds.length;
   const totalEarnings = completedCount * consultationFee;
+
+  const sortTaskIdsChronologically = (taskIdsToUpdate, currentTasks) => {
+    return [...taskIdsToUpdate].sort((aId, bId) => {
+      const a = currentTasks[aId];
+      const b = currentTasks[bId];
+      
+      const dateA = new Date(a.raw_date).getTime();
+      const dateB = new Date(b.raw_date).getTime();
+      
+      // If both dates are valid and different, sort by date
+      if (!isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
+        return dateA - dateB;
+      }
+      
+      // Fallback to time sorting (works for raw_time or standard time string like '09:00')
+      const timeA = a.raw_time || a.time || "";
+      const timeB = b.raw_time || b.time || "";
+      
+      return timeA.localeCompare(timeB);
+    });
+  };
 
   const onDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
@@ -140,14 +197,8 @@ const DoctorKanbanBoard = () => {
     const startColumn = data.columns[source.droppableId];
     const finishColumn = data.columns[destination.droppableId];
 
-    // Optimistic UI update
+    // Disable reordering within the same column to maintain chronological order
     if (startColumn === finishColumn) {
-      const newTaskIds = Array.from(startColumn.taskIds);
-      newTaskIds.splice(source.index, 1);
-      newTaskIds.splice(destination.index, 0, draggableId);
-
-      const newColumn = { ...startColumn, taskIds: newTaskIds };
-      setData({ ...data, columns: { ...data.columns, [newColumn.id]: newColumn } });
       return;
     }
 
@@ -156,8 +207,16 @@ const DoctorKanbanBoard = () => {
     const newStart = { ...startColumn, taskIds: startTaskIds };
 
     const finishTaskIds = Array.from(finishColumn.taskIds);
-    finishTaskIds.splice(destination.index, 0, draggableId);
-    const newFinish = { ...finishColumn, taskIds: finishTaskIds };
+    finishTaskIds.push(draggableId); // Just push it, then sort
+    
+    const newFinishId = finishColumn.id;
+    const updatedTasks = {
+      ...data.tasks,
+      [draggableId]: { ...data.tasks[draggableId], status: newFinishId }
+    };
+    
+    const sortedFinishTaskIds = sortTaskIdsChronologically(finishTaskIds, updatedTasks);
+    const newFinish = { ...finishColumn, taskIds: sortedFinishTaskIds };
 
     setData(prev => ({
       ...prev,
@@ -292,6 +351,11 @@ const DoctorKanbanBoard = () => {
                                     <Hash size={10} />
                                     {task.tokenNumber || 'NO-TOKEN'}
                                   </span>
+                                  {task.is_rescheduled && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 ml-2 mb-3 text-[10px] font-black uppercase tracking-widest bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-800/50 shadow-sm">
+                                      🔄 Rescheduled
+                                    </span>
+                                  )}
                                   <h4 className="font-extrabold text-slate-800 dark:text-white leading-tight text-lg">{task.patientName}</h4>
                                 </div>
                                 {task.status === 'completed' && (

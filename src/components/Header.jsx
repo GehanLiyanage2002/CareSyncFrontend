@@ -1,0 +1,266 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse, History, Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../features/auth/authSlice';
+import NotificationBell from './NotificationBell';
+
+const Header = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Check local storage or system preference on load
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+      setIsDarkMode(true);
+    }
+  };
+
+  return (
+    <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+        <div className="flex items-center">
+          <span className="text-2xl font-bold text-blue-700 dark:text-blue-400 cursor-pointer" onClick={() => navigate('/')}>CareSync</span>
+        </div>
+        <nav className="hidden md:flex space-x-8">
+          <button onClick={() => navigate('/#hero')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</button>
+          <button onClick={() => navigate('/doctors')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</button>
+          <button onClick={() => navigate('/services')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</button>
+          <button onClick={() => navigate('/contact')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Contact Us</button>
+          {/* <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a> */}
+        </nav>
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={toggleDarkMode} 
+            className={`relative flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              isDarkMode 
+                ? 'bg-slate-800 text-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)] border border-yellow-500/30' 
+                : 'bg-blue-50 text-indigo-600 shadow-[0_0_15px_rgba(99,102,241,0.4)] border border-indigo-200'
+            }`}
+            aria-label="Toggle Dark Mode"
+          >
+            <div className={`absolute transition-all duration-700 transform ${isDarkMode ? 'rotate-[360deg] scale-100 opacity-100' : '-rotate-[90deg] scale-50 opacity-0'}`}>
+              <Sun size={20} className="drop-shadow-md" strokeWidth={2.5} />
+            </div>
+            <div className={`absolute transition-all duration-700 transform ${isDarkMode ? 'rotate-[90deg] scale-50 opacity-0' : 'rotate-0 scale-100 opacity-100'}`}>
+              <Moon size={20} className="drop-shadow-md" fill="currentColor" />
+            </div>
+          </button>
+          {!isAuthenticated ? (
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+            >
+              Sign In
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  if (user?.role === 'Doctor') {
+                    navigate('/doctor/dashboard');
+                    setTimeout(() => {
+                      document.getElementById('schedule-manager')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  } else {
+                    navigate('/doctors');
+                  }
+                }}
+                className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 items-center gap-2"
+              >
+                {user?.role === 'Doctor' ? 'Set Appointment' : 'Book Appointment'}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </button>
+
+              {/* Notification Bell */}
+              <NotificationBell />
+
+              <div className="relative" ref={dropdownRef}>
+                <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border border-blue-600 hover:bg-blue-200 dark:hover:bg-blue-800 transition shadow-sm overflow-hidden ring-2 ring-transparent hover:ring-blue-300 dark:hover:ring-blue-700"
+                title="Account Menu"
+              >
+                {user?.name || user?.full_name ? (
+                  <div className="w-full h-full flex items-center justify-center relative">
+                    <img 
+                      src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover rounded-full" 
+                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} 
+                    />
+                    <span className="hidden font-bold text-lg">{(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}</span>
+                  </div>
+                ) : <User size={20} />}
+              </button>
+
+              {/* Google-Style Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-4 w-[360px] max-w-[90vw] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden flex flex-col transform origin-top-right transition-all duration-200 ease-out">
+                  
+                  {/* Top Bar with Close Button */}
+                  <div className="flex justify-between items-center px-6 pt-4 pb-2">
+                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300 truncate w-full text-center">
+                      {user?.email || 'user@caresync.com'}
+                    </span>
+                    <button 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5 transition-colors absolute right-4 top-4"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Avatar & Greeting Section */}
+                  <div className="flex flex-col items-center pt-2 pb-4 px-6">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-white dark:border-slate-800 mb-3 relative overflow-hidden">
+                      <img 
+                        src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} 
+                      />
+                      <div className="hidden absolute inset-0 items-center justify-center">
+                        {(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-medium text-slate-800 dark:text-white mb-4">
+                      Hi, {user?.name || user?.full_name || 'User'}!
+                    </h3>
+                    
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate('/edit-profile');
+                      }}
+                      className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
+                    >
+                      Manage your CareSync Profile
+                    </button>
+                  </div>
+
+                  {/* Dashboard Sections List */}
+                  <div className="bg-white dark:bg-slate-900 mx-2 mb-2 rounded-2xl flex flex-col overflow-hidden shadow-inner border border-slate-100 dark:border-slate-800">
+                    
+                    <button 
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/dashboard' : '/patient/dashboard'); }}
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                    >
+                      <Home className="text-slate-500 dark:text-slate-400" size={20} />
+                      <span className="font-medium text-slate-700 dark:text-slate-200">Dashboard</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/kanban' : '/patient/appointments'); }}
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                    >
+                      <Calendar className="text-slate-500 dark:text-slate-400" size={20} />
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointments Board' : 'My Appointments'}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/history' : '/patient/medical-profile'); }}
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                    >
+                      {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
+                    </button>
+
+                    {/* Patient Medical History */}
+                    {user?.role === 'Patient' && (
+                      <button 
+                        onClick={() => { setIsDropdownOpen(false); navigate('/patient/medical-history'); }}
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      >
+                        <History className="text-slate-500 dark:text-slate-400" size={20} />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">Medical History</span>
+                      </button>
+                    )}
+
+                    {/* My Reviews — Doctor only */}
+                    {user?.role === 'Doctor' && (
+                      <button 
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          navigate('/doctor/reviews');
+                        }}
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      >
+                        <Star className="text-amber-400" size={20} />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">My Reviews</span>
+                      </button>
+                    )}
+
+                    <button 
+                      onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                    >
+                      <Settings className="text-slate-500 dark:text-slate-400" size={20} />
+                      <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>
+                    </button>
+                    <div className="p-2">
+                      <button 
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          dispatch(logout());
+                          navigate('/');
+                        }}
+                        className="flex items-center gap-4 px-4 py-3 w-full hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl transition-colors text-left font-medium"
+                      >
+                        <LogOut size={20} />
+                        <span>Sign out</span>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+            </div>
+            </>
+          )}
+
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

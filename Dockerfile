@@ -1,12 +1,12 @@
 # 1. Build Stage
-FROM node:18-alpine AS build
+FROM node:18 AS build
 
 # Set working directory
 WORKDIR /app
 
 # Copy package.json and install dependencies
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application code
 COPY . .

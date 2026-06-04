@@ -17,7 +17,7 @@ import DoctorDashboardHome from './pages/DoctorDashboardHome';
 import DoctorKanbanPage from './pages/DoctorKanbanPage';
 import DoctorHistoryPage from './pages/DoctorHistoryPage';
 import DoctorReviewsPage from './pages/DoctorReviewsPage';
-import ReceptionistDashboard from './pages/ReceptionistDashboard';
+import ReceptionistDashboard from './pages/Receptionist/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EditProfilePage from './pages/EditProfilePage';
 import BookAppointmentPage from './pages/BookAppointmentPage';

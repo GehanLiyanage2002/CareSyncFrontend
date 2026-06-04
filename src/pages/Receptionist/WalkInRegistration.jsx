@@ -40,7 +40,7 @@ const WalkInRegistration = () => {
         'http://localhost:5000/api/receptionist/register-patient',
         formData,
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: token }
         }
       );
 

@@ -58,16 +58,29 @@ const Footer = () => {
               <p>Design: CareSync Team</p>
               <p>Distributed By: IIT 08</p>
               
-              <button 
-                onClick={() => navigate('/login', { state: { role: 'Admin' } })}
-                className="mt-6 opacity-10 hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
-                title="System Administration"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                  <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
-                </svg>
-                <span>Admin</span>
-              </button>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => navigate('/login', { state: { role: 'Admin' } })}
+                  className="mt-6 opacity-10 hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
+                  title="System Administration"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                    <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+                  </svg>
+                  <span>Admin</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/login', { state: { role: 'Receptionist' } })}
+                  className="mt-6 opacity-10 hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
+                  title="Receptionist Access"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                  <span>Receptionist</span>
+                </button>
+              </div>
             </div>
           </div>
           

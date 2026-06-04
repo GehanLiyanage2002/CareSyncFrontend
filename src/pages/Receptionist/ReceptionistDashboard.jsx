@@ -5,6 +5,7 @@ import {
   Users, UserPlus, Calendar, CreditCard, LayoutDashboard 
 } from 'lucide-react';
 import { logout } from '../../features/auth/authSlice';
+import WalkInRegistration from './WalkInRegistration';
 
 const ReceptionistDashboard = () => {
   const [activeTab, setActiveTab] = useState('Live Queue');
@@ -117,12 +118,8 @@ const ReceptionistDashboard = () => {
           )}
 
           {activeTab === 'Walk-in' && (
-            <div className="bg-white rounded-3xl p-8 border border-blue-50 shadow-sm min-h-[400px] flex items-center justify-center border-dashed">
-                <div className="text-center text-slate-400">
-                  <UserPlus size={48} className="mx-auto mb-4 opacity-50 text-indigo-400" />
-                  <h4 className="text-lg font-bold text-slate-600 mb-1">Walk-in Patient Registration</h4>
-                  <p className="text-sm font-medium">This module is under construction.</p>
-                </div>
+            <div className="animate-fadeIn">
+              <WalkInRegistration />
             </div>
           )}
 

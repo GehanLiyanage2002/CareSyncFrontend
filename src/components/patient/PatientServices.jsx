@@ -57,52 +57,92 @@ const PatientServices = () => {
 
   const handlePayment = async (e) => {
     e.preventDefault();
-    if (!cardNumber || !expiry || !cvv) {
-      toast.error('Please fill payment details');
-      return;
-    }
 
+    const amount = selectedService.price;
+    const order_id = `PSRV-${Date.now()}`;
+    
     try {
-      const res = await axios.post('http://localhost:5000/api/services/book', {
-        service_id: selectedService.id,
-        date,
-        time,
-        amount_paid: selectedService.price
-      }, { headers: { Authorization: token } });
+      const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
+        order_id: order_id,
+        amount: amount,
+        currency: 'LKR'
+      });
 
-      if (res.data.success) {
-        toast.success('Service booked and paid successfully!');
-        
-        // Refresh bookings to get the ID and structured data from DB
-        fetchServicesAndBookings();
+      if (hashRes.data) {
+        const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
 
-        // Create booking object for PDF
-        const pdfBooking = {
-          id: res.data.booking.id,
-          patientName: user?.full_name || user?.name || 'Patient',
-          serviceName: selectedService.name,
-          price: selectedService.price,
-          date,
-          time,
-          status: 'Confirmed'
+        const payment = {
+          sandbox: true,
+          merchant_id: merchant_id,
+          return_url: window.location.href,
+          cancel_url: window.location.href,
+          notify_url: "http://localhost:5000/api/payment/notify",
+          order_id: order_id,
+          items: `Service: ${selectedService.name}`,
+          amount: formattedAmount,
+          currency: 'LKR',
+          hash: hash,
+          first_name: user?.full_name || user?.name || 'Patient',
+          last_name: '',
+          email: user?.email || 'test@example.com',
+          phone: '0000000000',
+          address: 'Sri Lanka',
+          city: 'Colombo',
+          country: 'Sri Lanka'
         };
 
-        // Generate PDF
-        generatePDF(pdfBooking);
+        window.payhere.onCompleted = async function onCompleted(orderId) {
+          console.log("Payment completed. OrderID:" + orderId);
+          try {
+            const res = await axios.post('http://localhost:5000/api/services/book', {
+              service_id: selectedService.id,
+              date,
+              time,
+              amount_paid: amount
+            }, { headers: { Authorization: token } });
 
-        // Reset forms
-        setIsPaying(false);
-        setSelectedService(null);
-        setDate('');
-        setTime('');
-        setCardNumber('');
-        setExpiry('');
-        setCvv('');
-        setActiveTab('history');
+            if (res.data.success) {
+              toast.success('Service booked and paid successfully!');
+              fetchServicesAndBookings();
+              
+              const pdfBooking = {
+                id: res.data.booking.id,
+                patientName: user?.full_name || user?.name || 'Patient',
+                serviceName: selectedService.name,
+                price: amount,
+                date,
+                time,
+                status: 'Confirmed'
+              };
+              generatePDF(pdfBooking);
+              
+              setIsPaying(false);
+              setSelectedService(null);
+              setDate('');
+              setTime('');
+              setActiveTab('history');
+            }
+          } catch (error) {
+            console.error('Error booking service:', error);
+            toast.error(error.response?.data?.message || 'Failed to complete booking');
+          }
+        };
+
+        window.payhere.onDismissed = function onDismissed() {
+          console.log("Payment dismissed");
+          toast.error("Payment was dismissed.");
+        };
+
+        window.payhere.onError = function onError(error) {
+          console.log("Error:"  + error);
+          toast.error("Payment error occurred.");
+        };
+
+        window.payhere.startPayment(payment);
       }
     } catch (error) {
-      console.error('Error booking service:', error);
-      toast.error(error.response?.data?.message || 'Failed to complete booking');
+      console.error("Hash generation failed", error);
+      toast.error("Failed to initialize payment gateway");
     }
   };
 
@@ -254,51 +294,12 @@ const PatientServices = () => {
                 </div>
 
                 <form onSubmit={handlePayment} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Card Number</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><CreditCard size={18} /></div>
-                      <input 
-                        type="text" 
-                        value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, '').substring(0, 16))}
-                        placeholder="0000 0000 0000 0000"
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-white"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Expiry Date</label>
-                      <input 
-                        type="text" 
-                        value={expiry}
-                        onChange={(e) => setExpiry(e.target.value.substring(0, 5))}
-                        placeholder="MM/YY"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-white"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">CVV</label>
-                      <input 
-                        type="text" 
-                        value={cvv}
-                        onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').substring(0, 3))}
-                        placeholder="123"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-white"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
                   <div className="pt-4 flex gap-3">
                     <button type="button" onClick={() => setIsPaying(false)} className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white font-bold rounded-xl transition-colors">
                       Back
                     </button>
                     <button type="submit" className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-colors flex items-center justify-center gap-2">
-                      <CheckCircle2 size={18} /> Pay & Book
+                      <CreditCard size={18} /> Pay via PayHere
                     </button>
                   </div>
                 </form>

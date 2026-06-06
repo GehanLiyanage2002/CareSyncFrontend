@@ -123,23 +123,84 @@ const BookServicePage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      try {
-        const res = await axios.post('http://localhost:5000/api/services/book', {
-          service_id: service.id,
-          date: selectedDateObj.schedule_date,
-          time: selectedTime,
-          amount_paid: service.price || 0
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setBookingId(res.data.booking.id);
-          setShowSuccessModal(true);
+      const amount = service.price || 0;
+      
+      const submitBooking = async () => {
+        try {
+          const res = await axios.post('http://localhost:5000/api/services/book', {
+            service_id: service.id,
+            date: selectedDateObj.schedule_date,
+            time: selectedTime,
+            amount_paid: amount
+          }, {
+            headers: { Authorization: token }
+          });
+          
+          if (res.data.success) {
+            setBookingId(res.data.booking.id);
+            setShowSuccessModal(true);
+          }
+        } catch (error) {
+          console.error("Booking failed", error);
+          alert(error.response?.data?.message || 'Booking failed');
         }
-      } catch (error) {
-        console.error("Booking failed", error);
-        alert(error.response?.data?.message || 'Booking failed');
+      };
+
+      if (paymentMethod === 'Online') {
+        const order_id = `SRV-${Date.now()}`;
+        try {
+          const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
+            order_id: order_id,
+            amount: amount,
+            currency: 'LKR'
+          });
+
+          if (hashRes.data) {
+            const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
+
+            const payment = {
+              sandbox: true,
+              merchant_id: merchant_id,
+              return_url: window.location.href,
+              cancel_url: window.location.href,
+              notify_url: "http://localhost:5000/api/payment/notify",
+              order_id: order_id,
+              items: `Service Booking: ${service.name}`,
+              amount: formattedAmount,
+              currency: 'LKR',
+              hash: hash,
+              first_name: user?.name || user?.full_name || 'Patient',
+              last_name: '',
+              email: user?.email || 'test@example.com',
+              phone: '0000000000',
+              address: 'Sri Lanka',
+              city: 'Colombo',
+              country: 'Sri Lanka'
+            };
+
+            window.payhere.onCompleted = function onCompleted(orderId) {
+              console.log("Payment completed. OrderID:" + orderId);
+              submitBooking();
+            };
+
+            window.payhere.onDismissed = function onDismissed() {
+              console.log("Payment dismissed");
+              alert("Payment was dismissed. Booking not completed.");
+            };
+
+            window.payhere.onError = function onError(error) {
+              console.log("Error:"  + error);
+              alert("Payment error occurred.");
+            };
+
+            window.payhere.startPayment(payment);
+          }
+        } catch (error) {
+          console.error("Hash generation failed", error);
+          alert("Failed to initialize payment gateway");
+        }
+      } else {
+        submitBooking();
       }
     }
   };

@@ -184,30 +184,91 @@ const BookAppointmentPage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      try {
-        const docId = doctor?.id || doctor?.doctor_id;
-        const res = await axios.post('http://localhost:5000/api/appointments', {
-          doctor_id: docId,
-          appointment_date: selectedDate.valueDate,
-          start_time: selectedTime,
-          patient_name: formData.fullName,
-          age: parseInt(formData.age),
-          mobile_number: formData.mobileNumber,
-          gender: formData.gender,
-          email: formData.email,
-          payment_method: paymentMethod,
-          is_telemedicine: isTelemedicine
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setTokenNumber(res.data.appointment.token_number);
-          setShowSuccessModal(true);
+      const docId = doctor?.id || doctor?.doctor_id;
+      const amount = isTelemedicine ? 2500 : doctor.consultationFee;
+      
+      const submitBooking = async () => {
+        try {
+          const res = await axios.post('http://localhost:5000/api/appointments', {
+            doctor_id: docId,
+            appointment_date: selectedDate.valueDate,
+            start_time: selectedTime,
+            patient_name: formData.fullName,
+            age: parseInt(formData.age),
+            mobile_number: formData.mobileNumber,
+            gender: formData.gender,
+            email: formData.email,
+            payment_method: paymentMethod,
+            is_telemedicine: isTelemedicine
+          }, {
+            headers: { Authorization: token }
+          });
+          
+          if (res.data.success) {
+            setTokenNumber(res.data.appointment.token_number);
+            setShowSuccessModal(true);
+          }
+        } catch (error) {
+          console.error("Booking failed", error);
+          alert(error.response?.data?.message || 'Booking failed');
         }
-      } catch (error) {
-        console.error("Booking failed", error);
-        alert(error.response?.data?.message || 'Booking failed');
+      };
+
+      if (paymentMethod === 'Online') {
+        const order_id = `APT-${Date.now()}`;
+        try {
+          const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
+            order_id: order_id,
+            amount: amount,
+            currency: 'LKR'
+          });
+
+          if (hashRes.data) {
+            const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
+
+            const payment = {
+              sandbox: true,
+              merchant_id: merchant_id,
+              return_url: window.location.href,
+              cancel_url: window.location.href,
+              notify_url: "http://localhost:5000/api/payment/notify",
+              order_id: order_id,
+              items: `Appointment with ${doctor?.name || 'Doctor'}`,
+              amount: formattedAmount,
+              currency: 'LKR',
+              hash: hash,
+              first_name: formData.fullName,
+              last_name: '',
+              email: formData.email || 'test@example.com',
+              phone: formData.mobileNumber,
+              address: 'Sri Lanka',
+              city: 'Colombo',
+              country: 'Sri Lanka'
+            };
+
+            window.payhere.onCompleted = function onCompleted(orderId) {
+              console.log("Payment completed. OrderID:" + orderId);
+              submitBooking();
+            };
+
+            window.payhere.onDismissed = function onDismissed() {
+              console.log("Payment dismissed");
+              alert("Payment was dismissed. Booking not completed.");
+            };
+
+            window.payhere.onError = function onError(error) {
+              console.log("Error:"  + error);
+              alert("Payment error occurred.");
+            };
+
+            window.payhere.startPayment(payment);
+          }
+        } catch (error) {
+          console.error("Hash generation failed", error);
+          alert("Failed to initialize payment gateway");
+        }
+      } else {
+        submitBooking();
       }
     }
   };

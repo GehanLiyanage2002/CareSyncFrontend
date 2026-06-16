@@ -16,8 +16,8 @@ const statusConfig = {
     color: 'bg-amber-50 text-amber-700 border-amber-200',
     icon: ClockIcon,
   },
-  confirmed: {
-    label: 'Confirmed',
+  'in progress': {
+    label: 'In Progress',
     color: 'bg-blue-50 text-blue-700 border-blue-200',
     icon: CheckCircle,
   },
@@ -82,7 +82,7 @@ const PatientAppointmentsPage = () => {
         )
       );
       toast(`Appointment status updated to ${status}`, {
-        icon: status === 'completed' ? '✅' : status === 'cancelled' ? '❌' : status === 'confirmed' ? '📋' : '🕐',
+        icon: status === 'completed' ? '✅' : status === 'cancelled' ? '❌' : status === 'in progress' ? '📋' : '🕐',
       });
     };
 
@@ -93,7 +93,7 @@ const PatientAppointmentsPage = () => {
   const filters = [
     { key: 'all', label: 'All' },
     { key: 'pending', label: 'Pending' },
-    { key: 'confirmed', label: 'Confirmed' },
+    { key: 'in progress', label: 'In Progress' },
     { key: 'completed', label: 'Completed' },
     { key: 'cancelled', label: 'Cancelled' },
   ];
@@ -102,7 +102,7 @@ const PatientAppointmentsPage = () => {
   const standardizedServices = serviceBookings.map(s => ({ 
     ...s, 
     itemType: 'Services',
-    status: s.status ? s.status.toLowerCase() : 'confirmed'
+    status: s.status ? s.status.toLowerCase() : 'in progress'
   }));
 
   const allItems = [...standardizedAppointments, ...standardizedServices];

@@ -27,6 +27,9 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [doctorSearchQuery, setDoctorSearchQuery] = useState('');
   const [doctorStatusFilter, setDoctorStatusFilter] = useState('All');
+  
+  const [patientSearchQuery, setPatientSearchQuery] = useState('');
+  const [patientTypeFilter, setPatientTypeFilter] = useState('All');
 
   
   // Filtering and Real-time state
@@ -285,6 +288,24 @@ const AdminDashboard = () => {
       earn.specialization.toLowerCase().includes(query) ||
       earn.consultation_fee.toString().includes(query)
     );
+  });
+
+  const filteredPatients = patients.filter(patient => {
+    // Type Filter
+    const isWalkIn = patient.email && patient.email.includes('@caresync.local');
+    if (patientTypeFilter === 'Walk-in' && !isWalkIn) return false;
+    if (patientTypeFilter === 'Online' && isWalkIn) return false;
+
+    // Search Query Filter
+    const trimmedQuery = patientSearchQuery.trim().toLowerCase();
+    if (!trimmedQuery) return true;
+    
+    const nameMatch = String(patient.full_name || '').toLowerCase().includes(trimmedQuery);
+    const emailMatch = String(patient.email || '').toLowerCase().includes(trimmedQuery);
+    const phoneMatch = String(patient.mobile_number || '').toLowerCase().includes(trimmedQuery);
+    const bloodMatch = String(patient.blood_group || '').toLowerCase().includes(trimmedQuery);
+    
+    return nameMatch || emailMatch || phoneMatch || bloodMatch;
   });
 
   const filteredDoctors = doctors.filter(doc => {
@@ -686,13 +707,79 @@ const AdminDashboard = () => {
 
               {/* PATIENTS TAB */}
               {activeTab === 'Patients' && (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
-                  <div className="p-5 border-b border-blue-50">
-                    <h3 className="text-xl font-extrabold text-slate-800">Registered Patients</h3>
+                <>
+                  {/* Search and Filter for Patients Tab */}
+                  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                      <h3 className="text-[15px] font-bold text-slate-700 mb-2">
+                        Search patients
+                        {patientSearchQuery && (
+                          <span className="ml-2 text-xs font-normal text-blue-500">
+                            — {filteredPatients.length} result{filteredPatients.length !== 1 ? 's' : ''} found
+                          </span>
+                        )}
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-full md:w-[380px]">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
+                          <input 
+                            type="text" 
+                            placeholder="Search name / email / mobile"
+                            value={patientSearchQuery}
+                            onChange={(e) => setPatientSearchQuery(e.target.value)}
+                            className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white"
+                          />
+                          {patientSearchQuery && (
+                            <button
+                              onClick={() => setPatientSearchQuery('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+                      <button 
+                        onClick={() => setPatientTypeFilter('All')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                          patientTypeFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'
+                        }`}
+                      >
+                        All
+                      </button>
+                      <button 
+                        onClick={() => setPatientTypeFilter('Walk-in')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                          patientTypeFilter === 'Walk-in' 
+                            ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' 
+                            : 'border-transparent text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        Walk-in
+                      </button>
+                      <button 
+                        onClick={() => setPatientTypeFilter('Online')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                          patientTypeFilter === 'Online' 
+                            ? 'bg-purple-50 border-purple-200 text-purple-700 shadow-sm' 
+                            : 'border-transparent text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        Online
+                      </button>
+                    </div>
                   </div>
-                  <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
-                      {patients.map(patient => (
+
+                  <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+                    <div className="p-5 border-b border-blue-50">
+                      <h3 className="text-xl font-extrabold text-slate-800">Registered Patients</h3>
+                    </div>
+                    <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+                        {filteredPatients.map(patient => (
                         <div 
                           key={patient.id} 
                           className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col gap-4 relative"
@@ -731,14 +818,15 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                       ))}
-                      {patients.length === 0 && (
+                      {filteredPatients.length === 0 && (
                         <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
-                          No patients registered yet.
+                          No patients match your search.
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
+                </>
               )}
 
               {/* APPOINTMENTS TAB */}

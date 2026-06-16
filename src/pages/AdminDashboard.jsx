@@ -213,6 +213,17 @@ const AdminDashboard = () => {
     socket.on('doctorFeeChanged', refreshDoctors);
     socket.on('doctorAvailabilityChanged', refreshDoctors);
     
+    // Listen for patient updates to refresh the patients list
+    const refreshPatients = () => {
+      if (activeTab === 'Patients') {
+        fetchPatients();
+      }
+      refreshData();
+    };
+
+    socket.on('patientRegistered', refreshPatients);
+    socket.on('patientUpdated', refreshPatients);
+    
     return () => socket.disconnect();
   }, [activeTab, dateFilter, customDates]);
 
@@ -679,38 +690,53 @@ const AdminDashboard = () => {
                   <div className="p-5 border-b border-blue-50">
                     <h3 className="text-xl font-extrabold text-slate-800">Registered Patients</h3>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                          <th className="p-4 px-6 font-bold">Patient Name</th>
-                          <th className="p-4 font-bold">Email</th>
-                          <th className="p-4 font-bold">Mobile</th>
-                          <th className="p-4 font-bold">Blood Group</th>
-                          <th className="p-4 px-6 font-bold">Joined Date</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-50">
-                        {patients.map(patient => (
-                          <tr key={patient.id} className="hover:bg-blue-50/30 transition-colors">
-                            <td className="p-4 px-6 font-bold text-slate-700">{patient.full_name}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">{patient.email}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">{patient.mobile_number || 'N/A'}</td>
-                            <td className="p-4">
-                              <span className="inline-block px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-xs font-bold">
-                                {patient.blood_group || 'N/A'}
+                  <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+                      {patients.map(patient => (
+                        <div 
+                          key={patient.id} 
+                          className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col gap-4 relative"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex gap-4">
+                              <div className="w-[70px] h-[70px] rounded-2xl bg-[#bae6fd] flex items-center justify-center text-slate-800 text-[28px] font-light overflow-hidden flex-shrink-0 shadow-inner">
+                                {patient.full_name ? patient.full_name.substring(0, 2).toUpperCase() : 'US'}
+                              </div>
+                              <div className="flex flex-col justify-center">
+                                <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                  <h4 className="font-extrabold text-indigo-900 text-[17px]">{patient.full_name}</h4>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${patient.blood_group && patient.blood_group !== 'N/A' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'}`}>
+                                    {patient.blood_group || 'N/A'}
+                                  </span>
+                                </div>
+                                <p className="text-slate-500 text-[12px] font-medium">{patient.email}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
+                            <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
+                              <span>Mobile:</span>
+                              <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
+                                {patient.mobile_number || 'N/A'}
                               </span>
-                            </td>
-                            <td className="p-4 px-6 text-slate-500 text-xs font-medium uppercase tracking-wider">
-                              {new Date(patient.created_at).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                        {patients.length === 0 && (
-                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No patients registered yet.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
+                              <span className="text-slate-600 font-bold text-[13px]">Joined:</span>
+                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+                                {new Date(patient.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {patients.length === 0 && (
+                        <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                          No patients registered yet.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

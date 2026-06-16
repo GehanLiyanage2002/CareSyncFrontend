@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { UserPlus, User, Phone, Mail, Droplets, Activity } from 'lucide-react';
+import { UserPlus, User, Phone, Mail, Droplets, Activity, CalendarPlus, Stethoscope } from 'lucide-react';
+import QuickBookModal from './QuickBookModal';
+import QuickBookServiceModal from './QuickBookServiceModal';
 
 const WalkInRegistration = () => {
   const { token } = useSelector((state) => state.auth);
@@ -21,6 +23,8 @@ const WalkInRegistration = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [allPatients, setAllPatients] = useState([]);
+  const [patientForBooking, setPatientForBooking] = useState(null);
+  const [patientForServiceBooking, setPatientForServiceBooking] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -168,7 +172,7 @@ const WalkInRegistration = () => {
 
         {/* Search Dropdown */}
         {showDropdown && (
-          <div className="absolute top-[85px] left-0 w-full md:w-[calc(100%-110px)] z-50 bg-white rounded-2xl shadow-xl border border-slate-100 max-h-60 overflow-y-auto">
+          <div className="absolute top-[105px] left-0 w-full md:w-[calc(100%-110px)] z-50 bg-white rounded-2xl shadow-xl border border-slate-100 max-h-[28rem] overflow-y-auto">
             <div className="p-2">
               <p className="text-xs font-bold text-slate-400 px-3 pb-2 pt-1 uppercase tracking-wider">Suggested Patients</p>
               
@@ -181,13 +185,40 @@ const WalkInRegistration = () => {
                 searchResults.map((patient) => (
                   <div 
                     key={patient.id} 
-                    onClick={() => handleSelectPatient(patient)}
-                    className="px-4 py-3 hover:bg-slate-50 cursor-pointer rounded-xl transition-colors border-b border-slate-50 last:border-0"
+                    className="px-4 py-3 hover:bg-slate-50 rounded-xl transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
                   >
-                    <p className="font-bold text-slate-800 text-sm">{patient.full_name}</p>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                      <span className="text-xs text-slate-500 flex items-center gap-1"><Phone size={12}/> {patient.mobile_number}</span>
-                      {patient.email && <span className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>}
+                    <div className="cursor-pointer flex-1" onClick={() => handleSelectPatient(patient)}>
+                      <p className="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{patient.full_name}</p>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                        <span className="text-xs text-slate-500 flex items-center gap-1"><Phone size={12}/> {patient.mobile_number}</span>
+                        {patient.email && <span className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 ml-3 shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPatientForBooking(patient);
+                          setShowDropdown(false);
+                        }}
+                        className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
+                      >
+                        <Stethoscope size={14} />
+                        <span className="hidden sm:inline">Book Doctor</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPatientForServiceBooking(patient);
+                          setShowDropdown(false);
+                        }}
+                        className="px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"
+                      >
+                        <Activity size={14} />
+                        <span className="hidden sm:inline">Book Service</span>
+                      </button>
                     </div>
                   </div>
                 ))
@@ -199,7 +230,7 @@ const WalkInRegistration = () => {
         )}
       </div>
 
-      <div className="bg-white rounded-3xl border border-blue-50 shadow-sm p-8 lg:p-10 relative overflow-hidden">
+      <div className={`bg-white rounded-3xl border border-blue-50 shadow-sm p-8 lg:p-10 relative overflow-hidden transition-all duration-300 ${showDropdown ? 'hidden' : 'block'}`}>
         {/* Decorative BG element */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60"></div>
         
@@ -367,6 +398,30 @@ const WalkInRegistration = () => {
         </form>
       </div>
     </div>
+      
+      {/* Quick Booking Modal */}
+      {patientForBooking && (
+        <QuickBookModal 
+          patient={patientForBooking} 
+          onClose={() => setPatientForBooking(null)}
+          onBookingSuccess={() => {
+            setSearchQuery('');
+            setPatientForBooking(null);
+          }}
+        />
+      )}
+
+      {/* Quick Service Booking Modal */}
+      {patientForServiceBooking && (
+        <QuickBookServiceModal 
+          patient={patientForServiceBooking} 
+          onClose={() => setPatientForServiceBooking(null)}
+          onBookingSuccess={() => {
+            setSearchQuery('');
+            setPatientForServiceBooking(null);
+          }}
+        />
+      )}
     </div>
   );
 };

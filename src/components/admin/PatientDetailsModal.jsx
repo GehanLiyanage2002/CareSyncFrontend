@@ -31,7 +31,7 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
     try {
       setLoading(true);
       const res = await axios.get(`http://localhost:5000/api/admin/patients/${patient.id}/appointments`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: token }
       });
       setAppointments(res.data.appointments);
     } catch (err) {

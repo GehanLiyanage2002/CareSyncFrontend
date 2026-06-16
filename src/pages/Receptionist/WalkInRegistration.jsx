@@ -19,6 +19,8 @@ const WalkInRegistration = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [allPatients, setAllPatients] = useState([]);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -32,35 +34,44 @@ const WalkInRegistration = () => {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery.length >= 2) {
-        fetchPatients(searchQuery);
-      } else {
-        setSearchResults([]);
-        setShowDropdown(false);
+    const fetchAllPatients = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/receptionist/all-patients`, {
+          headers: { Authorization: token }
+        });
+        setAllPatients(response.data);
+      } catch (error) {
+        console.error('Error preloading patients:', error);
       }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    };
+    fetchAllPatients();
+  }, [token]);
 
-  const fetchPatients = async (query) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/receptionist/search-patients?q=${query}`, {
-        headers: { Authorization: token }
-      });
-      setSearchResults(response.data);
-      if (response.data.length > 0) {
-        setShowDropdown(true);
-      } else {
-        setShowDropdown(false);
-      }
-    } catch (error) {
-      console.error('Error fetching patients:', error);
+  useEffect(() => {
+    if (searchQuery.length >= 2) {
+      const q = searchQuery.toLowerCase();
+      // Instant local search (0ms network delay)
+      const filtered = allPatients.filter(p => 
+        (p.full_name && p.full_name.toLowerCase().includes(q)) || 
+        (p.email && p.email.toLowerCase().includes(q)) ||
+        (p.mobile_number && p.mobile_number.includes(q))
+      ).slice(0, 10);
+      
+      setSearchResults(filtered);
+      setShowDropdown(true);
+      setIsSearching(false);
+    } else {
+      setSearchResults([]);
+      setShowDropdown(false);
+      setIsSearching(false);
     }
-  };
+  }, [searchQuery, allPatients]);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
+    if (e.target.value.length < 2) {
+      setShowDropdown(false);
+    }
   };
 
   const handleSelectPatient = (patient) => {
@@ -156,23 +167,33 @@ const WalkInRegistration = () => {
         </div>
 
         {/* Search Dropdown */}
-        {showDropdown && searchResults.length > 0 && (
+        {showDropdown && (
           <div className="absolute top-[85px] left-0 w-full md:w-[calc(100%-110px)] z-50 bg-white rounded-2xl shadow-xl border border-slate-100 max-h-60 overflow-y-auto">
             <div className="p-2">
               <p className="text-xs font-bold text-slate-400 px-3 pb-2 pt-1 uppercase tracking-wider">Suggested Patients</p>
-              {searchResults.map((patient) => (
-                <div 
-                  key={patient.id} 
-                  onClick={() => handleSelectPatient(patient)}
-                  className="px-4 py-3 hover:bg-slate-50 cursor-pointer rounded-xl transition-colors border-b border-slate-50 last:border-0"
-                >
-                  <p className="font-bold text-slate-800 text-sm">{patient.full_name}</p>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                    <span className="text-xs text-slate-500 flex items-center gap-1"><Phone size={12}/> {patient.mobile_number}</span>
-                    {patient.email && <span className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>}
-                  </div>
+              
+              {isSearching ? (
+                <div className="flex items-center justify-center p-4 text-slate-500 gap-2">
+                  <Activity className="animate-spin text-blue-500" size={16} />
+                  <span className="text-sm font-bold">Searching...</span>
                 </div>
-              ))}
+              ) : searchResults.length > 0 ? (
+                searchResults.map((patient) => (
+                  <div 
+                    key={patient.id} 
+                    onClick={() => handleSelectPatient(patient)}
+                    className="px-4 py-3 hover:bg-slate-50 cursor-pointer rounded-xl transition-colors border-b border-slate-50 last:border-0"
+                  >
+                    <p className="font-bold text-slate-800 text-sm">{patient.full_name}</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                      <span className="text-xs text-slate-500 flex items-center gap-1"><Phone size={12}/> {patient.mobile_number}</span>
+                      {patient.email && <span className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>}
+                    </div>
+                  </div>
+                ))
+              ) : searchQuery.length >= 2 ? (
+                <div className="p-4 text-center text-sm font-bold text-slate-500">No patients found.</div>
+              ) : null}
             </div>
           </div>
         )}

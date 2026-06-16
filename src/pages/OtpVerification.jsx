@@ -94,7 +94,7 @@ const OtpVerification = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-otp', {
+      const response = await axios.post('http://127.0.0.1:5000/api/auth/verify-otp', {
         email,
         otp: otpCode
       });

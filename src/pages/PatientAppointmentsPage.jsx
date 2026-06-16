@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const statusConfig = {
   pending: {
@@ -47,8 +47,8 @@ const PatientAppointmentsPage = () => {
     const fetchAppointments = async () => {
       try {
         const [appRes, servRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/appointments/patient/my-appointments', { headers: { Authorization: token } }),
-          axios.get('http://localhost:5000/api/services/bookings', { headers: { Authorization: token } })
+          axios.get('http://127.0.0.1:5000/api/appointments/patient/my-appointments', { headers: { Authorization: token } }),
+          axios.get('http://127.0.0.1:5000/api/services/bookings', { headers: { Authorization: token } })
         ]);
         if (appRes.data.success) {
           setAppointments(appRes.data.appointments);

@@ -17,7 +17,7 @@ const PatientMedicalHistoryPage = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/reports/my-history`, {
+        const res = await axios.get(`http://127.0.0.1:5000/api/reports/my-history`, {
           headers: { Authorization: token }
         });
         if (res.data.success) {

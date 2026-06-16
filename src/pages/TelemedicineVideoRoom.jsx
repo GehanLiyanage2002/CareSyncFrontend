@@ -34,7 +34,7 @@ export default function TelemedicineVideoRoom() {
 
   const setupMeeting = async () => {
     try {
-      const res = await axios.post('http://localhost:5000/api/telemedicine/token', 
+      const res = await axios.post('http://127.0.0.1:5000/api/telemedicine/token', 
         { appointmentId: id },
         { headers: { Authorization: token } }
       );
@@ -132,7 +132,7 @@ export default function TelemedicineVideoRoom() {
 
     if (role === 'Doctor') {
       try {
-        await axios.post('http://localhost:5000/api/telemedicine/end', 
+        await axios.post('http://127.0.0.1:5000/api/telemedicine/end', 
           { appointmentId: id },
           { headers: { Authorization: token } }
         );

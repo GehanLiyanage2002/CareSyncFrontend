@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const ServiceProfilePage = () => {
   const location = useLocation();
@@ -87,7 +87,7 @@ const ServiceProfilePage = () => {
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-500 to-teal-400 opacity-20 blur-md scale-105"></div>
                 {service.image ? (
                   <img
-                    src={`http://localhost:5000/api/services/${service.id}/image?t=${imgKey}`}
+                    src={`http://127.0.0.1:5000/api/services/${service.id}/image?t=${imgKey}`}
                     alt={service.name}
                     className="w-full aspect-square object-cover rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl relative z-10"
                     onError={(e) => {

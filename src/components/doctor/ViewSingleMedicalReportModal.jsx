@@ -15,7 +15,7 @@ const ViewSingleMedicalReportModal = ({ isOpen, onClose, appointment, onEditClic
       const fetchReport = async () => {
         setIsLoading(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/reports/appointment/${appointment.id}`, {
+          const res = await axios.get(`http://127.0.0.1:5000/api/reports/appointment/${appointment.id}`, {
             headers: { Authorization: token }
           });
           if (res.data.success && res.data.report) {

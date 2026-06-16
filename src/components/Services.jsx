@@ -10,7 +10,7 @@ import {
   Baby, Sparkles, Search, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const Services = ({ isPage }) => {
   const navigate = useNavigate();
@@ -125,7 +125,7 @@ const Services = ({ isPage }) => {
                       {service.has_image ? (
                         <div className="w-20 h-20 rounded-full border-2 border-white dark:border-gray-800 shadow-sm overflow-hidden group-hover:scale-105 transition-transform duration-300">
                           <img 
-                            src={`http://localhost:5000/api/services/${service.id}/image`} 
+                            src={`http://127.0.0.1:5000/api/services/${service.id}/image`} 
                             alt={service.name} 
                             className="w-full h-full object-cover"
                           />

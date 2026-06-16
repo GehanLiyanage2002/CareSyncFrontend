@@ -27,7 +27,7 @@ const ScheduleManager = () => {
 
   const fetchSchedules = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/doctor/schedule', {
+      const res = await axios.get('http://127.0.0.1:5000/api/doctor/schedule', {
         headers: { Authorization: token }
       });
       if (res.data.success) {
@@ -66,7 +66,7 @@ const ScheduleManager = () => {
       const dayStr = String(selectedDate.getDate()).padStart(2, '0');
       const schedule_date = `${year}-${monthStr}-${dayStr}`;
 
-      await axios.post('http://localhost:5000/api/doctor/schedule', {
+      await axios.post('http://127.0.0.1:5000/api/doctor/schedule', {
         schedule_date: schedule_date,
         start_time: formData.start_time,
         end_time: formData.end_time,

@@ -82,7 +82,7 @@ const AdminDashboard = () => {
   const handleCancelAppointment = async () => {
     if (!appointmentToCancel) return;
     try {
-      const res = await axios.put(`http://localhost:5000/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
+      const res = await axios.put(`http://127.0.0.1:5000/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
       if (res.data.success) {
         toast.success(res.data.message);
         setAppointments(prev => prev.map(appt => appt.id === appointmentToCancel ? { ...appt, status: 'Cancelled' } : appt));
@@ -122,7 +122,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      let url = 'http://localhost:5000/api/admin/stats';
+      let url = 'http://127.0.0.1:5000/api/admin/stats';
       const { startDate, endDate } = getFilterDates();
       if (startDate && endDate) {
         url += `?startDate=${startDate}&endDate=${endDate}`;
@@ -137,7 +137,7 @@ const AdminDashboard = () => {
 
   const fetchDoctors = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/doctors', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/admin/doctors', config);
       setDoctors(res.data.doctors);
     } catch (err) {
       console.error(err);
@@ -146,7 +146,7 @@ const AdminDashboard = () => {
 
   const fetchServiceBookings = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/services/bookings', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/services/bookings', config);
       setServiceBookings(res.data.bookings);
     } catch (err) {
       console.error(err);
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
 
   const fetchPatients = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/patients', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/admin/patients', config);
       setPatients(res.data.patients);
     } catch (err) {
       console.error(err);
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/appointments', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/admin/appointments', config);
       setAppointments(res.data.appointments);
     } catch (err) {
       console.error(err);
@@ -173,7 +173,7 @@ const AdminDashboard = () => {
 
   const fetchEarnings = async () => {
     try {
-      let url = 'http://localhost:5000/api/admin/earnings';
+      let url = 'http://127.0.0.1:5000/api/admin/earnings';
       const { startDate, endDate } = getFilterDates();
       if (startDate && endDate) {
         url += `?startDate=${startDate}&endDate=${endDate}`;
@@ -206,7 +206,7 @@ const AdminDashboard = () => {
   }, [activeTab, dateFilter, customDates]);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000', { reconnection: true, reconnectionDelay: 1000 });
+    const socket = io('http://127.0.0.1:5000', { reconnection: true, reconnectionDelay: 1000 });
     socket.on('connect', () => {
       setSocketConnected(true);
       // Refresh data on reconnect (e.g. after server restart)
@@ -262,7 +262,7 @@ const AdminDashboard = () => {
 
   const handleApproveDoctor = async (id, currentStatus) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/admin/doctors/${id}/approve`, {
+      const res = await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${id}/approve`, {
         is_approved: !currentStatus
       }, config);
       toast.success(res.data.message);
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
   const confirmDeleteDoctor = async () => {
     if (!doctorToDelete) return;
     try {
-      const res = await axios.delete(`http://localhost:5000/api/admin/doctors/${doctorToDelete.id}`, config);
+      const res = await axios.delete(`http://127.0.0.1:5000/api/admin/doctors/${doctorToDelete.id}`, config);
       toast.success(res.data.message);
       setDoctorToDelete(null);
       setSelectedDoctor(null);
@@ -566,7 +566,7 @@ const AdminDashboard = () => {
                               <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
                                   <img 
-                                    src={`http://localhost:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} 
+                                    src={`http://127.0.0.1:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} 
                                     alt={earn.doctor_name} 
                                     className="w-full h-full object-cover" 
                                     onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name ? earn.doctor_name.charAt(0).toUpperCase() : 'DR'; }} 
@@ -729,7 +729,7 @@ const AdminDashboard = () => {
                             <div className="flex justify-between items-start">
                               <div className="flex gap-4">
                                 <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
-                                   <img src={`http://localhost:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
+                                   <img src={`http://127.0.0.1:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
                                 </div>
                                 <div className="flex flex-col justify-center">
                                   <div className="flex items-center gap-3 mb-1 flex-wrap">
@@ -1211,7 +1211,7 @@ const AdminDashboard = () => {
             <div className="px-8 pb-8">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
-                  <img src={`http://localhost:5000/api/users/profile-image/${selectedDoctor.id}?t=${Date.now()}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
+                  <img src={`http://127.0.0.1:5000/api/users/profile-image/${selectedDoctor.id}?t=${Date.now()}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
                 </div>
                 
                 {/* Toggle Switch */}

@@ -21,7 +21,7 @@ const QuickBookServiceModal = ({ patient, onClose, onBookingSuccess }) => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/services');
+        const res = await axios.get('http://127.0.0.1:5000/api/services');
         if (res.data.success) {
           // Filter out unavailable services
           setServices(res.data.services.filter(s => s.is_available));
@@ -53,7 +53,7 @@ const QuickBookServiceModal = ({ patient, onClose, onBookingSuccess }) => {
         payment_method: paymentMethod
       };
 
-      const res = await axios.post('http://localhost:5000/api/services/book', payload, {
+      const res = await axios.post('http://127.0.0.1:5000/api/services/book', payload, {
         headers: { Authorization: token }
       });
 

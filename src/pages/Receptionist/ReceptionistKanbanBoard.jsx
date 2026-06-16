@@ -3,7 +3,7 @@ import { Calendar, Clock, User, CreditCard, X, Hash, Check } from 'lucide-react'
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const ReceptionistKanbanBoard = ({ allAppointments = [] }) => {
   const { user } = useSelector((state) => state.auth);

@@ -9,7 +9,7 @@ import ScheduleManager from '../components/doctor/ScheduleManager';
 import FeeManager from '../components/doctor/FeeManager';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -24,7 +24,7 @@ const DoctorDashboardHome = () => {
     const fetchData = async () => {
       try {
         // Fetch doctor profile to get availability status
-        const profileRes = await axios.get('http://localhost:5000/api/users/doctor-profile', {
+        const profileRes = await axios.get('http://127.0.0.1:5000/api/users/doctor-profile', {
           headers: { Authorization: token }
         });
         if (profileRes.data.profile) {
@@ -32,7 +32,7 @@ const DoctorDashboardHome = () => {
         }
 
         // Fetch today's appointments
-        const aptRes = await axios.get('http://localhost:5000/api/appointments/doctor/my-appointments', {
+        const aptRes = await axios.get('http://127.0.0.1:5000/api/appointments/doctor/my-appointments', {
           headers: { Authorization: token }
         });
         
@@ -82,7 +82,7 @@ const DoctorDashboardHome = () => {
     setIsAvailable(newStatus);
     
     try {
-      await axios.put('http://localhost:5000/api/appointments/doctor/availability', {}, {
+      await axios.put('http://127.0.0.1:5000/api/appointments/doctor/availability', {}, {
         headers: { Authorization: token }
       });
       

@@ -41,7 +41,7 @@ const WalkInRegistration = () => {
   useEffect(() => {
     const fetchAllPatients = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/receptionist/all-patients`, {
+        const response = await axios.get(`http://127.0.0.1:5000/api/receptionist/all-patients`, {
           headers: { Authorization: token }
         });
         setAllPatients(response.data);
@@ -113,7 +113,7 @@ const WalkInRegistration = () => {
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/receptionist/register-patient',
+        'http://127.0.0.1:5000/api/receptionist/register-patient',
         formData,
         {
           headers: { Authorization: token }
@@ -452,6 +452,7 @@ const WalkInRegistration = () => {
           onBookingSuccess={() => {
             setSearchQuery('');
             setPatientForBooking(null);
+            setRecentlyRegisteredPatient(null);
           }}
         />
       )}
@@ -464,6 +465,7 @@ const WalkInRegistration = () => {
           onBookingSuccess={() => {
             setSearchQuery('');
             setPatientForServiceBooking(null);
+            setRecentlyRegisteredPatient(null);
           }}
         />
       )}

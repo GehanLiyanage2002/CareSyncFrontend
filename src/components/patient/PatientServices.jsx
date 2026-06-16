@@ -26,8 +26,8 @@ const PatientServices = () => {
   const fetchServicesAndBookings = async () => {
     try {
       const [servicesRes, bookingsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/services', { headers: { Authorization: token } }),
-        axios.get('http://localhost:5000/api/services/bookings', { headers: { Authorization: token } })
+        axios.get('http://127.0.0.1:5000/api/services', { headers: { Authorization: token } }),
+        axios.get('http://127.0.0.1:5000/api/services/bookings', { headers: { Authorization: token } })
       ]);
       
       if (servicesRes.data.success) {
@@ -63,7 +63,7 @@ const PatientServices = () => {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/services/book', {
+      const res = await axios.post('http://127.0.0.1:5000/api/services/book', {
         service_id: selectedService.id,
         date,
         time,

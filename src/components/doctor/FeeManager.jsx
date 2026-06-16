@@ -13,7 +13,7 @@ const FeeManager = () => {
   useEffect(() => {
     const fetchFee = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/doctor/profile', {
+        const res = await axios.get('http://127.0.0.1:5000/api/doctor/profile', {
           headers: { Authorization: token }
         });
         if (res.data.success) {
@@ -38,7 +38,7 @@ const FeeManager = () => {
     
     setLoading(true);
     try {
-      const res = await axios.put('http://localhost:5000/api/doctor/fee', 
+      const res = await axios.put('http://127.0.0.1:5000/api/doctor/fee', 
         { fee: Number(fee) },
         { headers: { Authorization: token } }
       );

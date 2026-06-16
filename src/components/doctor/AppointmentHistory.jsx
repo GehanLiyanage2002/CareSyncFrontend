@@ -20,7 +20,7 @@ const AppointmentHistory = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/doctor/appointments', {
+        const response = await axios.get('http://127.0.0.1:5000/api/doctor/appointments', {
           headers: { Authorization: token }
         });
 

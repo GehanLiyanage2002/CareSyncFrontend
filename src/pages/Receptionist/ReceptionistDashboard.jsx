@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, UserPlus, Calendar, CreditCard, LayoutDashboard
+  Users, UserPlus, Calendar, CreditCard, LayoutDashboard, Monitor
 } from 'lucide-react';
 import { logout } from '../../features/auth/authSlice';
 import WalkInRegistration from './WalkInRegistration';
 import LiveQueue from './LiveQueue';
+import GlobalQueueMonitor from './GlobalQueueMonitor';
 
 const ReceptionistDashboard = () => {
-  const [activeTab, setActiveTab] = useState('Live Queue');
+  const [activeTab, setActiveTab] = useState('Patient Queue');
   const { token, user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -28,7 +29,8 @@ const ReceptionistDashboard = () => {
   };
 
   const navItems = [
-    { name: 'Live Queue', icon: <Users /> },
+    { name: 'Patient Queue', icon: <Users /> },
+    { name: 'Live Queue', icon: <Monitor /> },
     { name: 'Walk-in', icon: <UserPlus /> },
     { name: 'Booking', icon: <Calendar /> },
     { name: 'Billing', icon: <CreditCard /> },
@@ -81,9 +83,15 @@ const ReceptionistDashboard = () => {
 
 
           {/* Dynamic Content */}
-          {activeTab === 'Live Queue' && (
+          {activeTab === 'Patient Queue' && (
             <div className="animate-fadeIn">
               <LiveQueue />
+            </div>
+          )}
+
+          {activeTab === 'Live Queue' && (
+            <div className="animate-fadeIn">
+              <GlobalQueueMonitor />
             </div>
           )}
 

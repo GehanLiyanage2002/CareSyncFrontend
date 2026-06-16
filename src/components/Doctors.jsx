@@ -56,7 +56,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   };
 
   return (
-    <section id="doctors" className={`${hideHeader ? 'pb-24 pt-4' : 'py-24'} bg-white relative overflow-hidden transition-colors duration-300`}>
+    <section id="doctors" className={`${hideHeader ? 'pb-24 pt-4' : 'py-24'} bg-white dark:bg-gray-800 relative overflow-hidden transition-colors duration-300`}>
       
       {/* Decorative Dots - Left */}
       <div className="absolute top-1/4 left-10 hidden lg:block opacity-30 z-0">
@@ -130,7 +130,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
             {/* Left Scroll Button */}
             <button 
               onClick={() => scroll('left')}
-              className="hidden md:flex absolute -left-4 lg:-left-12 z-20 w-10 h-10 bg-white shadow-md rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+              className="hidden md:flex absolute -left-4 lg:-left-12 z-20 w-10 h-10 bg-white dark:bg-gray-800 shadow-md rounded-full items-center justify-center text-slate-500 dark:text-gray-400 hover:text-blue-600 transition-colors"
             >
               <ChevronLeft size={24} />
             </button>
@@ -194,7 +194,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
             {/* Right Scroll Button */}
             <button 
               onClick={() => scroll('right')}
-              className="hidden md:flex absolute -right-4 lg:-right-12 z-20 w-10 h-10 bg-white shadow-md rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+              className="hidden md:flex absolute -right-4 lg:-right-12 z-20 w-10 h-10 bg-white dark:bg-gray-800 shadow-md rounded-full items-center justify-center text-slate-500 dark:text-gray-400 hover:text-blue-600 transition-colors"
             >
               <ChevronRight size={24} />
             </button>
@@ -202,7 +202,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-slate-500 text-lg font-medium">
+            <p className="text-slate-500 dark:text-gray-400 text-lg font-medium">
               No doctors found matching "{searchTerm}"
             </p>
           </div>

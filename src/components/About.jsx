@@ -6,7 +6,7 @@ const About = () => {
   const navigate = useNavigate();
 
   return (
-    <section id="about" className="py-20 bg-white overflow-hidden">
+    <section id="about" className="py-20 bg-white dark:bg-gray-800 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
           
@@ -24,7 +24,7 @@ const About = () => {
               Medical Clinic
             </h2>
             
-            <p className="text-slate-500 text-lg leading-relaxed mb-8 max-w-lg">
+            <p className="text-slate-500 dark:text-gray-400 text-lg leading-relaxed mb-8 max-w-lg">
               There are many variations of passages of lorem ipsum available, 
               but the majority have suffered alteration in some form, by injected 
               humour, or randomised words which don't look even slightly believable.
@@ -62,7 +62,7 @@ const About = () => {
             </div>
 
             {/* Foreground Image (Female Doctor) */}
-            <div className="absolute -bottom-10 right-0 w-[60%] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border-8 border-white bg-white">
+            <div className="absolute -bottom-10 right-0 w-[60%] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)] border-8 border-white bg-white dark:bg-gray-800">
               <img 
                 src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                 alt="Female doctor" 

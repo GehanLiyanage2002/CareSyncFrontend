@@ -66,7 +66,7 @@ const ViewSingleMedicalReportModal = ({ isOpen, onClose, appointment, onEditClic
             )}
             <button 
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all"
+              className="p-2 text-slate-400 hover:text-slate-800 dark:text-white dark:hover:text-white rounded-full hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 shadow-sm transition-all"
             >
               <X size={20} />
             </button>
@@ -78,7 +78,7 @@ const ViewSingleMedicalReportModal = ({ isOpen, onClose, appointment, onEditClic
           {isLoading ? (
             <div className="flex flex-col items-center justify-center min-h-[300px]">
               <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-              <p className="text-slate-500 font-semibold">Loading report details...</p>
+              <p className="text-slate-500 dark:text-gray-400 font-semibold">Loading report details...</p>
             </div>
           ) : !report ? (
             <div className="flex flex-col items-center justify-center min-h-[300px] text-center">

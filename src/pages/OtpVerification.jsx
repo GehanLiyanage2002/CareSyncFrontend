@@ -145,7 +145,7 @@ const OtpVerification = () => {
 
       {/* Card container */}
       <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-200/50 p-8 md:p-10 border border-white/60">
+        <div className="bg-white dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-200/50 p-8 md:p-10 border border-white/60">
           
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-300 mb-5">
@@ -153,10 +153,10 @@ const OtpVerification = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
               </svg>
             </div>
-            <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Verify Your Account</h1>
-            <p className="mt-2 text-slate-500 text-sm font-medium">
+            <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Verify Your Account</h1>
+            <p className="mt-2 text-slate-500 dark:text-gray-400 text-sm font-medium">
               We've generated a 6-digit verification code for <br />
-              <strong className="text-slate-700">{email}</strong>
+              <strong className="text-slate-700 dark:text-gray-200">{email}</strong>
             </p>
           </div>
 
@@ -184,7 +184,7 @@ const OtpVerification = () => {
                   onChange={(e) => handleChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onFocus={(e) => e.target.select()}
-                  className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold bg-slate-50 border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all duration-200 shadow-sm"
+                  className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 shadow-sm"
                 />
               ))}
             </div>

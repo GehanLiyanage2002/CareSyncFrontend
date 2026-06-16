@@ -42,7 +42,7 @@ const PatientReviewsList = ({ title = "Patient Reviews", subtitle = "What patien
                   <Star key={s} size={14} className={s <= Math.round(reviewStats.average_rating) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200 dark:fill-gray-600 dark:text-gray-600'} />
                 ))}
               </div>
-              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">{reviewStats.total_reviews} review{reviewStats.total_reviews !== 1 ? 's' : ''}</span>
+              <span className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider">{reviewStats.total_reviews} review{reviewStats.total_reviews !== 1 ? 's' : ''}</span>
             </div>
           </div>
         )}

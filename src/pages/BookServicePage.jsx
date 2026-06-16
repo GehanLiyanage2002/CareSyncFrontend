@@ -471,10 +471,10 @@ const BookServicePage = () => {
 
       {/* Success Booking Receipt Modal */}
         {showSuccessModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white print:z-50 print:p-0">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white dark:bg-gray-800 print:z-50 print:p-0">
             <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-full print:rounded-none">
               <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-8 text-center text-white">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
+                <div className="w-16 h-16 bg-white dark:bg-gray-800/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
                   <CheckCircle className="h-10 w-10 text-white" />
                 </div>
                 <h4 className="text-2xl font-bold">Booking Confirmed!</h4>

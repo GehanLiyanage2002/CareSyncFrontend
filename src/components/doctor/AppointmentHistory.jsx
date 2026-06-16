@@ -82,7 +82,7 @@ const AppointmentHistory = () => {
       <div className="flex flex-col justify-center items-center h-[500px] text-slate-400">
         <div className="animate-pulse flex flex-col items-center">
           <div className="w-12 h-12 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mb-4"></div>
-          <p className="font-semibold text-slate-600">Loading your history...</p>
+          <p className="font-semibold text-slate-600 dark:text-gray-300">Loading your history...</p>
         </div>
       </div>
     );
@@ -146,7 +146,7 @@ const AppointmentHistory = () => {
                 <td colSpan="7" className="px-6 py-20 text-center">
                   <div className="flex flex-col items-center justify-center text-slate-400">
                     <Calendar className="w-12 h-12 mb-3 text-slate-300" />
-                    <p className="text-lg font-bold text-slate-500">No records found</p>
+                    <p className="text-lg font-bold text-slate-500 dark:text-gray-400">No records found</p>
                     <p className="text-sm mt-1">
                       {searchQuery ? "No history matches your search." : "You have no completed or cancelled appointments yet."}
                     </p>
@@ -155,7 +155,7 @@ const AppointmentHistory = () => {
               </tr>
             ) : (
               currentRecords.map((apt) => (
-                <tr key={apt.id} className="hover:bg-slate-50/80 dark:hover:bg-gray-700/50 transition-colors group">
+                <tr key={apt.id} className="hover:bg-slate-50 dark:bg-gray-900/80 dark:hover:bg-gray-700/50 transition-colors group">
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 rounded-lg font-bold text-xs border border-slate-200 dark:border-gray-600">
                       <Hash size={12} />
@@ -236,7 +236,7 @@ const AppointmentHistory = () => {
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-gray-600 text-sm font-semibold text-slate-600 dark:text-gray-300 disabled:opacity-50 hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm"
+              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-gray-600 text-sm font-semibold text-slate-600 dark:text-gray-300 disabled:opacity-50 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-800 transition-colors shadow-sm"
             >
               Previous
             </button>
@@ -246,7 +246,7 @@ const AppointmentHistory = () => {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-gray-600 text-sm font-semibold text-slate-600 dark:text-gray-300 disabled:opacity-50 hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm"
+              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-gray-600 text-sm font-semibold text-slate-600 dark:text-gray-300 disabled:opacity-50 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-800 transition-colors shadow-sm"
             >
               Next
             </button>

@@ -87,7 +87,7 @@ const PatientPastRecordsModal = ({ isOpen, onClose, patient }) => {
                     dateFormat="eeee, MMM d"
                     className="bg-transparent border-none text-sm font-bold text-slate-700 dark:text-gray-200 focus:ring-0 cursor-pointer outline-none w-full min-w-[120px] placeholder:text-slate-400"
                     isClearable
-                    clearButtonClassName="after:bg-slate-200 after:text-slate-600 dark:after:bg-gray-700 dark:after:text-gray-300"
+                    clearButtonClassName="after:bg-slate-200 after:text-slate-600 dark:text-gray-300 dark:after:bg-gray-700 dark:after:text-gray-300"
                   />
                 </div>
               </div>
@@ -95,7 +95,7 @@ const PatientPastRecordsModal = ({ isOpen, onClose, patient }) => {
             
             <button 
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all"
+              className="p-2 text-slate-400 hover:text-slate-800 dark:text-white dark:hover:text-white rounded-full hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 shadow-sm transition-all"
             >
               <X size={20} />
             </button>
@@ -107,7 +107,7 @@ const PatientPastRecordsModal = ({ isOpen, onClose, patient }) => {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center min-h-[300px]">
               <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-              <p className="text-slate-500 font-semibold">Loading history...</p>
+              <p className="text-slate-500 dark:text-gray-400 font-semibold">Loading history...</p>
             </div>
           ) : reports.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[300px] text-center">

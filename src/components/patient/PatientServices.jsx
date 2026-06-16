@@ -213,14 +213,14 @@ const PatientServices = () => {
       <div className="flex gap-4 border-b border-slate-200 dark:border-slate-700 pb-2">
         <button 
           onClick={() => setActiveTab('book')}
-          className={`pb-2 px-2 font-semibold text-sm transition-colors relative ${activeTab === 'book' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`pb-2 px-2 font-semibold text-sm transition-colors relative ${activeTab === 'book' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700 dark:text-gray-200'}`}
         >
           Book a Service
           {activeTab === 'book' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></div>}
         </button>
         <button 
           onClick={() => setActiveTab('history')}
-          className={`pb-2 px-2 font-semibold text-sm transition-colors relative ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+          className={`pb-2 px-2 font-semibold text-sm transition-colors relative ${activeTab === 'history' ? 'text-blue-600' : 'text-slate-500 hover:text-slate-700 dark:text-gray-200'}`}
         >
           My Bookings
           {activeTab === 'history' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-t-full"></div>}
@@ -295,11 +295,11 @@ const PatientServices = () => {
               <div className="animate-in slide-in-from-right-4 duration-300">
                 <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl mb-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-slate-500 text-sm">Service:</span>
+                    <span className="text-slate-500 dark:text-gray-400 text-sm">Service:</span>
                     <span className="font-semibold text-slate-800 dark:text-white">{selectedService.name}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-slate-500 text-sm">Date & Time:</span>
+                    <span className="text-slate-500 dark:text-gray-400 text-sm">Date & Time:</span>
                     <span className="font-semibold text-slate-800 dark:text-white">{date} at {time}</span>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700">
@@ -337,7 +337,7 @@ const PatientServices = () => {
                   </div>
                 </div>
               )) : (
-                <p className="text-slate-500 text-center py-8">No services currently available.</p>
+                <p className="text-slate-500 dark:text-gray-400 text-center py-8">No services currently available.</p>
               )}
             </div>
           </div>
@@ -363,7 +363,7 @@ const PatientServices = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {bookings.length > 0 ? bookings.map(booking => (
-                  <tr key={booking.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={booking.id} className="hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="p-4 text-slate-600 dark:text-slate-300 font-medium">{booking.id}</td>
                     <td className="p-4 font-bold text-slate-800 dark:text-white">{booking.serviceName}</td>
                     <td className="p-4 text-slate-600 dark:text-slate-300">
@@ -381,7 +381,7 @@ const PatientServices = () => {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="5" className="p-8 text-center text-slate-500">
+                    <td colSpan="5" className="p-8 text-center text-slate-500 dark:text-gray-400">
                       You haven't booked any services yet.
                     </td>
                   </tr>

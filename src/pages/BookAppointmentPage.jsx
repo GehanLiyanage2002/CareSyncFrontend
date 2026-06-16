@@ -124,9 +124,29 @@ const BookAppointmentPage = () => {
           const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
             // Filter out buffer slots for online booking, and extract just the time string
-            const publicSlots = res.data.slots
+            let publicSlots = res.data.slots
               .filter(slotObj => !slotObj.isBuffer)
               .map(slotObj => slotObj.time);
+
+            // Filter out past slots if the selected date is today
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+
+            if (selectedDate.valueDate === todayStr) {
+              const currentHour = now.getHours();
+              const currentMinute = now.getMinutes();
+
+              publicSlots = publicSlots.filter(timeStr => {
+                const [slotHour, slotMinute] = timeStr.split(':').map(Number);
+                if (slotHour > currentHour) return true;
+                if (slotHour === currentHour && slotMinute > currentMinute) return true;
+                return false;
+              });
+            }
+
             setDynamicSlots(publicSlots);
           }
         } catch (error) {

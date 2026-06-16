@@ -110,7 +110,28 @@ const BookServicePage = () => {
     return slots;
   };
 
-  const dynamicSlots = generateSlots(selectedDateObj);
+  let dynamicSlots = generateSlots(selectedDateObj);
+
+  if (selectedDateObj) {
+    const now = new Date();
+    const scheduleDate = new Date(selectedDateObj.schedule_date);
+    
+    if (
+      scheduleDate.getFullYear() === now.getFullYear() &&
+      scheduleDate.getMonth() === now.getMonth() &&
+      scheduleDate.getDate() === now.getDate()
+    ) {
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      
+      dynamicSlots = dynamicSlots.filter(timeStr => {
+        const [slotHour, slotMinute] = timeStr.split(':').map(Number);
+        if (slotHour > currentHour) return true;
+        if (slotHour === currentHour && slotMinute > currentMinute) return true;
+        return false;
+      });
+    }
+  }
 
   const validateForm = () => {
     const newErrors = {};

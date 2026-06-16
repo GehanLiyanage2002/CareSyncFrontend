@@ -230,16 +230,16 @@ const LiveQueue = () => {
               return timeA.localeCompare(timeB);
             };
 
-            const inProgressPatients = allAppointments.filter(a => {
-              const s = a.status?.toLowerCase();
-              return s === 'in progress' || s === 'in_queue' || s === 'with_doctor';
-            }).sort(sortByTime);
-
+            const currentPatientList = allAppointments.filter(a => a.status?.toLowerCase() === 'in progress');
+            
+            const inQueuePatients = allAppointments.filter(a => a.status?.toLowerCase() === 'in_queue').sort((a,b) => (parseInt(a.token_number)||0) - (parseInt(b.token_number)||0));
             const pendingPatients = allAppointments.filter(a => a.status?.toLowerCase() === 'pending').sort(sortByTime);
 
-            const currentPatient = inProgressPatients.length > 0 ? inProgressPatients[0] : null;
-            const nextPatient = pendingPatients.length > 0 ? pendingPatients[0] : null;
-            const waitingCount = pendingPatients.length;
+            const currentPatient = currentPatientList.length > 0 ? currentPatientList[0] : null;
+            
+            const nextPatient = inQueuePatients.length > 0 ? inQueuePatients[0] : (pendingPatients.length > 0 ? pendingPatients[0] : null);
+            
+            const waitingCount = inQueuePatients.length + pendingPatients.length;
 
             const formatDisplay = (patient, isNext = false) => {
               if (!patient) return <span className="text-slate-300 text-2xl font-black">-</span>;

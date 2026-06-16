@@ -175,10 +175,11 @@ const ReceptionistKanbanBoard = ({ allAppointments = [] }) => {
                             e.stopPropagation();
                             toast.success("Billing module coming soon!");
                           }}
-                          className="p-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-800/50 transition-all border border-emerald-100 dark:border-emerald-800/30 shadow-sm hover:scale-105 active:scale-95"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-800/50 transition-all border border-emerald-100 dark:border-emerald-800/30 shadow-sm hover:scale-105 active:scale-95"
                           title="Generate Bill"
                         >
-                          <Receipt size={18} strokeWidth={2.5} />
+                          <Receipt size={16} strokeWidth={2.5} />
+                          <span className="text-xs font-black uppercase tracking-wider">Billing</span>
                         </button>
                       )}
                     </div>

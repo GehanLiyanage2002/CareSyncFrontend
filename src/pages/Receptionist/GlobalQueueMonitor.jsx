@@ -132,17 +132,17 @@ const GlobalQueueMonitor = () => {
       {/* Grid of Doctor Queues */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {queues.map((docData) => {
-          // Calculate current, next, waiting
-          const inProgressPatients = docData.activeQueue.filter(a => {
-            const s = a.status?.toLowerCase();
-            return s === 'in progress' || s === 'in_queue' || s === 'with_doctor';
-          });
+          // Logic for Current, Next, Waiting
+          const currentPatientList = docData.upcomingAppointments?.filter(a => a.status?.toLowerCase() === 'in progress') || [];
           
+          const inQueuePatients = docData.activeQueue.filter(a => a.status?.toLowerCase() === 'in_queue').sort((a,b) => (parseInt(a.token_number)||0) - (parseInt(b.token_number)||0));
           const pendingPatients = (docData.pendingAppointments || []).sort(sortByTime);
           
-          const currentPatient = inProgressPatients.length > 0 ? inProgressPatients[0] : null;
-          const nextPatient = pendingPatients.length > 0 ? pendingPatients[0] : null;
-          const waitingCount = pendingPatients.length;
+          const currentPatient = currentPatientList.length > 0 ? currentPatientList[0] : null;
+          
+          const nextPatient = inQueuePatients.length > 0 ? inQueuePatients[0] : (pendingPatients.length > 0 ? pendingPatients[0] : null);
+          
+          const waitingCount = inQueuePatients.length + pendingPatients.length;
 
           return (
             <div key={docData.doctorId} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100 overflow-hidden flex flex-col group">

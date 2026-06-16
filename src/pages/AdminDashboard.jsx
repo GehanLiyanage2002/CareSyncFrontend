@@ -31,6 +31,19 @@ const AdminDashboard = () => {
   
   const [patientSearchQuery, setPatientSearchQuery] = useState('');
   const [patientTypeFilter, setPatientTypeFilter] = useState('All');
+  const [patientCurrentPage, setPatientCurrentPage] = useState(1);
+  const patientsPerPage = 6;
+
+  const [doctorCurrentPage, setDoctorCurrentPage] = useState(1);
+  const doctorsPerPage = 6;
+
+  useEffect(() => {
+    setPatientCurrentPage(1);
+  }, [patientSearchQuery, patientTypeFilter]);
+
+  useEffect(() => {
+    setDoctorCurrentPage(1);
+  }, [doctorSearchQuery, doctorStatusFilter]);
 
   
   // Filtering and Real-time state
@@ -310,6 +323,12 @@ const AdminDashboard = () => {
     return nameMatch || emailMatch || phoneMatch || bloodMatch;
   });
 
+  // Pagination Logic
+  const indexOfLastPatient = patientCurrentPage * patientsPerPage;
+  const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
+  const currentPatients = filteredPatients.slice(indexOfFirstPatient, indexOfLastPatient);
+  const totalPatientPages = Math.ceil(filteredPatients.length / patientsPerPage);
+
   const filteredDoctors = doctors.filter(doc => {
     // Status Filter based on is_available (Accepting patients or not)
     if (doctorStatusFilter === 'Available' && !doc.is_available) return false;
@@ -326,6 +345,12 @@ const AdminDashboard = () => {
     
     return nameMatch || specMatch || emailMatch || phoneMatch;
   });
+
+  // Doctor Pagination Logic
+  const indexOfLastDoctor = doctorCurrentPage * doctorsPerPage;
+  const indexOfFirstDoctor = indexOfLastDoctor - doctorsPerPage;
+  const currentDoctors = filteredDoctors.slice(indexOfFirstDoctor, indexOfLastDoctor);
+  const totalDoctorPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 overflow-hidden font-sans">
@@ -642,66 +667,86 @@ const AdminDashboard = () => {
                         Add Doctor
                       </button>
                     </div>
-                  <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
-                      {filteredDoctors.map(doctor => (
-                        <div 
-                          key={doctor.id} 
-                          onClick={() => setSelectedDoctor(doctor)}
-                          className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex gap-4">
-                              <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
-                                 <img src={`http://localhost:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
-                              </div>
-                              <div className="flex flex-col justify-center">
-                                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                  <h4 className="font-extrabold text-indigo-900 text-[17px]">Dr. {doctor.full_name}</h4>
-                                  <span className={`flex items-center gap-1.5 text-[11px] font-bold ${doctor.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
-                                    <span className={`w-2 h-2 rounded-full ${doctor.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                                    {doctor.is_available ? 'Available' : 'Unavailable'}
-                                  </span>
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${doctor.is_approved ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}`}>
-                                    {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
-                                  </span>
+                    <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+                        {currentDoctors.map(doctor => (
+                          <div 
+                            key={doctor.id} 
+                            onClick={() => setSelectedDoctor(doctor)}
+                            className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex gap-4">
+                                <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
+                                   <img src={`http://localhost:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
                                 </div>
-                                <p className="text-slate-500 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+                                <div className="flex flex-col justify-center">
+                                  <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                    <h4 className="font-extrabold text-indigo-900 text-[17px]">Dr. {doctor.full_name}</h4>
+                                    <span className={`flex items-center gap-1.5 text-[11px] font-bold ${doctor.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                      <span className={`w-2 h-2 rounded-full ${doctor.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                                      {doctor.is_available ? 'Available' : 'Unavailable'}
+                                    </span>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${doctor.is_approved ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}`}>
+                                      {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-500 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-1 text-indigo-900 font-bold text-sm mt-1">
+                                   <span className="text-yellow-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
+                                </div>
                               </div>
                             </div>
-                            
-                            <div className="flex flex-col items-end gap-1">
-                              <div className="flex items-center gap-1 text-indigo-900 font-bold text-sm mt-1">
-                                 <span className="text-yellow-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
-                              </div>
-                            </div>
-                          </div>
 
-                          <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
-                              <span>Patients</span>
-                              <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
-                                <Users size={14} className="text-indigo-400" /> {doctor.total_patients || 0}
-                              </span>
-                            </div>
-                            
-                            <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
-                              <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
-                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
-                                LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
-                              </span>
+                            <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
+                              <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
+                                <span>Patients</span>
+                                <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
+                                  <Users size={14} className="text-indigo-400" /> {doctor.total_patients || 0}
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
+                                <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
+                                <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+                                  LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                      
                       {filteredDoctors.length === 0 && (
-                        <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                        <div className="col-span-full p-10 mt-4 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
                           No doctors match your search.
+                        </div>
+                      )}
+                      
+                      {totalDoctorPages > 1 && (
+                        <div className="flex justify-center items-center gap-2 mt-6 pt-6 border-t border-indigo-50/50">
+                          {Array.from({ length: totalDoctorPages }, (_, i) => (
+                            <button
+                              key={i + 1}
+                              onClick={() => setDoctorCurrentPage(i + 1)}
+                              className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
+                                doctorCurrentPage === i + 1 
+                                  ? 'bg-indigo-600 text-white shadow-md' 
+                                  : 'bg-white text-slate-500 hover:bg-indigo-50 border border-slate-200'
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
                   </div>
-                </div>
+
                     </>
                   )}
                 </>
@@ -789,7 +834,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
                       <div className="flex flex-col gap-3">
-                        {filteredPatients.map(patient => (
+                        {currentPatients.map(patient => (
                         <div 
                           key={patient.id} 
                           onClick={() => setSelectedPatient(patient)}
@@ -834,6 +879,24 @@ const AdminDashboard = () => {
                       {filteredPatients.length === 0 && (
                         <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
                           No patients match your search.
+                        </div>
+                      )}
+                      
+                      {totalPatientPages > 1 && (
+                        <div className="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-indigo-50/50">
+                          {Array.from({ length: totalPatientPages }, (_, i) => (
+                            <button
+                              key={i + 1}
+                              onClick={() => setPatientCurrentPage(i + 1)}
+                              className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
+                                patientCurrentPage === i + 1 
+                                  ? 'bg-indigo-600 text-white shadow-md' 
+                                  : 'bg-white text-slate-500 hover:bg-indigo-50 border border-slate-200'
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>

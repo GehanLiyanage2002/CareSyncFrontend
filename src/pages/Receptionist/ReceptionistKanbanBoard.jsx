@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, CreditCard, X, Hash, Check, Receipt } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check, Receipt, CheckCircle, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
 const socket = io('http://127.0.0.1:5000');
 
-const ReceptionistKanbanBoard = ({ allAppointments = [] }) => {
+const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
   const { user } = useSelector((state) => state.auth);
   
   const [data, setData] = useState({
@@ -21,6 +21,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [] }) => {
   });
   
   const [selectedTask, setSelectedTask] = useState(null);
+  const [billingTask, setBillingTask] = useState(null);
 
   useEffect(() => {
     if (!allAppointments || allAppointments.length === 0) {
@@ -173,7 +174,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [] }) => {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast.success("Billing module coming soon!");
+                            setBillingTask(task);
                           }}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-800/50 transition-all border border-emerald-100 dark:border-emerald-800/30 shadow-sm hover:scale-105 active:scale-95"
                           title="Generate Bill"
@@ -254,6 +255,111 @@ const ReceptionistKanbanBoard = ({ allAppointments = [] }) => {
                     {selectedTask.paymentMethod || 'Cash'}
                   </p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Billing Receipt Modal */}
+      {billingTask && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setBillingTask(null)}>
+          <style>{`
+            @media print {
+              body * { visibility: hidden !important; }
+              #billing-receipt-modal, #billing-receipt-modal * { visibility: visible !important; }
+              #billing-receipt-modal {
+                position: absolute !important;
+                left: 50% !important;
+                top: 20px !important;
+                width: 100% !important;
+                max-width: 450px !important;
+                margin: 0 !important;
+                padding: 20px !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: white !important;
+                transform: translateX(-50%) !important;
+              }
+            }
+          `}</style>
+          <div 
+            id="billing-receipt-modal"
+            className="bg-white dark:bg-gray-800 rounded-[2rem] max-w-md w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in zoom-in-95 duration-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-500 p-5 text-center text-white relative print:bg-white print:text-black print:border-b print:border-gray-200 print:from-white print:to-white">
+              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-3 border border-white/30 animate-bounce print:animate-none print:bg-gray-100 print:border-gray-300">
+                <CheckCircle className="h-6 w-6 text-white print:text-emerald-600" />
+              </div>
+              <h4 className="text-xl font-black print:text-slate-800">Billing Receipt</h4>
+              <p className="text-xs text-emerald-100 font-bold uppercase tracking-widest mt-1 print:text-slate-500">CareSync Consultation Bill</p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="bg-teal-50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/60 rounded-2xl py-3 px-4 text-center shadow-sm print:shadow-none print:border-gray-200 print:bg-gray-50">
+                <span className="block text-[10px] text-teal-600 dark:text-teal-400 font-black uppercase tracking-widest mb-1 print:text-gray-500">Queue Token</span>
+                <span className="text-3xl font-black text-teal-800 dark:text-teal-400 tracking-wider font-mono print:text-black">{billingTask.tokenNumber || 'N/A'}</span>
+              </div>
+
+              <div className="border-2 border-dashed border-gray-100 dark:border-gray-700 p-5 rounded-3xl space-y-3 bg-gray-50/50 dark:bg-gray-900/20 print:border-gray-300 print:bg-white print:rounded-xl">
+                {doctor && (
+                  <>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Doctor</span>
+                      <span className="text-gray-800 dark:text-gray-200 font-black text-base print:text-black">Dr. {doctor.name || doctor.doctor_name}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Specialization</span>
+                      <span className="text-gray-800 dark:text-gray-200 font-bold print:text-black">{doctor.specialization || 'General'}</span>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Patient Name</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-black text-base print:text-black">{billingTask.patientName}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Contact</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-bold print:text-black">{billingTask.contact || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Date & Time</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-bold print:text-black">{billingTask.date} @ {billingTask.time}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Type</span>
+                  <span className="text-gray-800 dark:text-gray-200 font-bold print:text-black">{billingTask.type}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Payment</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-black print:text-black">
+                    {billingTask.paymentMethod === 'Cash' ? 'Pay Cash at Counter' : 'Online Paid'}
+                  </span>
+                </div>
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-2 flex justify-between items-center text-base">
+                  <span className="text-gray-500 font-black uppercase tracking-widest text-xs">Amount Due</span>
+                  <span className="text-2xl font-black text-slate-800 dark:text-white tracking-tight print:text-black">
+                    Rs. {billingTask.type === 'Telemedicine' ? '2,500' : (doctor?.consultation_fee?.toLocaleString() || doctor?.consultationFee?.toLocaleString() || '3,000')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6 print:hidden">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex-1 border border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-800 text-slate-700 dark:text-gray-300 font-bold py-3 rounded-2xl flex items-center justify-center gap-2 transition-all text-sm shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Printer className="h-5 w-5" />
+                  <span>Print Bill</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingTask(null)}
+                  className="flex-1 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-bold py-3 rounded-2xl transition-all text-sm shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

@@ -274,7 +274,7 @@ const LiveQueue = () => {
             );
           })()}
 
-          <ReceptionistKanbanBoard allAppointments={allAppointments} />
+          <ReceptionistKanbanBoard allAppointments={allAppointments} doctor={doctors.find(d => String(d.doctor_id) === String(selectedDoctorId))} />
 
         </div>
       )}

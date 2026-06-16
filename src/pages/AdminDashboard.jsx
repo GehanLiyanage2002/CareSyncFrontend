@@ -1097,7 +1097,7 @@ const AdminDashboard = () => {
                               </div>
                               
                               <div className="flex items-center justify-between">
-                                {booking.status === 'Completed' || booking.status === 'Confirmed' ? (
+                                {booking.status === 'Completed' || booking.status === 'In Progress' ? (
                                   <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
                                     {booking.status.toUpperCase()}
                                   </span>

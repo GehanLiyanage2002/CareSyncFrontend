@@ -17,11 +17,11 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
     tasks: {},
     columns: {
       'pending': { id: 'pending', title: 'Pending', taskIds: [] },
-      'confirmed': { id: 'confirmed', title: 'Confirmed', taskIds: [] },
+      'in progress': { id: 'in progress', title: 'In Progress', taskIds: [] },
       'completed': { id: 'completed', title: 'Completed', taskIds: [] },
       'cancelled': { id: 'cancelled', title: 'Cancelled', taskIds: [] },
     },
-    columnOrder: ['pending', 'confirmed', 'completed', 'cancelled'],
+    columnOrder: ['pending', 'in progress', 'completed', 'cancelled'],
   });
   const [selectedTask, setSelectedTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +54,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
           const newTasks = {};
           const cols = {
             'pending': [],
-            'confirmed': [],
+            'in progress': [],
             'completed': [],
             'cancelled': []
           };
@@ -112,7 +112,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
             tasks: newTasks,
             columns: {
               'pending': { ...prev.columns['pending'], taskIds: sortTaskIdsChronologically(cols['pending'], newTasks) },
-              'confirmed': { ...prev.columns['confirmed'], taskIds: sortTaskIdsChronologically(cols['confirmed'], newTasks) },
+              'in progress': { ...prev.columns['in progress'], taskIds: sortTaskIdsChronologically(cols['in progress'], newTasks) },
               'completed': { ...prev.columns['completed'], taskIds: sortTaskIdsChronologically(cols['completed'], newTasks) },
               'cancelled': { ...prev.columns['cancelled'], taskIds: sortTaskIdsChronologically(cols['cancelled'], newTasks) },
             }
@@ -229,7 +229,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
 
     // Make API call to update status
     try {
-      const newStatus = finishColumn.id; // 'pending', 'confirmed', 'completed', 'cancelled'
+      const newStatus = finishColumn.id; // 'pending', 'in progress', 'completed', 'cancelled'
       await axios.put(`http://localhost:5000/api/doctor/appointments/${draggableId}/status`, {
         status: newStatus
       }, {
@@ -308,14 +308,14 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
               <div key={column.id} className="flex flex-col bg-slate-50/50 dark:bg-gray-900/50 rounded-3xl border border-slate-100 dark:border-gray-700 overflow-hidden shadow-sm h-full">
                 <div className={`p-5 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center
                   ${column.id === 'pending' ? 'bg-amber-50/80 dark:bg-amber-900/20' : 
-                    column.id === 'confirmed' ? 'bg-blue-50/80 dark:bg-blue-900/20' : 
+                    column.id === 'in progress' ? 'bg-blue-50/80 dark:bg-blue-900/20' : 
                     column.id === 'completed' ? 'bg-emerald-50/80 dark:bg-emerald-900/20' : 
                     'bg-rose-50/80 dark:bg-rose-900/20'}
                 `}>
                   <h3 className="font-extrabold text-slate-800 dark:text-white flex items-center gap-2 text-sm uppercase tracking-widest">
                     <span className={`w-3 h-3 rounded-full shadow-sm ${
                       column.id === 'pending' ? 'bg-amber-500' : 
-                      column.id === 'confirmed' ? 'bg-blue-500' : 
+                      column.id === 'in progress' ? 'bg-blue-500' : 
                       column.id === 'completed' ? 'bg-emerald-500' : 
                       'bg-rose-500'
                     }`}></span>

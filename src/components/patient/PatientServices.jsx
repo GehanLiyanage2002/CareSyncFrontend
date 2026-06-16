@@ -84,7 +84,7 @@ const PatientServices = () => {
           price: selectedService.price,
           date,
           time,
-          status: 'Confirmed'
+          status: 'In Progress'
         };
 
         // Generate PDF

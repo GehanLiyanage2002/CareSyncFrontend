@@ -778,40 +778,40 @@ const AdminDashboard = () => {
                       <h3 className="text-xl font-extrabold text-slate-800">Registered Patients</h3>
                     </div>
                     <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+                      <div className="flex flex-col gap-3">
                         {filteredPatients.map(patient => (
                         <div 
                           key={patient.id} 
-                          className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col gap-4 relative"
+                          className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                         >
-                          <div className="flex justify-between items-start">
-                            <div className="flex gap-4">
-                              <div className="w-[70px] h-[70px] rounded-2xl bg-[#bae6fd] flex items-center justify-center text-slate-800 text-[28px] font-light overflow-hidden flex-shrink-0 shadow-inner">
-                                {patient.full_name ? patient.full_name.substring(0, 2).toUpperCase() : 'US'}
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-[#bae6fd] flex items-center justify-center text-slate-800 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
+                              {patient.full_name ? patient.full_name.substring(0, 2).toUpperCase() : 'US'}
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                <h4 className="font-extrabold text-indigo-900 text-[15px]">{patient.full_name}</h4>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${patient.blood_group && patient.blood_group !== 'N/A' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'}`}>
+                                  {patient.blood_group || 'N/A'}
+                                </span>
                               </div>
-                              <div className="flex flex-col justify-center">
-                                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                  <h4 className="font-extrabold text-indigo-900 text-[17px]">{patient.full_name}</h4>
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${patient.blood_group && patient.blood_group !== 'N/A' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'}`}>
-                                    {patient.blood_group || 'N/A'}
-                                  </span>
-                                </div>
-                                <p className="text-slate-500 text-[12px] font-medium">{patient.email}</p>
-                              </div>
+                              <p className="text-slate-500 text-[12px] font-medium">{patient.email}</p>
                             </div>
                           </div>
 
-                          <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
-                              <span>Mobile:</span>
-                              <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
+                          <div className="flex items-center gap-6 sm:gap-6 bg-slate-50/50 px-4 py-2 rounded-xl border border-slate-100">
+                            <div className="flex flex-col text-left sm:text-right">
+                              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Mobile</span>
+                              <span className="text-indigo-900 font-extrabold text-[13px]">
                                 {patient.mobile_number || 'N/A'}
                               </span>
                             </div>
                             
-                            <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
-                              <span className="text-slate-600 font-bold text-[13px]">Joined:</span>
-                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+                            <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                            
+                            <div className="flex flex-col text-left sm:text-right">
+                              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Joined</span>
+                              <span className="text-indigo-900 font-extrabold text-[13px]">
                                 {new Date(patient.created_at).toLocaleDateString()}
                               </span>
                             </div>
@@ -819,7 +819,7 @@ const AdminDashboard = () => {
                         </div>
                       ))}
                       {filteredPatients.length === 0 && (
-                        <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                        <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
                           No patients match your search.
                         </div>
                       )}

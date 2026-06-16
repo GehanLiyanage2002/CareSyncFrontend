@@ -133,7 +133,7 @@ const ScheduleManager = () => {
           
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* React DatePicker Component */}
-            <div className="space-y-2">
+            <div className="space-y-2 relative z-50">
               <div className="flex justify-between items-end mb-1">
                 <label className="text-sm font-medium text-slate-700">Select Date</label>
               </div>
@@ -153,7 +153,7 @@ const ScheduleManager = () => {
             </div>
 
             {/* Time Range */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 relative z-40">
               <div className="space-y-1">
                 <DatePicker
                   selected={getTimeDate(formData.start_time)}

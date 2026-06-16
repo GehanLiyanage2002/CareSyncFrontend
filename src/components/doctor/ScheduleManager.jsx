@@ -24,7 +24,29 @@ const ScheduleManager = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [showPastSchedules, setShowPastSchedules] = useState(false);
 
+  const [scheduleToDelete, setScheduleToDelete] = useState(null);
+
+  const requestDelete = (id) => {
+    setScheduleToDelete(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!scheduleToDelete) return;
+    try {
+      await axios.delete(`http://127.0.0.1:5000/api/doctor/schedule/${scheduleToDelete}`, {
+        headers: { Authorization: token }
+      });
+      toast.success("Schedule deleted successfully");
+      fetchSchedules();
+    } catch (error) {
+      console.error("Failed to delete schedule", error);
+      toast.error("Failed to delete schedule");
+    } finally {
+      setScheduleToDelete(null);
+    }
+  };
   const fetchSchedules = async () => {
     try {
       const res = await axios.get('http://127.0.0.1:5000/api/doctor/schedule', {
@@ -225,7 +247,17 @@ const ScheduleManager = () => {
 
         {/* Current Schedule List */}
         <div className="lg:col-span-2">
-          <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-5">Your Configured Days</h4>
+          <div className="flex justify-between items-center mb-5">
+            <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Your Configured Days</h4>
+            {schedules.filter(s => new Date(s.schedule_date) < new Date(new Date().setHours(0,0,0,0))).length > 0 && (
+              <button 
+                onClick={() => setShowPastSchedules(!showPastSchedules)}
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                {showPastSchedules ? 'Hide Past Schedules' : 'View Past Schedules'}
+              </button>
+            )}
+          </div>
           
           {fetching ? (
             <div className="flex justify-center py-10 text-slate-400">Loading schedules...</div>
@@ -236,36 +268,123 @@ const ScheduleManager = () => {
               <p className="text-sm text-slate-400 mt-1">Set your working hours for each day using the form to start receiving appointments automatically.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {schedules.map((schedule) => {
-                const dateObj = new Date(schedule.schedule_date);
-                const options = { weekday: 'long', month: 'short', day: 'numeric' };
-                const formattedDate = dateObj.toLocaleDateString('en-US', options);
-                
-                return (
-                <div key={schedule.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-indigo-100 hover:shadow-md transition-all group">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-bold bg-indigo-100 text-indigo-700">
-                      {formattedDate}
-                    </span>
-                    <span className="text-xs font-semibold text-slate-400 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
-                      {schedule.slot_duration_minutes}m slots
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-slate-700 font-medium mt-2">
-                    <Clock size={16} className="text-indigo-400" />
-                    <span>{schedule.start_time.substring(0,5)}</span>
-                    <span className="text-slate-400">-</span>
-                    <span>{schedule.end_time.substring(0,5)}</span>
+            <div className="space-y-6">
+              {/* Upcoming Schedules */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {schedules
+                  .filter(schedule => new Date(schedule.schedule_date) >= new Date(new Date().setHours(0,0,0,0)))
+                  .map((schedule) => {
+                    const dateObj = new Date(schedule.schedule_date);
+                    const options = { weekday: 'long', month: 'short', day: 'numeric' };
+                    const formattedDate = dateObj.toLocaleDateString('en-US', options);
+                    
+                    return (
+                    <div key={schedule.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-indigo-100 hover:shadow-md transition-all group relative">
+                      <button 
+                        onClick={() => requestDelete(schedule.id)}
+                        className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        title="Delete Schedule"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      <div className="flex justify-between items-start mb-3 pr-8">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-bold bg-indigo-100 text-indigo-700">
+                          {formattedDate}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-400 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
+                          {schedule.slot_duration_minutes}m slots
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-slate-700 font-medium mt-2">
+                        <Clock size={16} className="text-indigo-400" />
+                        <span>{schedule.start_time.substring(0,5)}</span>
+                        <span className="text-slate-400">-</span>
+                        <span>{schedule.end_time.substring(0,5)}</span>
+                      </div>
+                    </div>
+                  )})}
+              </div>
+
+              {/* Past Schedules */}
+              {showPastSchedules && schedules.filter(s => new Date(s.schedule_date) < new Date(new Date().setHours(0,0,0,0))).length > 0 && (
+                <div className="mt-8">
+                  <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-t border-slate-100 pt-6">Past Schedules</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-70">
+                    {schedules
+                      .filter(schedule => new Date(schedule.schedule_date) < new Date(new Date().setHours(0,0,0,0)))
+                      .map((schedule) => {
+                        const dateObj = new Date(schedule.schedule_date);
+                        const options = { weekday: 'long', month: 'short', day: 'numeric' };
+                        const formattedDate = dateObj.toLocaleDateString('en-US', options);
+                        
+                        return (
+                        <div key={schedule.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-slate-200 transition-all group relative">
+                          <button 
+                            onClick={() => requestDelete(schedule.id)}
+                            className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                            title="Delete Schedule"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <div className="flex justify-between items-start mb-3 pr-8">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-bold bg-slate-200 text-slate-600">
+                              {formattedDate}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-400 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
+                              {schedule.slot_duration_minutes}m slots
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-slate-500 font-medium mt-2">
+                            <Clock size={16} className="text-slate-400" />
+                            <span>{schedule.start_time.substring(0,5)}</span>
+                            <span className="text-slate-300">-</span>
+                            <span>{schedule.end_time.substring(0,5)}</span>
+                          </div>
+                        </div>
+                      )})}
                   </div>
                 </div>
-              )})}
+              )}
             </div>
           )}
         </div>
         
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      {scheduleToDelete && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setScheduleToDelete(null)}>
+          <div 
+            className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Delete Schedule?</h3>
+              <p className="text-slate-500 dark:text-slate-400 mb-6">Are you sure you want to delete this schedule? This action cannot be undone.</p>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setScheduleToDelete(null)}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

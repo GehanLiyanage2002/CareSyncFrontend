@@ -160,7 +160,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
 
                   {/* Info */}
                   <h3 className="text-xl font-bold text-[#1e3a8a] dark:text-white mb-1 transition-colors">
-                    {doctor.name}
+                    {doctor.name?.match(/^Dr\.?\s/i) ? doctor.name : `Dr. ${doctor.name}`}
                   </h3>
                   <p className="text-[#0ea5e9] font-medium text-sm mb-2">
                     {doctor.specialization || 'General Practitioner'}

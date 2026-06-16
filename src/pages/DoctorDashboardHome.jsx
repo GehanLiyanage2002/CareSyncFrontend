@@ -107,7 +107,7 @@ const DoctorDashboardHome = () => {
   };
 
   // Calculate stats
-  const pendingCount = appointments.filter(a => a.status === 'pending' || a.status === 'confirmed').length;
+  const pendingCount = appointments.filter(a => a.status?.toLowerCase() === 'pending' || a.status?.toLowerCase() === 'in progress').length;
   const completedCount = appointments.filter(a => a.status === 'completed').length;
 
   return (
@@ -253,7 +253,7 @@ const DoctorDashboardHome = () => {
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${
                           apt.status === 'completed' 
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : apt.status === 'confirmed'
+                            : apt.status?.toLowerCase() === 'in progress'
                             ? 'bg-blue-50 text-blue-700 border-blue-200'
                             : apt.status === 'cancelled'
                             ? 'bg-rose-50 text-rose-700 border-rose-200'

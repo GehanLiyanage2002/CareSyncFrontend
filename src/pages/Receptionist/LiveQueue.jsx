@@ -1,0 +1,240 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
+import { Users, ChevronDown, User, Activity, Calendar, Clock, LayoutDashboard, ListFilter, CheckCircle2, XCircle } from 'lucide-react';
+import ReceptionistKanbanBoard from './ReceptionistKanbanBoard';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
+
+const LiveQueue = () => {
+  const { token } = useSelector((state) => state.auth);
+
+  const [doctors, setDoctors] = useState([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
+  const [activeQueue, setActiveQueue] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [checkInLoading, setCheckInLoading] = useState(null);
+  const [emergencyLoading, setEmergencyLoading] = useState(null);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDoctorId) {
+      fetchQueueData(selectedDoctorId);
+    } else {
+      setActiveQueue([]);
+      setUpcoming([]);
+      setAllAppointments([]);
+    }
+
+    // Real-time Socket.io listeners for the selected doctor
+    const handleUpdate = (data) => {
+      if (String(data.doctor_id) === String(selectedDoctorId) || String(data.doctorId) === String(selectedDoctorId)) {
+        // Refetch queue silently to keep real-time UI smooth
+        axios.get(`http://localhost:5000/api/receptionist/queue-dashboard/${selectedDoctorId}`, {
+          headers: { Authorization: token }
+        }).then(res => {
+          setUpcoming(res.data.upcoming || []);
+          setActiveQueue(res.data.activeQueue || []);
+          setAllAppointments(res.data.allAppointments || []);
+        }).catch(err => console.error("Real-time fetch error:", err));
+      }
+    };
+
+    socket.on('slotBooked', handleUpdate);
+    socket.on('appointmentStatusChanged', handleUpdate);
+    socket.on('appointmentRescheduled', handleUpdate);
+
+    return () => {
+      socket.off('slotBooked', handleUpdate);
+      socket.off('appointmentStatusChanged', handleUpdate);
+      socket.off('appointmentRescheduled', handleUpdate);
+    };
+  }, [selectedDoctorId, token]);
+
+  const fetchDoctors = async () => {
+    try {
+      // Fetch all available doctors using the public/user endpoint
+      const res = await axios.get('http://localhost:5000/api/users/doctors', {
+        headers: { Authorization: token }
+      });
+      setDoctors(res.data.doctors || []);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      toast.error('Failed to load doctors list.');
+    }
+  };
+
+  const fetchQueueData = async (doctorId) => {
+    try {
+      setLoading(true);
+      // Fetch using the all-queues API and filter, or use the dedicated endpoint
+      const res = await axios.get(`http://localhost:5000/api/receptionist/queue-dashboard/${doctorId}`, {
+        headers: { Authorization: token }
+      });
+      setUpcoming(res.data.upcoming || []);
+      setActiveQueue(res.data.activeQueue || []);
+      setAllAppointments(res.data.allAppointments || []);
+    } catch (error) {
+      console.error('Error fetching queue data:', error);
+      toast.error('Failed to load queue data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    try {
+      const date = new Date(timeString);
+      if (!isNaN(date)) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      const [hours, minutes] = timeString.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const formattedHour = hour % 12 || 12;
+      return `${formattedHour}:${minutes} ${ampm}`;
+    } catch (e) {
+      return timeString;
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-fadeIn pb-10">
+
+      {/* Dropdown Selector Header */}
+      <div className="bg-white rounded-3xl border border-blue-50 shadow-sm p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60 pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center text-blue-600 shadow-inner">
+              <Users size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-extrabold text-slate-800">Live Queue Dashboard</h3>
+              <p className="text-sm font-medium text-slate-500">Select a doctor to manage their live queue.</p>
+            </div>
+          </div>
+
+          <div className="relative min-w-[280px] flex items-center gap-3">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <User size={18} />
+              </div>
+              <select
+                value={selectedDoctorId}
+                onChange={(e) => setSelectedDoctorId(e.target.value)}
+                className="block w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-bold appearance-none cursor-pointer shadow-sm"
+              >
+                <option value="" disabled>Select a Doctor...</option>
+                {doctors.map(doc => (
+                  <option key={doc.doctor_id} value={doc.doctor_id}>
+                    Dr. {doc.name} ({doc.specialization || 'General'})
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                <ChevronDown size={18} />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {!selectedDoctorId ? (
+        <div className="bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 p-12 text-center shadow-sm">
+          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+            <Users size={32} />
+          </div>
+          <h3 className="text-xl font-bold text-slate-600 mb-2">No Doctor Selected</h3>
+          <p className="text-slate-400 font-medium">Please select a doctor from the dropdown above to view their live queue.</p>
+        </div>
+      ) : (
+        <div className="relative">
+          {/* Loading Overlay */}
+          {loading && (
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 rounded-3xl flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <svg className="animate-spin h-8 w-8 text-blue-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <p className="font-bold text-slate-600">Syncing Live Queue...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Status Banner */}
+          {(() => {
+            const sortByTime = (a, b) => {
+              const dateA = new Date(a.appointment_date).getTime();
+              const dateB = new Date(b.appointment_date).getTime();
+              if (!isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) return dateA - dateB;
+              const timeA = a.start_time || "";
+              const timeB = b.start_time || "";
+              return timeA.localeCompare(timeB);
+            };
+
+            const inProgressPatients = allAppointments.filter(a => {
+              const s = a.status?.toLowerCase();
+              return s === 'in progress' || s === 'in_queue' || s === 'with_doctor';
+            }).sort(sortByTime);
+            
+            const pendingPatients = allAppointments.filter(a => a.status?.toLowerCase() === 'pending').sort(sortByTime);
+
+            const currentPatient = inProgressPatients.length > 0 ? inProgressPatients[0] : null;
+            const nextPatient = pendingPatients.length > 0 ? pendingPatients[0] : null;
+            const waitingCount = pendingPatients.length;
+
+            const formatDisplay = (patient, isNext = false) => {
+              if (!patient) return <span className="text-slate-300 text-2xl font-black">-</span>;
+              const token = patient.token_number ? `Token ${String(patient.token_number).padStart(2, '0')}` : 'N/A';
+              const name = patient.patient_name || patient.user_name || 'Unknown';
+              return (
+                <div className="flex flex-col items-center justify-center gap-1.5 mt-1">
+                  <span className={`text-xl font-black tracking-tight ${isNext ? 'text-blue-600' : 'text-emerald-600'}`}>{token}</span>
+                  <span className="text-[12px] font-bold text-slate-500 bg-slate-50 px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
+                    <User size={12} className={isNext ? "text-blue-500" : "text-emerald-500"} /> 
+                    <span className="truncate max-w-[140px]">{name}</span>
+                  </span>
+                </div>
+              );
+            };
+
+            return (
+              <div className="bg-white rounded-3xl shadow-sm border border-slate-100 mb-8 flex flex-col sm:flex-row items-center justify-between overflow-hidden">
+                <div className="flex-1 w-full py-5 px-6 text-center border-b sm:border-b-0 sm:border-r border-slate-100 hover:bg-slate-50 transition-colors">
+                  <p className="text-slate-500 text-[13px] font-bold uppercase tracking-wider mb-2">Current Patient</p>
+                  <div>{formatDisplay(currentPatient, false)}</div>
+                </div>
+                <div className="flex-1 w-full py-5 px-6 text-center border-b sm:border-b-0 sm:border-r border-slate-100 hover:bg-slate-50 transition-colors">
+                  <p className="text-slate-500 text-[13px] font-bold uppercase tracking-wider mb-2">Next</p>
+                  <div>{formatDisplay(nextPatient, true)}</div>
+                </div>
+                <div className="flex-1 w-full py-5 px-6 text-center hover:bg-slate-50 transition-colors flex flex-col justify-center">
+                  <p className="text-slate-500 text-[13px] font-bold uppercase tracking-wider mb-1">Waiting</p>
+                  <p className="text-3xl font-black text-slate-800 tracking-tight">{waitingCount}</p>
+                </div>
+              </div>
+            );
+          })()}
+
+          <ReceptionistKanbanBoard allAppointments={allAppointments} />
+
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default LiveQueue;

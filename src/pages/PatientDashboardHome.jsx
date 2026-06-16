@@ -97,7 +97,7 @@ const PatientDashboardHome = () => {
         );
         if (response.data.success) {
           const upcoming = response.data.appointments.find(a => 
-            (a.status === 'pending' || a.status === 'confirmed') && a.is_telemedicine
+            (a.status?.toLowerCase() === 'pending' || a.status?.toLowerCase() === 'in progress') && a.is_telemedicine
           );
           setUpcomingTelemedicine(upcoming);
           setAppointments(response.data.appointments || []);
@@ -281,7 +281,7 @@ const PatientDashboardHome = () => {
                     })() && (
                       <button onClick={() => openRescheduleModal(app)} className="flex-1 md:flex-none px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded-xl transition-colors">Reschedule</button>
                     )}
-                    {(app.status === 'pending' || app.status === 'confirmed') && (
+                    {(app.status?.toLowerCase() === 'pending' || app.status?.toLowerCase() === 'in progress') && (
                       <button onClick={() => handleCancel(app.id)} className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-xl transition-colors">Cancel</button>
                     )}
                   </div>

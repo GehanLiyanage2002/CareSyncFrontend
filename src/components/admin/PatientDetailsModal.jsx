@@ -65,7 +65,7 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
             <div>
               <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">{patient.full_name}</h2>
               <div className="flex items-center gap-3 mt-1.5 text-sm text-slate-500 font-medium">
-                <span>{patient.email}</span>
+                <span>{patient.email?.includes('@caresync.local') ? 'No email provided' : patient.email}</span>
                 <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                 <span>{patient.mobile_number || 'No Mobile'}</span>
                 {patient.blood_group && patient.blood_group !== 'N/A' && (

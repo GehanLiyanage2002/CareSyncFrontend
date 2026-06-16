@@ -806,7 +806,9 @@ const AdminDashboard = () => {
                                   {patient.blood_group || 'N/A'}
                                 </span>
                               </div>
-                              <p className="text-slate-500 text-[12px] font-medium">{patient.email}</p>
+                              <p className="text-slate-500 text-[12px] font-medium">
+                                {patient.email?.includes('@caresync.local') ? 'No email provided' : patient.email}
+                              </p>
                             </div>
                           </div>
 

@@ -37,8 +37,14 @@ const DoctorDashboardHome = () => {
         });
         
         if (aptRes.data.appointments) {
-          // For now, we display all fetched appointments as "Today's" or we could filter by date
-          setAppointments(aptRes.data.appointments);
+          const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+          
+          const todaysAppointments = aptRes.data.appointments.filter(apt => {
+            const aptDateStr = new Date(apt.appointment_date).toLocaleDateString('en-CA');
+            return aptDateStr === todayStr;
+          });
+          
+          setAppointments(todaysAppointments);
         }
       } catch (error) {
         console.error("Error fetching dashboard data", error);
@@ -219,34 +225,33 @@ const DoctorDashboardHome = () => {
             ) : appointments.length === 0 ? (
               <div className="p-10 text-center text-slate-500 font-medium">No appointments scheduled for today. Take a break! ☕</div>
             ) : (
-              <table className="w-full text-left border-collapse">
+              <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                    <th className="px-6 py-4 font-semibold">Token Number</th>
-                    <th className="px-6 py-4 font-semibold">Patient Name</th>
-                    <th className="px-6 py-4 font-semibold">Age/Gender</th>
-                    <th className="px-6 py-4 font-semibold">Time</th>
-                    <th className="px-6 py-4 font-semibold">Contact</th>
+                    <th className="px-6 py-4 font-semibold text-left">Token</th>
+                    <th className="px-6 py-4 font-semibold text-left">Patient Name</th>
+                    <th className="px-6 py-4 font-semibold text-center">Age/Gender</th>
+                    <th className="px-6 py-4 font-semibold text-center">Time</th>
+                    <th className="px-6 py-4 font-semibold text-center">Contact</th>
                     <th className="px-6 py-4 font-semibold text-right">Status</th>
-                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {appointments.map((apt) => (
                     <tr key={apt.id} className="hover:bg-slate-50/80 transition-colors group">
-                      <td className="px-6 py-4 whitespace-nowrap font-bold text-teal-700">
+                      <td className="px-6 py-4 whitespace-nowrap font-bold text-teal-700 text-left">
                         {apt.token_number || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
+                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800 text-left">
                         {apt.patient_name || 'Unknown Patient'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 text-center">
                         {apt.patient_age ? `${apt.patient_age} Yrs` : '-'} {apt.patient_gender ? `/ ${apt.patient_gender}` : ''}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium text-center">
                         {apt.start_time ? apt.start_time.substring(0, 5) : (apt.appointment_time || '-')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 text-center">
                         {apt.patient_contact || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -261,16 +266,6 @@ const DoctorDashboardHome = () => {
                         }`}>
                           {apt.status ? apt.status.charAt(0).toUpperCase() + apt.status.slice(1) : 'Pending'}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {apt.is_telemedicine && apt.status !== 'completed' && apt.status !== 'cancelled' && (
-                          <button
-                            onClick={() => navigate(`/telemedicine/${apt.id}`)}
-                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
-                          >
-                            Start Video Call
-                          </button>
-                        )}
                       </td>
                     </tr>
                   ))}

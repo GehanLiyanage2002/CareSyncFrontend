@@ -11,6 +11,7 @@ const AppointmentHistory = () => {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterDate, setFilterDate] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
   
@@ -46,20 +47,30 @@ const AppointmentHistory = () => {
     if (token) fetchHistory();
   }, [token]);
 
-  // Search filter
+  // Search and date filter
   const filteredHistory = useMemo(() => {
     return history.filter((apt) => {
       const query = searchQuery.toLowerCase();
       const nameMatch = apt.patient_name?.toLowerCase().includes(query);
       const tokenMatch = apt.token_number?.toString().includes(query);
-      return nameMatch || tokenMatch;
+      const matchesSearch = nameMatch || tokenMatch;
+      
+      let matchesDate = true;
+      if (filterDate) {
+        // apt.appointment_date is typically ISO string, toLocaleDateString('en-CA') gives YYYY-MM-DD in local time
+        // Alternatively using a stable extraction of date component
+        const aptDateStr = new Date(apt.appointment_date).toLocaleDateString('en-CA');
+        matchesDate = aptDateStr === filterDate;
+      }
+      
+      return matchesSearch && matchesDate;
     });
-  }, [history, searchQuery]);
+  }, [history, searchQuery, filterDate]);
 
-  // Reset page when search query changes
+  // Reset page when search query or date changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, filterDate]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredHistory.length / recordsPerPage);
@@ -91,17 +102,27 @@ const AppointmentHistory = () => {
           </p>
         </div>
         
-        <div className="relative w-full sm:w-72">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-            <Search size={18} />
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
+          <div className="relative w-full sm:w-40">
+            <input
+              type="date"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-gray-900/50 border border-slate-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-800 dark:text-gray-200"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-gray-900/50 border border-slate-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-800 dark:text-gray-200"
-            placeholder="Search by name or token..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+          <div className="relative w-full sm:w-64">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <Search size={18} />
+            </div>
+            <input
+              type="text"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-gray-900/50 border border-slate-200 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-800 dark:text-gray-200"
+              placeholder="Search by name or token..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
       </div>
       

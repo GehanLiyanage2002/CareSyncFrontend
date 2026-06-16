@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { Users, ChevronDown, User, Activity, Calendar, Clock, LayoutDashboard, ListFilter, CheckCircle2, XCircle } from 'lucide-react';
+import { Users, ChevronDown, User, Activity, Calendar, Clock, LayoutDashboard, ListFilter, CheckCircle2, XCircle, Search } from 'lucide-react';
 import ReceptionistKanbanBoard from './ReceptionistKanbanBoard';
 import { io } from 'socket.io-client';
 
@@ -17,6 +17,7 @@ const LiveQueue = () => {
   const [upcoming, setUpcoming] = useState([]);
   const [allAppointments, setAllAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [checkInLoading, setCheckInLoading] = useState(null);
   const [emergencyLoading, setEmergencyLoading] = useState(null);
 
@@ -110,8 +111,8 @@ const LiveQueue = () => {
   return (
     <div className="space-y-6 animate-fadeIn pb-10">
 
-      {/* Dropdown Selector Header */}
-      <div className="bg-white rounded-3xl border border-blue-50 shadow-sm p-6 relative overflow-hidden">
+      {/* Doctor Selection Header */}
+      <div className="bg-white rounded-3xl border border-blue-50 shadow-sm p-6 relative overflow-hidden flex flex-col gap-6">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60 pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -125,29 +126,60 @@ const LiveQueue = () => {
             </div>
           </div>
 
-          <div className="relative min-w-[280px] flex items-center gap-3">
-            <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                <User size={18} />
-              </div>
-              <select
-                value={selectedDoctorId}
-                onChange={(e) => setSelectedDoctorId(e.target.value)}
-                className="block w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-bold appearance-none cursor-pointer shadow-sm"
-              >
-                <option value="" disabled>Select a Doctor...</option>
-                {doctors.map(doc => (
-                  <option key={doc.doctor_id} value={doc.doctor_id}>
-                    Dr. {doc.name} ({doc.specialization || 'General'})
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
-                <ChevronDown size={18} />
-              </div>
+          <div className="relative min-w-[280px] md:max-w-md flex-1">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <Search size={18} />
             </div>
-
+            <input
+              type="text"
+              placeholder="Search doctors by name or specialty..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-bold placeholder-slate-400 shadow-sm"
+            />
           </div>
+        </div>
+
+        {/* Horizontal Scrollable Doctor Cards */}
+        <div className="relative z-10 flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+          {(() => {
+            const filteredDoctors = doctors.filter(doc => 
+              (doc.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+              (doc.specialization || '').toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            if (filteredDoctors.length === 0) {
+              return <div className="text-slate-500 text-sm font-medium py-2">No doctors found matching your search.</div>;
+            }
+
+            return filteredDoctors.map(doc => (
+              <button
+                key={doc.doctor_id}
+                onClick={() => setSelectedDoctorId(String(doc.doctor_id))}
+                className={`flex-shrink-0 flex items-center gap-3 p-3 pr-5 rounded-2xl border transition-all text-left group ${
+                  String(selectedDoctorId) === String(doc.doctor_id) 
+                    ? 'bg-blue-600 border-blue-600 shadow-md transform scale-[1.02]' 
+                    : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-blue-50 shadow-sm'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black shadow-inner transition-colors ${
+                  String(selectedDoctorId) === String(doc.doctor_id)
+                    ? 'bg-white/20 text-white'
+                    : 'bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600'
+                }`}>
+                  {doc.name ? doc.name.charAt(0).toUpperCase() : <User size={18} />}
+                </div>
+                <div>
+                  <h4 className={`font-bold text-sm ${String(selectedDoctorId) === String(doc.doctor_id) ? 'text-white' : 'text-slate-800'}`}>
+                    Dr. {doc.name}
+                  </h4>
+                  <p className={`text-[11px] font-medium ${String(selectedDoctorId) === String(doc.doctor_id) ? 'text-blue-100' : 'text-slate-500'}`}>
+                    {doc.specialization || 'General'}
+                  </p>
+                </div>
+              </button>
+            ));
+          })()}
         </div>
       </div>
 
@@ -157,7 +189,7 @@ const LiveQueue = () => {
             <Users size={32} />
           </div>
           <h3 className="text-xl font-bold text-slate-600 mb-2">No Doctor Selected</h3>
-          <p className="text-slate-400 font-medium">Please select a doctor from the dropdown above to view their live queue.</p>
+          <p className="text-slate-400 font-medium">Please select a doctor from the list above to view their live queue.</p>
         </div>
       ) : (
         <div className="relative">
@@ -189,7 +221,7 @@ const LiveQueue = () => {
               const s = a.status?.toLowerCase();
               return s === 'in progress' || s === 'in_queue' || s === 'with_doctor';
             }).sort(sortByTime);
-            
+
             const pendingPatients = allAppointments.filter(a => a.status?.toLowerCase() === 'pending').sort(sortByTime);
 
             const currentPatient = inProgressPatients.length > 0 ? inProgressPatients[0] : null;
@@ -204,7 +236,7 @@ const LiveQueue = () => {
                 <div className="flex flex-col items-center justify-center gap-1.5 mt-1">
                   <span className={`text-xl font-black tracking-tight ${isNext ? 'text-blue-600' : 'text-emerald-600'}`}>{token}</span>
                   <span className="text-[12px] font-bold text-slate-500 bg-slate-50 px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
-                    <User size={12} className={isNext ? "text-blue-500" : "text-emerald-500"} /> 
+                    <User size={12} className={isNext ? "text-blue-500" : "text-emerald-500"} />
                     <span className="truncate max-w-[140px]">{name}</span>
                   </span>
                 </div>

@@ -556,46 +556,76 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-extrabold text-slate-800">Doctors</h3>
                         <span className="text-xs font-semibold text-slate-400">Showing {filteredEarnings.length} of {earnings.length}</span>
                      </div>
-                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                          <thead>
-                            <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                              <th className="p-4 px-6 font-bold">Doctor</th>
-                              <th className="p-4 font-bold">Specialization</th>
-                              <th className="p-4 font-bold">Fee</th>
-                              <th className="p-4 font-bold text-center">Appointments</th>
-                              <th className="p-4 font-bold text-center">Completed</th>
-                              <th className="p-4 font-bold text-center">Canceled</th>
-                              <th className="p-4 px-6 font-bold text-right">Total Earnings</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-blue-50">
-                            {filteredEarnings.map(earn => (
-                              <tr key={earn.doctor_id} className="hover:bg-blue-50/30 transition-colors group">
-                                <td className="p-4 px-6">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold overflow-hidden shadow-sm">
-                                      <img src={`http://localhost:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} alt={earn.doctor_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name.charAt(0); }} />
-                                    </div>
-                                    <div>
-                                      <p className="font-bold text-slate-700">Dr. {earn.doctor_name}</p>
-                                      <p className="text-[11px] text-slate-400 font-medium">ID: {earn.doctor_id.split('-')[0]}</p>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="p-4 text-sm font-semibold text-slate-600">{earn.specialization}</td>
-                                <td className="p-4 text-sm font-semibold text-slate-600">LKR {parseFloat(earn.consultation_fee).toLocaleString()}</td>
-                                <td className="p-4 text-sm font-bold text-slate-700 text-center">{earn.total_appointments || 0}</td>
-                                <td className="p-4 text-sm font-bold text-blue-600 text-center">{earn.completed_appointments || 0}</td>
-                                <td className="p-4 text-sm font-bold text-rose-500 text-center">{earn.canceled_appointments || 0}</td>
-                                <td className="p-4 px-6 text-sm font-black text-slate-800 text-right">LKR {parseFloat(earn.total_earnings).toLocaleString()}</td>
-                              </tr>
-                            ))}
-                            {filteredEarnings.length === 0 && (
-                              <tr><td colSpan="7" className="p-10 text-center text-slate-500 font-medium">No doctors match your search.</td></tr>
-                            )}
-                          </tbody>
-                        </table>
+                     <div className="bg-[#f8eaff]/30 p-6">
+                        <div className="flex flex-col gap-3">
+                          {filteredEarnings.map(earn => (
+                            <div 
+                              key={earn.doctor_id} 
+                              className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-default"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
+                                  <img 
+                                    src={`http://localhost:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} 
+                                    alt={earn.doctor_name} 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name ? earn.doctor_name.charAt(0).toUpperCase() : 'DR'; }} 
+                                  />
+                                </div>
+                                <div className="flex flex-col">
+                                  <h4 className="font-extrabold text-indigo-900 text-[15px] mb-0.5">Dr. {earn.doctor_name}</h4>
+                                  <p className="text-slate-500 text-[12px] font-medium flex items-center gap-1.5">
+                                    <span>{earn.specialization}</span>
+                                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                    <span className="text-indigo-600 font-bold">LKR {parseFloat(earn.consultation_fee).toLocaleString()}</span>
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-4 sm:gap-6 bg-slate-50/50 px-5 py-2.5 rounded-xl border border-slate-100">
+                                <div className="flex flex-col text-left sm:text-right min-w-[60px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Appts</span>
+                                  <span className="text-slate-700 font-extrabold text-[14px]">
+                                    {earn.total_appointments || 0}
+                                  </span>
+                                </div>
+                                
+                                <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                                
+                                <div className="flex flex-col text-left sm:text-right min-w-[60px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Completed</span>
+                                  <span className="text-blue-600 font-extrabold text-[14px]">
+                                    {earn.completed_appointments || 0}
+                                  </span>
+                                </div>
+
+                                <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                                
+                                <div className="flex flex-col text-left sm:text-right min-w-[60px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Canceled</span>
+                                  <span className="text-rose-500 font-extrabold text-[14px]">
+                                    {earn.canceled_appointments || 0}
+                                  </span>
+                                </div>
+
+                                <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                                
+                                <div className="flex flex-col text-left sm:text-right min-w-[90px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Earnings</span>
+                                  <span className="text-emerald-600 font-black text-[14px]">
+                                    LKR {parseFloat(earn.total_earnings).toLocaleString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {filteredEarnings.length === 0 && (
+                            <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                              No doctors match your search.
+                            </div>
+                          )}
+                        </div>
                      </div>
                   </div>
                 </>

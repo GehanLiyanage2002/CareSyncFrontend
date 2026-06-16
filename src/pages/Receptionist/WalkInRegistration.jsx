@@ -9,6 +9,7 @@ import QuickBookServiceModal from './QuickBookServiceModal';
 const WalkInRegistration = () => {
   const { token } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
+  const [recentlyRegisteredPatient, setRecentlyRegisteredPatient] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -111,7 +112,7 @@ const WalkInRegistration = () => {
     setLoading(true);
 
     try {
-      await axios.post(
+      const res = await axios.post(
         'http://localhost:5000/api/receptionist/register-patient',
         formData,
         {
@@ -119,8 +120,19 @@ const WalkInRegistration = () => {
         }
       );
 
-      toast.success('Patient Details Saved Successfully! 🎉');
+      toast.success('Patient Details Saved Successfully!');
       
+      const registeredPatient = res.data.patient || formData; // Fallback to formData if patient object is incomplete
+      // Format it to match what QuickBookModal expects (it needs at least id, full_name, mobile_number)
+      const patientForBooking = {
+        ...registeredPatient,
+        id: registeredPatient.id,
+        full_name: registeredPatient.full_name || registeredPatient.name || formData.name,
+        mobile_number: registeredPatient.mobile_number || registeredPatient.phone || formData.phone,
+      };
+      
+      setRecentlyRegisteredPatient(patientForBooking);
+
       // Clear form
       setFormData({
         name: '',
@@ -390,13 +402,46 @@ const WalkInRegistration = () => {
               ) : (
                 <>
                   <UserPlus size={20} />
-                  Save / Register Patient
+                  Register Patient
                 </>
               )}
             </button>
           </div>
         </form>
       </div>
+      
+      {/* Post-Registration Action Section */}
+      {recentlyRegisteredPatient && (
+        <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 lg:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 animate-fadeIn">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-slate-800">Registration Successful!</h4>
+              <p className="text-sm font-medium text-slate-600 mt-0.5">
+                Patient <strong>{recentlyRegisteredPatient.full_name}</strong> is now registered in the system.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 w-full md:w-auto shrink-0">
+            <button
+              onClick={() => setPatientForBooking(recentlyRegisteredPatient)}
+              className="flex-1 md:flex-none px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
+            >
+              <Stethoscope size={18} />
+              Book Doctor
+            </button>
+            <button
+              onClick={() => setPatientForServiceBooking(recentlyRegisteredPatient)}
+              className="flex-1 md:flex-none px-6 py-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <Activity size={18} />
+              Book Service
+            </button>
+          </div>
+        </div>
+      )}
     </div>
       
       {/* Quick Booking Modal */}

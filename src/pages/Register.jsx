@@ -108,7 +108,7 @@ const Register = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left side: Graphic / Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-[#edf4fa] items-center justify-center overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#edf4fa] dark:bg-gray-900 items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply"
           style={{
@@ -120,7 +120,7 @@ const Register = () => {
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2rem] mx-auto mb-10 flex items-center justify-center shadow-xl shadow-blue-200/50 rotate-3 hover:rotate-6 transition-transform duration-500">
             <span className="text-4xl font-black text-blue-600 tracking-tighter">CS</span>
           </div>
-          <h2 className="text-5xl font-extrabold text-slate-900 mb-6 tracking-tight leading-[1.1]">
+          <h2 className="text-5xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight leading-[1.1]">
             Your Health,<br />Our Priority
           </h2>
           <p className="text-lg text-slate-600 dark:text-gray-300 font-medium leading-relaxed max-w-sm mx-auto">
@@ -321,13 +321,13 @@ const Register = () => {
             </div>
 
             {/* Role badge (display only, locked to Patient) */}
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-700/50 rounded-xl px-4 py-3">
               <span className="text-blue-500">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </span>
-              <p className="text-sm text-blue-700 font-semibold">
+              <p className="text-sm text-blue-700 dark:text-blue-300 font-semibold">
                 Registering as: <span className="font-extrabold">Patient</span>
               </p>
             </div>
@@ -340,7 +340,7 @@ const Register = () => {
               className={`w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-white text-sm font-bold shadow-lg transition-all duration-200 ease-out
                 ${loading
                   ? 'bg-emerald-400 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-emerald-300/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-emerald-300/50 dark:shadow-emerald-900/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
                 }`}
             >
               {loading ? (

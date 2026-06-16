@@ -107,7 +107,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left side: Graphic / Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-[#edf4fa] items-center justify-center overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#edf4fa] dark:bg-gray-900 items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply"
           style={{
@@ -119,7 +119,7 @@ const Login = () => {
           <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2rem] mx-auto mb-10 flex items-center justify-center shadow-xl shadow-blue-200/50 rotate-3 hover:rotate-6 transition-transform duration-500">
             <span className="text-4xl font-black text-blue-600 tracking-tighter">CS</span>
           </div>
-          <h2 className="text-5xl font-extrabold text-slate-900 mb-6 tracking-tight leading-[1.1]">
+          <h2 className="text-5xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight leading-[1.1]">
             Your Health,<br />Our Priority
           </h2>
           <p className="text-lg text-slate-600 dark:text-gray-300 font-medium leading-relaxed max-w-sm mx-auto">
@@ -154,7 +154,7 @@ const Login = () => {
 
           {/* Role Selection Tabs */}
           {['Patient', 'Doctor'].includes(loginRole) ? (
-            <div className="flex bg-slate-100/80 p-1.5 rounded-xl mb-8 relative border border-slate-200 dark:border-gray-600/60">
+            <div className="flex bg-slate-100/80 dark:bg-gray-700/60 p-1.5 rounded-xl mb-8 relative border border-slate-200 dark:border-gray-600/60">
               <button
                 type="button"
                 onClick={() => setLoginRole('Patient')}
@@ -195,7 +195,7 @@ const Login = () => {
 
           {/* Toggle Login Method for Doctors */}
           {loginRole === 'Doctor' && (
-            <div className="flex justify-center mb-6 bg-slate-100 p-1.5 rounded-xl w-full max-w-sm mx-auto">
+            <div className="flex justify-center mb-6 bg-slate-100 dark:bg-gray-700/60 p-1.5 rounded-xl w-full max-w-sm mx-auto border border-transparent dark:border-gray-600/40">
               <button
                 type="button"
                 onClick={() => setUseFaceId(true)}
@@ -303,7 +303,7 @@ const Login = () => {
               className={`w-full relative flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-white text-sm font-bold shadow-lg transition-all duration-200 ease-out
                 ${loading
                   ? 'bg-blue-400 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-blue-300/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-blue-300/50 dark:shadow-blue-900/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
                 }`}
             >
               {loading ? (

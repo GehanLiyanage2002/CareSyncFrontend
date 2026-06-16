@@ -147,7 +147,7 @@ const DoctorRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-4 relative overflow-hidden">
 
 
       {/* Decorative blobs */}
@@ -157,7 +157,7 @@ const DoctorRegister = () => {
 
       {/* Card container */}
       <div className="relative z-10 w-full max-w-md my-8">
-        <div className="bg-white dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-200/50 p-8 md:p-10 border border-white/60">
+        <div className="bg-white dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-200/50 dark:shadow-none p-8 md:p-10 border border-white/60 dark:border-gray-700/60">
 
           {/* ── Back to Home ────────────────────────────────────────────── */}
           <div className="flex justify-start mb-2">
@@ -276,8 +276,8 @@ const DoctorRegister = () => {
             </div>
 
             {/* Doctor Specific Fields */}
-            <div className="space-y-5 p-5 bg-indigo-50/50 rounded-xl border border-indigo-100">
-              <h3 className="text-sm font-bold text-indigo-800">Doctor Professional Details</h3>
+            <div className="space-y-5 p-5 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-700/40">
+              <h3 className="text-sm font-bold text-indigo-800 dark:text-indigo-300">Doctor Professional Details</h3>
               
               {/* Specialization */}
               <div>
@@ -417,13 +417,13 @@ const DoctorRegister = () => {
             </div>
 
             {/* Role badge (display only, locked to Doctor) */}
-            <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
+            <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-700/50 rounded-xl px-4 py-3">
               <span className="text-indigo-500">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </span>
-              <p className="text-sm text-indigo-700 font-semibold">
+              <p className="text-sm text-indigo-700 dark:text-indigo-300 font-semibold">
                 Registering as: <span className="font-extrabold">Doctor</span>
               </p>
             </div>
@@ -442,7 +442,7 @@ const DoctorRegister = () => {
               className={`w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-white text-sm font-bold shadow-lg transition-all duration-200 ease-out
                 ${loading
                   ? 'bg-indigo-400 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-300/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
+                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-300/50 dark:shadow-indigo-900/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
                 }`}
             >
               {loading ? (

@@ -96,8 +96,8 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
               const now = new Date();
               const currentMinutes = now.getHours() * 60 + now.getMinutes();
               
-              validSlots = validSlots.filter(slot => {
-                const [h, m] = slot.split(':');
+              validSlots = validSlots.filter(slotObj => {
+                const [h, m] = slotObj.time.split(':');
                 return (parseInt(h) * 60 + parseInt(m)) > currentMinutes;
               });
             }
@@ -106,7 +106,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
             
             // Auto-select nearest future time slot (which is now the first element)
             if (validSlots.length > 0) {
-              setSelectedTime(validSlots[0]);
+              setSelectedTime(validSlots[0].time);
             } else {
               setSelectedTime(null);
             }
@@ -363,17 +363,20 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
                 ) : (
                   <div className="flex flex-col flex-1">
                     <div className="grid grid-cols-2 gap-3">
-                      {slots.slice(slotPage * slotsPerPage, (slotPage + 1) * slotsPerPage).map((slot, idx) => (
+                      {slots.slice(slotPage * slotsPerPage, (slotPage + 1) * slotsPerPage).map((slotObj, idx) => (
                         <button
                           key={idx}
-                          onClick={() => setSelectedTime(slot)}
-                          className={`py-3 px-2 text-sm font-bold rounded-2xl border transition-all ${
-                            selectedTime === slot
+                          onClick={() => setSelectedTime(slotObj.time)}
+                          className={`py-2 px-2 text-sm rounded-2xl border transition-all flex flex-col items-center justify-center gap-0.5 ${
+                            selectedTime === slotObj.time
                               ? 'bg-blue-600 border-blue-600 text-white shadow-md scale-[1.02]'
-                              : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
+                              : slotObj.isBuffer
+                                ? 'bg-amber-50 border-amber-200 text-amber-700 hover:border-amber-400 hover:bg-amber-100'
+                                : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
                           }`}
                         >
-                          {formatTimeDisplay(slot)}
+                          <span className="font-bold">{formatTimeDisplay(slotObj.time)}</span>
+                          {slotObj.isBuffer && <span className="text-[9px] font-bold uppercase tracking-wider opacity-90">Walk-in</span>}
                         </button>
                       ))}
                     </div>

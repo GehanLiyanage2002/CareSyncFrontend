@@ -123,7 +123,11 @@ const BookAppointmentPage = () => {
         try {
           const res = await axios.get(`http://localhost:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
-            setDynamicSlots(res.data.slots);
+            // Filter out buffer slots for online booking, and extract just the time string
+            const publicSlots = res.data.slots
+              .filter(slotObj => !slotObj.isBuffer)
+              .map(slotObj => slotObj.time);
+            setDynamicSlots(publicSlots);
           }
         } catch (error) {
           console.error("Failed to fetch slots", error);

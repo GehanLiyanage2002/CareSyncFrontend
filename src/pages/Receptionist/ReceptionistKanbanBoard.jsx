@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, CreditCard, X, Hash, Check } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check, Receipt } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
@@ -168,6 +169,18 @@ const ReceptionistKanbanBoard = ({ allAppointments = [] }) => {
                         )}
                         <h4 className="font-extrabold text-slate-800 dark:text-white leading-tight text-lg">{task.patientName}</h4>
                       </div>
+                      {column.id === 'completed' && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.success("Billing module coming soon!");
+                          }}
+                          className="p-2 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-800/50 transition-all border border-emerald-100 dark:border-emerald-800/30 shadow-sm hover:scale-105 active:scale-95"
+                          title="Generate Bill"
+                        >
+                          <Receipt size={18} strokeWidth={2.5} />
+                        </button>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 text-xs font-bold mt-2">
                       <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-transparent">

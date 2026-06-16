@@ -33,7 +33,6 @@ const ReceptionistDashboard = () => {
     { name: 'Live Queue', icon: <Monitor /> },
     { name: 'Walk-in', icon: <UserPlus /> },
     { name: 'Booking', icon: <Calendar /> },
-    { name: 'Billing', icon: <CreditCard /> },
   ];
 
   return (
@@ -101,16 +100,6 @@ const ReceptionistDashboard = () => {
                 <Calendar size={32} />
               </div>
               <h3 className="text-xl font-bold text-slate-600 mb-2">Booking System</h3>
-              <p className="text-slate-400 font-medium">Under Construction</p>
-            </div>
-          </div>
-
-          <div className={`${activeTab === 'Billing' ? 'block animate-fadeIn' : 'hidden'}`}>
-            <div className="bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 p-12 text-center shadow-sm">
-              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                <CreditCard size={32} />
-              </div>
-              <h3 className="text-xl font-bold text-slate-600 mb-2">Billing System</h3>
               <p className="text-slate-400 font-medium">Under Construction</p>
             </div>
           </div>

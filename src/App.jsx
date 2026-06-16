@@ -55,11 +55,14 @@ const GenericDashboardRedirect = () => {
 };
 
 function App() {
+  const { user } = useSelector((state) => state.auth);
+  const showChatbot = !user || user.role === 'Patient';
+
   return (
     <div className="antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans">
       <Toaster position="top-right" />
       <ScrollToTop />
-      <Chatbot />
+      {showChatbot && <Chatbot />}
       <Router>
         <Routes>
           {/* Public Routes */}

@@ -9,7 +9,7 @@ import ScheduleManager from '../components/doctor/ScheduleManager';
 import FeeManager from '../components/doctor/FeeManager';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -24,7 +24,7 @@ const DoctorDashboardHome = () => {
     const fetchData = async () => {
       try {
         // Fetch doctor profile to get availability status
-        const profileRes = await axios.get('http://localhost:5000/api/users/doctor-profile', {
+        const profileRes = await axios.get('http://127.0.0.1:5000/api/users/doctor-profile', {
           headers: { Authorization: token }
         });
         if (profileRes.data.profile) {
@@ -32,7 +32,7 @@ const DoctorDashboardHome = () => {
         }
 
         // Fetch today's appointments
-        const aptRes = await axios.get('http://localhost:5000/api/appointments/doctor/my-appointments', {
+        const aptRes = await axios.get('http://127.0.0.1:5000/api/appointments/doctor/my-appointments', {
           headers: { Authorization: token }
         });
         
@@ -82,7 +82,7 @@ const DoctorDashboardHome = () => {
     setIsAvailable(newStatus);
     
     try {
-      await axios.put('http://localhost:5000/api/appointments/doctor/availability', {}, {
+      await axios.put('http://127.0.0.1:5000/api/appointments/doctor/availability', {}, {
         headers: { Authorization: token }
       });
       
@@ -107,7 +107,7 @@ const DoctorDashboardHome = () => {
   };
 
   // Calculate stats
-  const pendingCount = appointments.filter(a => a.status === 'pending' || a.status === 'confirmed').length;
+  const pendingCount = appointments.filter(a => a.status?.toLowerCase() === 'pending' || a.status?.toLowerCase() === 'in progress').length;
   const completedCount = appointments.filter(a => a.status === 'completed').length;
 
   return (
@@ -253,7 +253,7 @@ const DoctorDashboardHome = () => {
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${
                           apt.status === 'completed' 
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : apt.status === 'confirmed'
+                            : apt.status?.toLowerCase() === 'in progress'
                             ? 'bg-blue-50 text-blue-700 border-blue-200'
                             : apt.status === 'cancelled'
                             ? 'bg-rose-50 text-rose-700 border-rose-200'

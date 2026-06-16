@@ -7,7 +7,7 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const BookAppointmentPage = () => {
   const location = useLocation();
@@ -84,7 +84,7 @@ const BookAppointmentPage = () => {
       const fetchDates = async () => {
         setLoadingDates(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${docId}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/configured-dates/${docId}`);
           if (res.data.success && res.data.dates) {
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -121,9 +121,13 @@ const BookAppointmentPage = () => {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
-            setDynamicSlots(res.data.slots);
+            // Filter out buffer slots for online booking, and extract just the time string
+            const publicSlots = res.data.slots
+              .filter(slotObj => !slotObj.isBuffer)
+              .map(slotObj => slotObj.time);
+            setDynamicSlots(publicSlots);
           }
         } catch (error) {
           console.error("Failed to fetch slots", error);
@@ -184,6 +188,26 @@ const BookAppointmentPage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
+      try {
+        const docId = doctor?.id || doctor?.doctor_id;
+        const res = await axios.post('http://127.0.0.1:5000/api/appointments', {
+          doctor_id: docId,
+          appointment_date: selectedDate.valueDate,
+          start_time: selectedTime,
+          patient_name: formData.fullName,
+          age: parseInt(formData.age),
+          mobile_number: formData.mobileNumber,
+          gender: formData.gender,
+          email: formData.email,
+          payment_method: paymentMethod,
+          is_telemedicine: isTelemedicine
+        }, {
+          headers: { Authorization: token }
+        });
+        
+        if (res.data.success) {
+          setTokenNumber(res.data.appointment.token_number);
+          setShowSuccessModal(true);
       const docId = doctor?.id || doctor?.doctor_id;
       const amount = isTelemedicine ? 2500 : doctor.consultationFee;
       

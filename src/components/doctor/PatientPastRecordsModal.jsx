@@ -18,7 +18,7 @@ const PatientPastRecordsModal = ({ isOpen, onClose, patient }) => {
       const fetchReports = async () => {
         setIsLoading(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/reports/patient/${patient.patient_id}`, {
+          const res = await axios.get(`http://127.0.0.1:5000/api/reports/patient/${patient.patient_id}`, {
             headers: { Authorization: token }
           });
           if (res.data.success) {

@@ -27,7 +27,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
       const fetchReport = async () => {
         setIsLoading(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/reports/appointment/${appointment.id}`, {
+          const res = await axios.get(`http://127.0.0.1:5000/api/reports/appointment/${appointment.id}`, {
             headers: { Authorization: token }
           });
           if (res.data.success && res.data.report) {
@@ -116,14 +116,14 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
 
       let res;
       if (isEditMode && existingReport) {
-        res = await axios.put(`http://localhost:5000/api/reports/${existingReport.id}`, data, {
+        res = await axios.put(`http://127.0.0.1:5000/api/reports/${existingReport.id}`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: token,
           },
         });
       } else {
-        res = await axios.post('http://localhost:5000/api/reports', data, {
+        res = await axios.post('http://127.0.0.1:5000/api/reports', data, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: token,

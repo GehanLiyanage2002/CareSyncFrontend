@@ -26,7 +26,7 @@ const DoctorProfileEdit = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/doctor/profile', {
+        const response = await axios.get('http://127.0.0.1:5000/api/doctor/profile', {
           headers: { Authorization: token }
         });
         
@@ -83,7 +83,7 @@ const DoctorProfileEdit = () => {
     }
     
     try {
-      const response = await axios.put('http://localhost:5000/api/doctor/profile', {
+      const response = await axios.put('http://127.0.0.1:5000/api/doctor/profile', {
         full_name: `${profile.firstName} ${profile.lastName}`.trim(),
         mobile_number: profile.phone,
         specialization: profile.specialization,

@@ -30,7 +30,7 @@ const BookServicePage = () => {
   const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/reviews/public/recent')
+    axios.get('http://127.0.0.1:5000/api/reviews/public/recent')
       .then(res => {
         if (res.data.success && res.data.reviews) {
           setReviews(res.data.reviews);
@@ -53,7 +53,7 @@ const BookServicePage = () => {
       if (!service.id) return;
       setLoadingDates(true);
       try {
-        const res = await axios.get(`http://localhost:5000/api/services/${service.id}/schedules`, {
+        const res = await axios.get(`http://127.0.0.1:5000/api/services/${service.id}/schedules`, {
           headers: { Authorization: token }
         });
         if (res.data.success && res.data.schedules) {
@@ -123,6 +123,19 @@ const BookServicePage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
+      try {
+        const res = await axios.post('http://127.0.0.1:5000/api/services/book', {
+          service_id: service.id,
+          date: selectedDateObj.schedule_date,
+          time: selectedTime,
+          amount_paid: service.price || 0
+        }, {
+          headers: { Authorization: token }
+        });
+        
+        if (res.data.success) {
+          setBookingId(res.data.booking.id);
+          setShowSuccessModal(true);
       const amount = service.price || 0;
       
       const submitBooking = async () => {

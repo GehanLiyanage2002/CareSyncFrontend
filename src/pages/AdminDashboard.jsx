@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
 import AdminServices from '../components/admin/AdminServices';
 import AddDoctorModal from '../components/admin/AddDoctorModal';
+import PatientDetailsModal from '../components/admin/PatientDetailsModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const AdminDashboard = () => {
@@ -27,6 +28,30 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [doctorSearchQuery, setDoctorSearchQuery] = useState('');
   const [doctorStatusFilter, setDoctorStatusFilter] = useState('All');
+  
+  const [patientSearchQuery, setPatientSearchQuery] = useState('');
+  const [patientTypeFilter, setPatientTypeFilter] = useState('All');
+  const [patientCurrentPage, setPatientCurrentPage] = useState(1);
+  const patientsPerPage = 6;
+
+  const [doctorCurrentPage, setDoctorCurrentPage] = useState(1);
+  const doctorsPerPage = 6;
+
+  const [appointmentCurrentPage, setAppointmentCurrentPage] = useState(1);
+  const appointmentsPerPage = 8;
+  const [appointmentFilter, setAppointmentFilter] = useState('All');
+
+  useEffect(() => {
+    setPatientCurrentPage(1);
+  }, [patientSearchQuery, patientTypeFilter]);
+
+  useEffect(() => {
+    setDoctorCurrentPage(1);
+  }, [doctorSearchQuery, doctorStatusFilter]);
+
+  useEffect(() => {
+    setAppointmentCurrentPage(1);
+  }, [appointmentFilter]);
 
   
   // Filtering and Real-time state
@@ -35,10 +60,10 @@ const AdminDashboard = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [showAddDoctor, setShowAddDoctor] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [serviceBookings, setServiceBookings] = useState([]);
-  const [appointmentFilter, setAppointmentFilter] = useState('All');
 
   const { token, user } = useSelector(state => state.auth);
   const navigate = useNavigate();
@@ -57,7 +82,7 @@ const AdminDashboard = () => {
   const handleCancelAppointment = async () => {
     if (!appointmentToCancel) return;
     try {
-      const res = await axios.put(`http://localhost:5000/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
+      const res = await axios.put(`http://127.0.0.1:5000/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
       if (res.data.success) {
         toast.success(res.data.message);
         setAppointments(prev => prev.map(appt => appt.id === appointmentToCancel ? { ...appt, status: 'Cancelled' } : appt));
@@ -97,7 +122,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      let url = 'http://localhost:5000/api/admin/stats';
+      let url = 'http://127.0.0.1:5000/api/admin/stats';
       const { startDate, endDate } = getFilterDates();
       if (startDate && endDate) {
         url += `?startDate=${startDate}&endDate=${endDate}`;
@@ -112,7 +137,7 @@ const AdminDashboard = () => {
 
   const fetchDoctors = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/doctors', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/admin/doctors', config);
       setDoctors(res.data.doctors);
     } catch (err) {
       console.error(err);
@@ -121,7 +146,7 @@ const AdminDashboard = () => {
 
   const fetchServiceBookings = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/services/bookings', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/services/bookings', config);
       setServiceBookings(res.data.bookings);
     } catch (err) {
       console.error(err);
@@ -130,7 +155,7 @@ const AdminDashboard = () => {
 
   const fetchPatients = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/patients', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/admin/patients', config);
       setPatients(res.data.patients);
     } catch (err) {
       console.error(err);
@@ -139,7 +164,7 @@ const AdminDashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/appointments', config);
+      const res = await axios.get('http://127.0.0.1:5000/api/admin/appointments', config);
       setAppointments(res.data.appointments);
     } catch (err) {
       console.error(err);
@@ -148,7 +173,7 @@ const AdminDashboard = () => {
 
   const fetchEarnings = async () => {
     try {
-      let url = 'http://localhost:5000/api/admin/earnings';
+      let url = 'http://127.0.0.1:5000/api/admin/earnings';
       const { startDate, endDate } = getFilterDates();
       if (startDate && endDate) {
         url += `?startDate=${startDate}&endDate=${endDate}`;
@@ -181,7 +206,7 @@ const AdminDashboard = () => {
   }, [activeTab, dateFilter, customDates]);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000', { reconnection: true, reconnectionDelay: 1000 });
+    const socket = io('http://127.0.0.1:5000', { reconnection: true, reconnectionDelay: 1000 });
     socket.on('connect', () => {
       setSocketConnected(true);
       // Refresh data on reconnect (e.g. after server restart)
@@ -213,6 +238,17 @@ const AdminDashboard = () => {
     socket.on('doctorFeeChanged', refreshDoctors);
     socket.on('doctorAvailabilityChanged', refreshDoctors);
     
+    // Listen for patient updates to refresh the patients list
+    const refreshPatients = () => {
+      if (activeTab === 'Patients') {
+        fetchPatients();
+      }
+      refreshData();
+    };
+
+    socket.on('patientRegistered', refreshPatients);
+    socket.on('patientUpdated', refreshPatients);
+    
     return () => socket.disconnect();
   }, [activeTab, dateFilter, customDates]);
 
@@ -226,7 +262,7 @@ const AdminDashboard = () => {
 
   const handleApproveDoctor = async (id, currentStatus) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/admin/doctors/${id}/approve`, {
+      const res = await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${id}/approve`, {
         is_approved: !currentStatus
       }, config);
       toast.success(res.data.message);
@@ -247,7 +283,7 @@ const AdminDashboard = () => {
   const confirmDeleteDoctor = async () => {
     if (!doctorToDelete) return;
     try {
-      const res = await axios.delete(`http://localhost:5000/api/admin/doctors/${doctorToDelete.id}`, config);
+      const res = await axios.delete(`http://127.0.0.1:5000/api/admin/doctors/${doctorToDelete.id}`, config);
       toast.success(res.data.message);
       setDoctorToDelete(null);
       setSelectedDoctor(null);
@@ -276,6 +312,30 @@ const AdminDashboard = () => {
     );
   });
 
+  const filteredPatients = patients.filter(patient => {
+    // Type Filter
+    const isWalkIn = patient.email && patient.email.includes('@caresync.local');
+    if (patientTypeFilter === 'Walk-in' && !isWalkIn) return false;
+    if (patientTypeFilter === 'Online' && isWalkIn) return false;
+
+    // Search Query Filter
+    const trimmedQuery = patientSearchQuery.trim().toLowerCase();
+    if (!trimmedQuery) return true;
+    
+    const nameMatch = String(patient.full_name || '').toLowerCase().includes(trimmedQuery);
+    const emailMatch = String(patient.email || '').toLowerCase().includes(trimmedQuery);
+    const phoneMatch = String(patient.mobile_number || '').toLowerCase().includes(trimmedQuery);
+    const bloodMatch = String(patient.blood_group || '').toLowerCase().includes(trimmedQuery);
+    
+    return nameMatch || emailMatch || phoneMatch || bloodMatch;
+  });
+
+  // Pagination Logic
+  const indexOfLastPatient = patientCurrentPage * patientsPerPage;
+  const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
+  const currentPatients = filteredPatients.slice(indexOfFirstPatient, indexOfLastPatient);
+  const totalPatientPages = Math.ceil(filteredPatients.length / patientsPerPage);
+
   const filteredDoctors = doctors.filter(doc => {
     // Status Filter based on is_available (Accepting patients or not)
     if (doctorStatusFilter === 'Available' && !doc.is_available) return false;
@@ -292,6 +352,26 @@ const AdminDashboard = () => {
     
     return nameMatch || specMatch || emailMatch || phoneMatch;
   });
+
+  // Doctor Pagination Logic
+  const indexOfLastDoctor = doctorCurrentPage * doctorsPerPage;
+  const indexOfFirstDoctor = indexOfLastDoctor - doctorsPerPage;
+  const currentDoctors = filteredDoctors.slice(indexOfFirstDoctor, indexOfLastDoctor);
+  const totalDoctorPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
+
+  // Appointments Pagination Logic
+  let combinedAppointments = [];
+  if (appointmentFilter === 'All' || appointmentFilter === 'Doctor') {
+    combinedAppointments = [...combinedAppointments, ...(appointments || []).map(a => ({...a, _type: 'Doctor'}))];
+  }
+  if (appointmentFilter === 'All' || appointmentFilter === 'Services') {
+    combinedAppointments = [...combinedAppointments, ...(serviceBookings || []).map(s => ({...s, _type: 'Service'}))];
+  }
+
+  const indexOfLastAppointment = appointmentCurrentPage * appointmentsPerPage;
+  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
+  const currentAppointments = combinedAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
+  const totalAppointmentPages = Math.ceil(combinedAppointments.length / appointmentsPerPage);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 overflow-hidden font-sans">
@@ -476,46 +556,76 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-extrabold text-slate-800">Doctors</h3>
                         <span className="text-xs font-semibold text-slate-400">Showing {filteredEarnings.length} of {earnings.length}</span>
                      </div>
-                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                          <thead>
-                            <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                              <th className="p-4 px-6 font-bold">Doctor</th>
-                              <th className="p-4 font-bold">Specialization</th>
-                              <th className="p-4 font-bold">Fee</th>
-                              <th className="p-4 font-bold text-center">Appointments</th>
-                              <th className="p-4 font-bold text-center">Completed</th>
-                              <th className="p-4 font-bold text-center">Canceled</th>
-                              <th className="p-4 px-6 font-bold text-right">Total Earnings</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-blue-50">
-                            {filteredEarnings.map(earn => (
-                              <tr key={earn.doctor_id} className="hover:bg-blue-50/30 transition-colors group">
-                                <td className="p-4 px-6">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold overflow-hidden shadow-sm">
-                                      <img src={`http://localhost:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} alt={earn.doctor_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name.charAt(0); }} />
-                                    </div>
-                                    <div>
-                                      <p className="font-bold text-slate-700">Dr. {earn.doctor_name}</p>
-                                      <p className="text-[11px] text-slate-400 font-medium">ID: {earn.doctor_id.split('-')[0]}</p>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="p-4 text-sm font-semibold text-slate-600">{earn.specialization}</td>
-                                <td className="p-4 text-sm font-semibold text-slate-600">LKR {parseFloat(earn.consultation_fee).toLocaleString()}</td>
-                                <td className="p-4 text-sm font-bold text-slate-700 text-center">{earn.total_appointments || 0}</td>
-                                <td className="p-4 text-sm font-bold text-blue-600 text-center">{earn.completed_appointments || 0}</td>
-                                <td className="p-4 text-sm font-bold text-rose-500 text-center">{earn.canceled_appointments || 0}</td>
-                                <td className="p-4 px-6 text-sm font-black text-slate-800 text-right">LKR {parseFloat(earn.total_earnings).toLocaleString()}</td>
-                              </tr>
-                            ))}
-                            {filteredEarnings.length === 0 && (
-                              <tr><td colSpan="7" className="p-10 text-center text-slate-500 font-medium">No doctors match your search.</td></tr>
-                            )}
-                          </tbody>
-                        </table>
+                     <div className="bg-[#f8eaff]/30 p-6">
+                        <div className="flex flex-col gap-3">
+                          {filteredEarnings.map(earn => (
+                            <div 
+                              key={earn.doctor_id} 
+                              className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-default"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
+                                  <img 
+                                    src={`http://127.0.0.1:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} 
+                                    alt={earn.doctor_name} 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name ? earn.doctor_name.charAt(0).toUpperCase() : 'DR'; }} 
+                                  />
+                                </div>
+                                <div className="flex flex-col">
+                                  <h4 className="font-extrabold text-indigo-900 text-[15px] mb-0.5">Dr. {earn.doctor_name}</h4>
+                                  <p className="text-slate-500 text-[12px] font-medium flex items-center gap-1.5">
+                                    <span>{earn.specialization}</span>
+                                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                    <span className="text-indigo-600 font-bold">LKR {parseFloat(earn.consultation_fee).toLocaleString()}</span>
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-4 sm:gap-6 bg-slate-50/50 px-5 py-2.5 rounded-xl border border-slate-100">
+                                <div className="flex flex-col text-left sm:text-right min-w-[60px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Appts</span>
+                                  <span className="text-slate-700 font-extrabold text-[14px]">
+                                    {earn.total_appointments || 0}
+                                  </span>
+                                </div>
+                                
+                                <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                                
+                                <div className="flex flex-col text-left sm:text-right min-w-[60px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Completed</span>
+                                  <span className="text-blue-600 font-extrabold text-[14px]">
+                                    {earn.completed_appointments || 0}
+                                  </span>
+                                </div>
+
+                                <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                                
+                                <div className="flex flex-col text-left sm:text-right min-w-[60px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Canceled</span>
+                                  <span className="text-rose-500 font-extrabold text-[14px]">
+                                    {earn.canceled_appointments || 0}
+                                  </span>
+                                </div>
+
+                                <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                                
+                                <div className="flex flex-col text-left sm:text-right min-w-[90px]">
+                                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Earnings</span>
+                                  <span className="text-emerald-600 font-black text-[14px]">
+                                    LKR {parseFloat(earn.total_earnings).toLocaleString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {filteredEarnings.length === 0 && (
+                            <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                              No doctors match your search.
+                            </div>
+                          )}
+                        </div>
                      </div>
                   </div>
                 </>
@@ -608,66 +718,86 @@ const AdminDashboard = () => {
                         Add Doctor
                       </button>
                     </div>
-                  <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
-                      {filteredDoctors.map(doctor => (
-                        <div 
-                          key={doctor.id} 
-                          onClick={() => setSelectedDoctor(doctor)}
-                          className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex gap-4">
-                              <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
-                                 <img src={`http://localhost:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
-                              </div>
-                              <div className="flex flex-col justify-center">
-                                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                  <h4 className="font-extrabold text-indigo-900 text-[17px]">Dr. {doctor.full_name}</h4>
-                                  <span className={`flex items-center gap-1.5 text-[11px] font-bold ${doctor.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
-                                    <span className={`w-2 h-2 rounded-full ${doctor.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
-                                    {doctor.is_available ? 'Available' : 'Unavailable'}
-                                  </span>
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${doctor.is_approved ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}`}>
-                                    {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
-                                  </span>
+                    <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+                        {currentDoctors.map(doctor => (
+                          <div 
+                            key={doctor.id} 
+                            onClick={() => setSelectedDoctor(doctor)}
+                            className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex gap-4">
+                                <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
+                                   <img src={`http://127.0.0.1:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
                                 </div>
-                                <p className="text-slate-500 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+                                <div className="flex flex-col justify-center">
+                                  <div className="flex items-center gap-3 mb-1 flex-wrap">
+                                    <h4 className="font-extrabold text-indigo-900 text-[17px]">Dr. {doctor.full_name}</h4>
+                                    <span className={`flex items-center gap-1.5 text-[11px] font-bold ${doctor.is_available ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                      <span className={`w-2 h-2 rounded-full ${doctor.is_available ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                                      {doctor.is_available ? 'Available' : 'Unavailable'}
+                                    </span>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${doctor.is_approved ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}`}>
+                                      {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
+                                    </span>
+                                  </div>
+                                  <p className="text-slate-500 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-1 text-indigo-900 font-bold text-sm mt-1">
+                                   <span className="text-yellow-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
+                                </div>
                               </div>
                             </div>
-                            
-                            <div className="flex flex-col items-end gap-1">
-                              <div className="flex items-center gap-1 text-indigo-900 font-bold text-sm mt-1">
-                                 <span className="text-yellow-500">⭐</span> {doctor.average_rating ? Number(doctor.average_rating).toFixed(1) : '0.0'}
-                              </div>
-                            </div>
-                          </div>
 
-                          <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
-                            <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
-                              <span>Patients</span>
-                              <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
-                                <Users size={14} className="text-indigo-400" /> {doctor.total_patients || 0}
-                              </span>
-                            </div>
-                            
-                            <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
-                              <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
-                              <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
-                                LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
-                              </span>
+                            <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100">
+                              <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
+                                <span>Patients</span>
+                                <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
+                                  <Users size={14} className="text-indigo-400" /> {doctor.total_patients || 0}
+                                </span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
+                                <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
+                                <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+                                  LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                      
                       {filteredDoctors.length === 0 && (
-                        <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                        <div className="col-span-full p-10 mt-4 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
                           No doctors match your search.
+                        </div>
+                      )}
+                      
+                      {totalDoctorPages > 1 && (
+                        <div className="flex justify-center items-center gap-2 mt-6 pt-6 border-t border-indigo-50/50">
+                          {Array.from({ length: totalDoctorPages }, (_, i) => (
+                            <button
+                              key={i + 1}
+                              onClick={() => setDoctorCurrentPage(i + 1)}
+                              className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
+                                doctorCurrentPage === i + 1 
+                                  ? 'bg-indigo-600 text-white shadow-md' 
+                                  : 'bg-white text-slate-500 hover:bg-indigo-50 border border-slate-200'
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
                   </div>
-                </div>
+
                     </>
                   )}
                 </>
@@ -675,44 +805,155 @@ const AdminDashboard = () => {
 
               {/* PATIENTS TAB */}
               {activeTab === 'Patients' && (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
-                  <div className="p-5 border-b border-blue-50">
-                    <h3 className="text-xl font-extrabold text-slate-800">Registered Patients</h3>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-blue-50/50 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
-                          <th className="p-4 px-6 font-bold">Patient Name</th>
-                          <th className="p-4 font-bold">Email</th>
-                          <th className="p-4 font-bold">Mobile</th>
-                          <th className="p-4 font-bold">Blood Group</th>
-                          <th className="p-4 px-6 font-bold">Joined Date</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-blue-50">
-                        {patients.map(patient => (
-                          <tr key={patient.id} className="hover:bg-blue-50/30 transition-colors">
-                            <td className="p-4 px-6 font-bold text-slate-700">{patient.full_name}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">{patient.email}</td>
-                            <td className="p-4 text-sm text-slate-600 font-medium">{patient.mobile_number || 'N/A'}</td>
-                            <td className="p-4">
-                              <span className="inline-block px-3 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-xs font-bold">
-                                {patient.blood_group || 'N/A'}
-                              </span>
-                            </td>
-                            <td className="p-4 px-6 text-slate-500 text-xs font-medium uppercase tracking-wider">
-                              {new Date(patient.created_at).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                        {patients.length === 0 && (
-                          <tr><td colSpan="5" className="p-8 text-center text-slate-500">No patients registered yet.</td></tr>
+                <>
+                  {selectedPatient && (
+                    <PatientDetailsModal 
+                      token={token} 
+                      patient={selectedPatient} 
+                      onClose={() => setSelectedPatient(null)} 
+                    />
+                  )}
+
+                  {/* Search and Filter for Patients Tab */}
+                  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                      <h3 className="text-[15px] font-bold text-slate-700 mb-2">
+                        Search patients
+                        {patientSearchQuery && (
+                          <span className="ml-2 text-xs font-normal text-blue-500">
+                            — {filteredPatients.length} result{filteredPatients.length !== 1 ? 's' : ''} found
+                          </span>
                         )}
-                      </tbody>
-                    </table>
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-full md:w-[380px]">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
+                          <input 
+                            type="text" 
+                            placeholder="Search name / email / mobile"
+                            value={patientSearchQuery}
+                            onChange={(e) => setPatientSearchQuery(e.target.value)}
+                            className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white"
+                          />
+                          {patientSearchQuery && (
+                            <button
+                              onClick={() => setPatientSearchQuery('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+                      <button 
+                        onClick={() => setPatientTypeFilter('All')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                          patientTypeFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'
+                        }`}
+                      >
+                        All
+                      </button>
+                      <button 
+                        onClick={() => setPatientTypeFilter('Walk-in')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                          patientTypeFilter === 'Walk-in' 
+                            ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' 
+                            : 'border-transparent text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        Walk-in
+                      </button>
+                      <button 
+                        onClick={() => setPatientTypeFilter('Online')}
+                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
+                          patientTypeFilter === 'Online' 
+                            ? 'bg-purple-50 border-purple-200 text-purple-700 shadow-sm' 
+                            : 'border-transparent text-slate-500 hover:bg-slate-50'
+                        }`}
+                      >
+                        Online
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+                    <div className="p-5 border-b border-blue-50">
+                      <h3 className="text-xl font-extrabold text-slate-800">Registered Patients</h3>
+                    </div>
+                    <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
+                      <div className="flex flex-col gap-3">
+                        {currentPatients.map(patient => (
+                        <div 
+                          key={patient.id} 
+                          onClick={() => setSelectedPatient(patient)}
+                          className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-[#bae6fd] flex items-center justify-center text-slate-800 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
+                              {patient.full_name ? patient.full_name.substring(0, 2).toUpperCase() : 'US'}
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                <h4 className="font-extrabold text-indigo-900 text-[15px]">{patient.full_name}</h4>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${patient.blood_group && patient.blood_group !== 'N/A' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500'}`}>
+                                  {patient.blood_group || 'N/A'}
+                                </span>
+                              </div>
+                              <p className="text-slate-500 text-[12px] font-medium">
+                                {patient.email?.includes('@caresync.local') ? 'No email provided' : patient.email}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-6 sm:gap-6 bg-slate-50/50 px-4 py-2 rounded-xl border border-slate-100">
+                            <div className="flex flex-col text-left sm:text-right">
+                              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Mobile</span>
+                              <span className="text-indigo-900 font-extrabold text-[13px]">
+                                {patient.mobile_number || 'N/A'}
+                              </span>
+                            </div>
+                            
+                            <div className="w-[1px] h-8 bg-slate-200 hidden sm:block"></div>
+                            
+                            <div className="flex flex-col text-left sm:text-right">
+                              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Joined</span>
+                              <span className="text-indigo-900 font-extrabold text-[13px]">
+                                {new Date(patient.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {filteredPatients.length === 0 && (
+                        <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+                          No patients match your search.
+                        </div>
+                      )}
+                      
+                      {totalPatientPages > 1 && (
+                        <div className="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-indigo-50/50">
+                          {Array.from({ length: totalPatientPages }, (_, i) => (
+                            <button
+                              key={i + 1}
+                              onClick={() => setPatientCurrentPage(i + 1)}
+                              className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
+                                patientCurrentPage === i + 1 
+                                  ? 'bg-indigo-600 text-white shadow-md' 
+                                  : 'bg-white text-slate-500 hover:bg-indigo-50 border border-slate-200'
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+                </>
               )}
 
               {/* APPOINTMENTS TAB */}
@@ -741,140 +982,163 @@ const AdminDashboard = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {(appointmentFilter === 'All' || appointmentFilter === 'Doctor') && appointments.map(appt => (
-                      <div key={appt.id} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
-                        <div className="mb-3">
-                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{appt.patient_name}</h4>
-                          <p className="text-indigo-600 font-bold text-[12px]">
-                            {appt.age ? `${appt.age} yrs : ` : ''}{appt.gender ? `${appt.gender} : ` : ''}{appt.mobile_number || 'No Mobile'}
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-50">
-                          <p className="text-slate-600 font-bold text-[13px]">
-                            Dr. {appt.doctor_name}
-                          </p>
-                          <p className="text-indigo-500 font-medium text-[12px] mt-0.5">
-                            {appt.doctor_specialization || 'Not Specified'}
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 flex items-center justify-between">
-                          <p className="text-slate-500 font-bold text-[13px]">Fees:</p>
-                          <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
-                            <span className="text-indigo-600 text-[10px] mr-0.5">LKR</span> 
-                            {appt.fees ? parseFloat(appt.fees).toLocaleString() : '0'}
-                          </p>
-                        </div>
+                    {currentAppointments.map(item => {
+                      if (item._type === 'Doctor') {
+                        const appt = item;
+                        return (
+                          <div key={`doc-${appt.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                            <div className="mb-3">
+                              <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{appt.patient_name}</h4>
+                              <p className="text-indigo-600 font-bold text-[12px]">
+                                {appt.age ? `${appt.age} yrs : ` : ''}{appt.gender ? `${appt.gender} : ` : ''}{appt.mobile_number || 'No Mobile'}
+                              </p>
+                            </div>
+                            
+                            <div className="mb-4 bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-50">
+                              <p className="text-slate-600 font-bold text-[13px]">
+                                Dr. {appt.doctor_name}
+                              </p>
+                              <p className="text-indigo-500 font-medium text-[12px] mt-0.5">
+                                {appt.doctor_specialization || 'Not Specified'}
+                              </p>
+                            </div>
+                            
+                            <div className="mb-4 flex items-center justify-between">
+                              <p className="text-slate-500 font-bold text-[13px]">Fees:</p>
+                              <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
+                                <span className="text-indigo-600 text-[10px] mr-0.5">LKR</span> 
+                                {appt.fees ? parseFloat(appt.fees).toLocaleString() : '0'}
+                              </p>
+                            </div>
 
-                        <div className="mt-auto flex flex-col gap-4">
-                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
-                            <span className="flex items-center gap-1.5 text-indigo-600 font-bold text-[11px] bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
-                              <Calendar size={13} className="text-indigo-500" />
-                              {new Date(appt.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {appt.time}
-                            </span>
-                            
-                            {appt.status === 'Pending' && (
-                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
-                                PENDING
-                              </span>
-                            )}
+                            <div className="mt-auto flex flex-col gap-4">
+                              <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                                <span className="flex items-center gap-1.5 text-indigo-600 font-bold text-[11px] bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
+                                  <Calendar size={13} className="text-indigo-500" />
+                                  {new Date(appt.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {appt.time}
+                                </span>
+                                
+                                {appt.status === 'Pending' && (
+                                  <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                    PENDING
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                {appt.status === 'Completed' ? (
+                                  <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                    COMPLETED
+                                  </span>
+                                ) : appt.status === 'Cancelled' ? (
+                                  <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                    CANCELED
+                                  </span>
+                                ) : (
+                                  <span className="bg-transparent text-transparent px-4 py-1.5">
+                                    {/* Placeholder */}
+                                  </span>
+                                )}
+                                
+                                {appt.status === 'Cancelled' ? (
+                                  <span className="text-rose-400 font-bold text-[11px]">Admin Cancelled</span>
+                                ) : appt.status === 'Pending' ? (
+                                  <button 
+                                    onClick={() => setAppointmentToCancel(appt.id)}
+                                    className="text-rose-500 font-bold text-[11px] hover:text-white hover:bg-rose-500 px-3 py-1.5 rounded-full transition-colors border border-rose-100 hover:border-rose-500"
+                                  >
+                                    Admin Cancel
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
                           </div>
-                          
-                          <div className="flex items-center justify-between">
-                            {appt.status === 'Completed' ? (
-                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
-                                COMPLETED
-                              </span>
-                            ) : appt.status === 'Cancelled' ? (
-                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
-                                CANCELED
-                              </span>
-                            ) : (
-                              <span className="bg-transparent text-transparent px-4 py-1.5">
-                                {/* Placeholder */}
-                              </span>
-                            )}
+                        );
+                      } else {
+                        const booking = item;
+                        return (
+                          <div key={`service-${booking.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                            <div className="mb-3">
+                              <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{booking.patientName}</h4>
+                              <p className="text-indigo-600 font-bold text-[12px]">
+                                Medical Service Booking
+                              </p>
+                            </div>
                             
-                            {appt.status === 'Cancelled' ? (
-                              <span className="text-rose-400 font-bold text-[11px]">Admin Cancelled</span>
-                            ) : appt.status === 'Pending' ? (
-                              <button 
-                                onClick={() => setAppointmentToCancel(appt.id)}
-                                className="text-rose-500 font-bold text-[11px] hover:text-white hover:bg-rose-500 px-3 py-1.5 rounded-full transition-colors border border-rose-100 hover:border-rose-500"
-                              >
-                                Admin Cancel
-                              </button>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {(appointmentFilter === 'All' || appointmentFilter === 'Services') && serviceBookings.map(booking => (
-                      <div key={`service-${booking.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
-                        <div className="mb-3">
-                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{booking.patientName}</h4>
-                          <p className="text-indigo-600 font-bold text-[12px]">
-                            Medical Service Booking
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
-                          <p className="text-slate-600 font-bold text-[13px]">
-                            {booking.serviceName}
-                          </p>
-                          <p className="text-blue-500 font-medium text-[12px] mt-0.5">
-                            Lab & Diagnostic
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 flex items-center justify-between">
-                          <p className="text-slate-500 font-bold text-[13px]">Amount:</p>
-                          <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
-                            <span className="text-blue-600 text-[10px] mr-0.5">LKR</span> 
-                            {booking.price ? parseFloat(booking.price).toLocaleString() : '0'}
-                          </p>
-                        </div>
+                            <div className="mb-4 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
+                              <p className="text-slate-600 font-bold text-[13px]">
+                                {booking.serviceName}
+                              </p>
+                              <p className="text-blue-500 font-medium text-[12px] mt-0.5">
+                                Lab & Diagnostic
+                              </p>
+                            </div>
+                            
+                            <div className="mb-4 flex items-center justify-between">
+                              <p className="text-slate-500 font-bold text-[13px]">Amount:</p>
+                              <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
+                                <span className="text-blue-600 text-[10px] mr-0.5">LKR</span> 
+                                {booking.price ? parseFloat(booking.price).toLocaleString() : '0'}
+                              </p>
+                            </div>
 
-                        <div className="mt-auto flex flex-col gap-4">
-                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
-                            <span className="flex items-center gap-1.5 text-blue-600 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100">
-                              <Calendar size={13} className="text-blue-500" />
-                              {new Date(booking.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {booking.time}
-                            </span>
-                            
-                            {booking.status === 'Pending' && (
-                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
-                                PENDING
-                              </span>
-                            )}
+                            <div className="mt-auto flex flex-col gap-4">
+                              <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                                <span className="flex items-center gap-1.5 text-blue-600 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100">
+                                  <Calendar size={13} className="text-blue-500" />
+                                  {new Date(booking.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {booking.time}
+                                </span>
+                                
+                                {booking.status === 'Pending' && (
+                                  <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                    PENDING
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                {booking.status === 'Completed' || booking.status === 'In Progress' ? (
+                                  <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                    {booking.status.toUpperCase()}
+                                  </span>
+                                ) : booking.status === 'Cancelled' ? (
+                                  <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                    CANCELED
+                                  </span>
+                                ) : (
+                                  <span className="bg-transparent text-transparent px-4 py-1.5">
+                                    {/* Placeholder */}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          
-                          <div className="flex items-center justify-between">
-                            {booking.status === 'Completed' || booking.status === 'Confirmed' ? (
-                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
-                                {booking.status.toUpperCase()}
-                              </span>
-                            ) : booking.status === 'Cancelled' ? (
-                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
-                                CANCELED
-                              </span>
-                            ) : (
-                              <span className="bg-transparent text-transparent px-4 py-1.5">
-                                {/* Placeholder */}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      }
+                    })}
                   </div>
-                  {((appointmentFilter === 'All' && appointments.length === 0 && serviceBookings.length === 0) ||
-                    (appointmentFilter === 'Doctor' && appointments.length === 0) ||
-                    (appointmentFilter === 'Services' && serviceBookings.length === 0)) && (
-                    <div className="p-10 text-center bg-white rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm">
+                  
+                  {combinedAppointments.length === 0 && (
+                    <div className="p-10 text-center bg-white rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm mt-4">
                       <p className="text-indigo-600 font-medium">No appointments found for this filter.</p>
+                    </div>
+                  )}
+
+                  {totalAppointmentPages > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-6 pt-6 border-t border-indigo-50/50">
+                      {Array.from({ length: totalAppointmentPages }, (_, i) => (
+                        <button
+                          key={i + 1}
+                          onClick={() => setAppointmentCurrentPage(i + 1)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
+                            appointmentCurrentPage === i + 1 
+                              ? 'bg-[#1e293b] text-white shadow-md' 
+                              : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -947,7 +1211,7 @@ const AdminDashboard = () => {
             <div className="px-8 pb-8">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
-                  <img src={`http://localhost:5000/api/users/profile-image/${selectedDoctor.id}?t=${Date.now()}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
+                  <img src={`http://127.0.0.1:5000/api/users/profile-image/${selectedDoctor.id}?t=${Date.now()}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
                 </div>
                 
                 {/* Toggle Switch */}

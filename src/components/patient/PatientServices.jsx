@@ -26,8 +26,8 @@ const PatientServices = () => {
   const fetchServicesAndBookings = async () => {
     try {
       const [servicesRes, bookingsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/services', { headers: { Authorization: token } }),
-        axios.get('http://localhost:5000/api/services/bookings', { headers: { Authorization: token } })
+        axios.get('http://127.0.0.1:5000/api/services', { headers: { Authorization: token } }),
+        axios.get('http://127.0.0.1:5000/api/services/bookings', { headers: { Authorization: token } })
       ]);
       
       if (servicesRes.data.success) {
@@ -62,6 +62,12 @@ const PatientServices = () => {
     const order_id = `PSRV-${Date.now()}`;
     
     try {
+      const res = await axios.post('http://127.0.0.1:5000/api/services/book', {
+        service_id: selectedService.id,
+        date,
+        time,
+        amount_paid: selectedService.price
+      }, { headers: { Authorization: token } });
       const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
         order_id: order_id,
         amount: amount,
@@ -71,6 +77,15 @@ const PatientServices = () => {
       if (hashRes.data) {
         const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
 
+        // Create booking object for PDF
+        const pdfBooking = {
+          id: res.data.booking.id,
+          patientName: user?.full_name || user?.name || 'Patient',
+          serviceName: selectedService.name,
+          price: selectedService.price,
+          date,
+          time,
+          status: 'In Progress'
         const payment = {
           sandbox: true,
           merchant_id: merchant_id,

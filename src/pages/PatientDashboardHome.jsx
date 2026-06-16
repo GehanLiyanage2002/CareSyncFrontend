@@ -9,7 +9,7 @@ import Header from '../components/Header';
 import { Video, Calendar, Clock, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const CalendarIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
@@ -55,7 +55,7 @@ const PatientDashboardHome = () => {
     if (isRescheduleModalOpen && selectedAppointment) {
       const fetchDates = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${selectedAppointment.doctor_id}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/configured-dates/${selectedAppointment.doctor_id}`);
           if (res.data.success) {
             setConfiguredDates(res.data.dates.map(d => new Date(d).toDateString()));
           }
@@ -74,7 +74,7 @@ const PatientDashboardHome = () => {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${selectedAppointment.doctor_id}?date=${newDate}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${selectedAppointment.doctor_id}?date=${newDate}`);
           if (res.data.success) {
             setAvailableSlots(res.data.slots || []);
           }
@@ -92,12 +92,12 @@ const PatientDashboardHome = () => {
     const fetchAppointments = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5000/api/appointments/patient/my-appointments',
+          'http://127.0.0.1:5000/api/appointments/patient/my-appointments',
           { headers: { Authorization: token } }
         );
         if (response.data.success) {
           const upcoming = response.data.appointments.find(a => 
-            (a.status === 'pending' || a.status === 'confirmed') && a.is_telemedicine
+            (a.status?.toLowerCase() === 'pending' || a.status?.toLowerCase() === 'in progress') && a.is_telemedicine
           );
           setUpcomingTelemedicine(upcoming);
           setAppointments(response.data.appointments || []);
@@ -126,7 +126,7 @@ const PatientDashboardHome = () => {
   const handleCancel = async (id) => {
     if (!window.confirm('Are you sure you want to cancel this appointment? Cancellations are only allowed up to 1 hour before.')) return;
     try {
-      const res = await axios.put(`http://localhost:5000/api/appointments/${id}/cancel`, {}, {
+      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${id}/cancel`, {}, {
         headers: { Authorization: token }
       });
       if (res.data.success) {
@@ -150,7 +150,7 @@ const PatientDashboardHome = () => {
   const handleReschedule = async () => {
     if (!newDate || !newTime) return alert('Please select a new date and time');
     try {
-      const res = await axios.put(`http://localhost:5000/api/appointments/${selectedAppointment.id}/reschedule`, {
+      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${selectedAppointment.id}/reschedule`, {
         new_date: newDate,
         new_time: newTime
       }, {
@@ -281,7 +281,7 @@ const PatientDashboardHome = () => {
                     })() && (
                       <button onClick={() => openRescheduleModal(app)} className="flex-1 md:flex-none px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded-xl transition-colors">Reschedule</button>
                     )}
-                    {(app.status === 'pending' || app.status === 'confirmed') && (
+                    {(app.status?.toLowerCase() === 'pending' || app.status?.toLowerCase() === 'in progress') && (
                       <button onClick={() => handleCancel(app.id)} className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-xl transition-colors">Cancel</button>
                     )}
                   </div>

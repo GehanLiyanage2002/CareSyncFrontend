@@ -5,7 +5,7 @@ import DoctorKanbanBoard from '../components/doctor/DoctorKanbanBoard';
 
 const DoctorKanbanPage = () => {
   const navigate = useNavigate();
-  const [dateFilter, setDateFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('today');
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-teal-100 flex flex-col">

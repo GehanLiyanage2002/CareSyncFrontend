@@ -18,6 +18,7 @@ const LiveQueue = () => {
   const [allAppointments, setAllAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFetchingDoctors, setIsFetchingDoctors] = useState(true);
   const [checkInLoading, setCheckInLoading] = useState(null);
   const [emergencyLoading, setEmergencyLoading] = useState(null);
 
@@ -61,6 +62,7 @@ const LiveQueue = () => {
 
   const fetchDoctors = async () => {
     try {
+      setIsFetchingDoctors(true);
       // Fetch all available doctors using the public/user endpoint
       const res = await axios.get('http://localhost:5000/api/users/doctors', {
         headers: { Authorization: token }
@@ -69,6 +71,8 @@ const LiveQueue = () => {
     } catch (error) {
       console.error('Error fetching doctors:', error);
       toast.error('Failed to load doctors list.');
+    } finally {
+      setIsFetchingDoctors(false);
     }
   };
 
@@ -143,6 +147,15 @@ const LiveQueue = () => {
         {/* Horizontal Scrollable Doctor Cards */}
         <div className="relative z-10 flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
           {(() => {
+            if (isFetchingDoctors) {
+              return (
+                <div className="flex items-center justify-center w-full py-4 text-slate-500 gap-2">
+                  <Activity className="animate-spin text-blue-500" size={20} />
+                  <span className="text-sm font-bold">Loading doctors...</span>
+                </div>
+              );
+            }
+
             const filteredDoctors = doctors.filter(doc => 
               (doc.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
               (doc.specialization || '').toLowerCase().includes(searchQuery.toLowerCase())

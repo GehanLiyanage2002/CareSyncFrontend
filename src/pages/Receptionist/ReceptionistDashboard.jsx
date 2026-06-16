@@ -83,43 +83,37 @@ const ReceptionistDashboard = () => {
 
 
           {/* Dynamic Content */}
-          {activeTab === 'Patient Queue' && (
-            <div className="animate-fadeIn">
-              <LiveQueue />
-            </div>
-          )}
+          <div className={`${activeTab === 'Patient Queue' ? 'block animate-fadeIn' : 'hidden'}`}>
+            <LiveQueue />
+          </div>
 
-          {activeTab === 'Live Queue' && (
-            <div className="animate-fadeIn">
-              <GlobalQueueMonitor />
-            </div>
-          )}
+          <div className={`${activeTab === 'Live Queue' ? 'block animate-fadeIn' : 'hidden'}`}>
+            <GlobalQueueMonitor />
+          </div>
 
-          {activeTab === 'Walk-in' && (
-            <div className="animate-fadeIn">
-              <WalkInRegistration />
-            </div>
-          )}
+          <div className={`${activeTab === 'Walk-in' ? 'block animate-fadeIn' : 'hidden'}`}>
+            <WalkInRegistration />
+          </div>
 
-          {activeTab === 'Booking' && (
-            <div className="bg-white rounded-3xl p-8 border border-blue-50 shadow-sm min-h-[400px] flex items-center justify-center border-dashed">
-              <div className="text-center text-slate-400">
-                <Calendar size={48} className="mx-auto mb-4 opacity-50 text-indigo-400" />
-                <h4 className="text-lg font-bold text-slate-600 mb-1">Manual Appointment Booking</h4>
-                <p className="text-sm font-medium">This module is under construction.</p>
+          <div className={`${activeTab === 'Booking' ? 'block animate-fadeIn' : 'hidden'}`}>
+            <div className="bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 p-12 text-center shadow-sm">
+              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                <Calendar size={32} />
               </div>
+              <h3 className="text-xl font-bold text-slate-600 mb-2">Booking System</h3>
+              <p className="text-slate-400 font-medium">Under Construction</p>
             </div>
-          )}
+          </div>
 
-          {activeTab === 'Billing' && (
-            <div className="bg-white rounded-3xl p-8 border border-blue-50 shadow-sm min-h-[400px] flex items-center justify-center border-dashed">
-              <div className="text-center text-slate-400">
-                <CreditCard size={48} className="mx-auto mb-4 opacity-50 text-indigo-400" />
-                <h4 className="text-lg font-bold text-slate-600 mb-1">Billing & Invoicing</h4>
-                <p className="text-sm font-medium">This module is under construction.</p>
+          <div className={`${activeTab === 'Billing' ? 'block animate-fadeIn' : 'hidden'}`}>
+            <div className="bg-white/50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 p-12 text-center shadow-sm">
+              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                <CreditCard size={32} />
               </div>
+              <h3 className="text-xl font-bold text-slate-600 mb-2">Billing System</h3>
+              <p className="text-slate-400 font-medium">Under Construction</p>
             </div>
-          )}
+          </div>
 
         </div>
       </main>

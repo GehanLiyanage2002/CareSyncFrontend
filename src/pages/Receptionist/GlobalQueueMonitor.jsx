@@ -9,7 +9,7 @@ const socket = io('http://localhost:5000');
 const GlobalQueueMonitor = () => {
   const { token } = useSelector((state) => state.auth);
   const [queues, setQueues] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef(null);
 

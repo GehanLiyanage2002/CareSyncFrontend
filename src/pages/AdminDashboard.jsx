@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
 import AdminServices from '../components/admin/AdminServices';
 import AddDoctorModal from '../components/admin/AddDoctorModal';
+import PatientDetailsModal from '../components/admin/PatientDetailsModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 const AdminDashboard = () => {
@@ -38,6 +39,7 @@ const AdminDashboard = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [showAddDoctor, setShowAddDoctor] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [serviceBookings, setServiceBookings] = useState([]);
@@ -708,6 +710,14 @@ const AdminDashboard = () => {
               {/* PATIENTS TAB */}
               {activeTab === 'Patients' && (
                 <>
+                  {selectedPatient && (
+                    <PatientDetailsModal 
+                      token={token} 
+                      patient={selectedPatient} 
+                      onClose={() => setSelectedPatient(null)} 
+                    />
+                  )}
+
                   {/* Search and Filter for Patients Tab */}
                   <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
@@ -782,7 +792,8 @@ const AdminDashboard = () => {
                         {filteredPatients.map(patient => (
                         <div 
                           key={patient.id} 
-                          className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                          onClick={() => setSelectedPatient(patient)}
+                          className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
                         >
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-xl bg-[#bae6fd] flex items-center justify-center text-slate-800 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">

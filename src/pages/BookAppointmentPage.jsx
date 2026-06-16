@@ -188,26 +188,6 @@ const BookAppointmentPage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      try {
-        const docId = doctor?.id || doctor?.doctor_id;
-        const res = await axios.post('http://127.0.0.1:5000/api/appointments', {
-          doctor_id: docId,
-          appointment_date: selectedDate.valueDate,
-          start_time: selectedTime,
-          patient_name: formData.fullName,
-          age: parseInt(formData.age),
-          mobile_number: formData.mobileNumber,
-          gender: formData.gender,
-          email: formData.email,
-          payment_method: paymentMethod,
-          is_telemedicine: isTelemedicine
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setTokenNumber(res.data.appointment.token_number);
-          setShowSuccessModal(true);
       const docId = doctor?.id || doctor?.doctor_id;
       const amount = isTelemedicine ? 2500 : doctor.consultationFee;
       

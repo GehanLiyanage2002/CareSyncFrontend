@@ -123,19 +123,6 @@ const BookServicePage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      try {
-        const res = await axios.post('http://127.0.0.1:5000/api/services/book', {
-          service_id: service.id,
-          date: selectedDateObj.schedule_date,
-          time: selectedTime,
-          amount_paid: service.price || 0
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setBookingId(res.data.booking.id);
-          setShowSuccessModal(true);
       const amount = service.price || 0;
       
       const submitBooking = async () => {

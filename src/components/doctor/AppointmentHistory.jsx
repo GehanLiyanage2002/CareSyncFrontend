@@ -11,6 +11,8 @@ const AppointmentHistory = () => {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
   
   // Medical Report Modal State
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -53,6 +55,16 @@ const AppointmentHistory = () => {
       return nameMatch || tokenMatch;
     });
   }, [history, searchQuery]);
+
+  // Reset page when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredHistory.length / recordsPerPage);
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const currentRecords = filteredHistory.slice(startIndex, startIndex + recordsPerPage);
 
   if (isLoading) {
     return (
@@ -121,7 +133,7 @@ const AppointmentHistory = () => {
                 </td>
               </tr>
             ) : (
-              filteredHistory.map((apt) => (
+              currentRecords.map((apt) => (
                 <tr key={apt.id} className="hover:bg-slate-50/80 dark:hover:bg-gray-700/50 transition-colors group">
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 rounded-lg font-bold text-xs border border-slate-200 dark:border-gray-600">
@@ -192,6 +204,34 @@ const AppointmentHistory = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="p-4 border-t border-slate-100 dark:border-gray-700 flex justify-between items-center bg-slate-50 dark:bg-gray-900/50">
+          <p className="text-sm text-slate-500 dark:text-gray-400">
+            Showing <span className="font-bold">{startIndex + 1}</span> to <span className="font-bold">{Math.min(startIndex + recordsPerPage, filteredHistory.length)}</span> of <span className="font-bold">{filteredHistory.length}</span> records
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-gray-600 text-sm font-semibold text-slate-600 dark:text-gray-300 disabled:opacity-50 hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm"
+            >
+              Previous
+            </button>
+            <div className="text-sm font-bold text-slate-700 dark:text-gray-200 px-2 bg-slate-200/50 dark:bg-gray-800 py-1 rounded-md">
+              {currentPage} / {totalPages}
+            </div>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-gray-600 text-sm font-semibold text-slate-600 dark:text-gray-300 disabled:opacity-50 hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* View Medical Report Modal (Read Only) */}
       <ViewSingleMedicalReportModal

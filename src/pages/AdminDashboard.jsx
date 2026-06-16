@@ -37,6 +37,10 @@ const AdminDashboard = () => {
   const [doctorCurrentPage, setDoctorCurrentPage] = useState(1);
   const doctorsPerPage = 6;
 
+  const [appointmentCurrentPage, setAppointmentCurrentPage] = useState(1);
+  const appointmentsPerPage = 8;
+  const [appointmentFilter, setAppointmentFilter] = useState('All');
+
   useEffect(() => {
     setPatientCurrentPage(1);
   }, [patientSearchQuery, patientTypeFilter]);
@@ -44,6 +48,10 @@ const AdminDashboard = () => {
   useEffect(() => {
     setDoctorCurrentPage(1);
   }, [doctorSearchQuery, doctorStatusFilter]);
+
+  useEffect(() => {
+    setAppointmentCurrentPage(1);
+  }, [appointmentFilter]);
 
   
   // Filtering and Real-time state
@@ -56,7 +64,6 @@ const AdminDashboard = () => {
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [serviceBookings, setServiceBookings] = useState([]);
-  const [appointmentFilter, setAppointmentFilter] = useState('All');
 
   const { token, user } = useSelector(state => state.auth);
   const navigate = useNavigate();
@@ -351,6 +358,20 @@ const AdminDashboard = () => {
   const indexOfFirstDoctor = indexOfLastDoctor - doctorsPerPage;
   const currentDoctors = filteredDoctors.slice(indexOfFirstDoctor, indexOfLastDoctor);
   const totalDoctorPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
+
+  // Appointments Pagination Logic
+  let combinedAppointments = [];
+  if (appointmentFilter === 'All' || appointmentFilter === 'Doctor') {
+    combinedAppointments = [...combinedAppointments, ...(appointments || []).map(a => ({...a, _type: 'Doctor'}))];
+  }
+  if (appointmentFilter === 'All' || appointmentFilter === 'Services') {
+    combinedAppointments = [...combinedAppointments, ...(serviceBookings || []).map(s => ({...s, _type: 'Service'}))];
+  }
+
+  const indexOfLastAppointment = appointmentCurrentPage * appointmentsPerPage;
+  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
+  const currentAppointments = combinedAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
+  const totalAppointmentPages = Math.ceil(combinedAppointments.length / appointmentsPerPage);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 overflow-hidden font-sans">
@@ -931,140 +952,163 @@ const AdminDashboard = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {(appointmentFilter === 'All' || appointmentFilter === 'Doctor') && appointments.map(appt => (
-                      <div key={appt.id} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
-                        <div className="mb-3">
-                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{appt.patient_name}</h4>
-                          <p className="text-indigo-600 font-bold text-[12px]">
-                            {appt.age ? `${appt.age} yrs : ` : ''}{appt.gender ? `${appt.gender} : ` : ''}{appt.mobile_number || 'No Mobile'}
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-50">
-                          <p className="text-slate-600 font-bold text-[13px]">
-                            Dr. {appt.doctor_name}
-                          </p>
-                          <p className="text-indigo-500 font-medium text-[12px] mt-0.5">
-                            {appt.doctor_specialization || 'Not Specified'}
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 flex items-center justify-between">
-                          <p className="text-slate-500 font-bold text-[13px]">Fees:</p>
-                          <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
-                            <span className="text-indigo-600 text-[10px] mr-0.5">LKR</span> 
-                            {appt.fees ? parseFloat(appt.fees).toLocaleString() : '0'}
-                          </p>
-                        </div>
+                    {currentAppointments.map(item => {
+                      if (item._type === 'Doctor') {
+                        const appt = item;
+                        return (
+                          <div key={`doc-${appt.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                            <div className="mb-3">
+                              <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{appt.patient_name}</h4>
+                              <p className="text-indigo-600 font-bold text-[12px]">
+                                {appt.age ? `${appt.age} yrs : ` : ''}{appt.gender ? `${appt.gender} : ` : ''}{appt.mobile_number || 'No Mobile'}
+                              </p>
+                            </div>
+                            
+                            <div className="mb-4 bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-50">
+                              <p className="text-slate-600 font-bold text-[13px]">
+                                Dr. {appt.doctor_name}
+                              </p>
+                              <p className="text-indigo-500 font-medium text-[12px] mt-0.5">
+                                {appt.doctor_specialization || 'Not Specified'}
+                              </p>
+                            </div>
+                            
+                            <div className="mb-4 flex items-center justify-between">
+                              <p className="text-slate-500 font-bold text-[13px]">Fees:</p>
+                              <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
+                                <span className="text-indigo-600 text-[10px] mr-0.5">LKR</span> 
+                                {appt.fees ? parseFloat(appt.fees).toLocaleString() : '0'}
+                              </p>
+                            </div>
 
-                        <div className="mt-auto flex flex-col gap-4">
-                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
-                            <span className="flex items-center gap-1.5 text-indigo-600 font-bold text-[11px] bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
-                              <Calendar size={13} className="text-indigo-500" />
-                              {new Date(appt.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {appt.time}
-                            </span>
-                            
-                            {appt.status === 'Pending' && (
-                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
-                                PENDING
-                              </span>
-                            )}
+                            <div className="mt-auto flex flex-col gap-4">
+                              <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                                <span className="flex items-center gap-1.5 text-indigo-600 font-bold text-[11px] bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
+                                  <Calendar size={13} className="text-indigo-500" />
+                                  {new Date(appt.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {appt.time}
+                                </span>
+                                
+                                {appt.status === 'Pending' && (
+                                  <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                    PENDING
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                {appt.status === 'Completed' ? (
+                                  <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                    COMPLETED
+                                  </span>
+                                ) : appt.status === 'Cancelled' ? (
+                                  <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                    CANCELED
+                                  </span>
+                                ) : (
+                                  <span className="bg-transparent text-transparent px-4 py-1.5">
+                                    {/* Placeholder */}
+                                  </span>
+                                )}
+                                
+                                {appt.status === 'Cancelled' ? (
+                                  <span className="text-rose-400 font-bold text-[11px]">Admin Cancelled</span>
+                                ) : appt.status === 'Pending' ? (
+                                  <button 
+                                    onClick={() => setAppointmentToCancel(appt.id)}
+                                    className="text-rose-500 font-bold text-[11px] hover:text-white hover:bg-rose-500 px-3 py-1.5 rounded-full transition-colors border border-rose-100 hover:border-rose-500"
+                                  >
+                                    Admin Cancel
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
                           </div>
-                          
-                          <div className="flex items-center justify-between">
-                            {appt.status === 'Completed' ? (
-                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
-                                COMPLETED
-                              </span>
-                            ) : appt.status === 'Cancelled' ? (
-                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
-                                CANCELED
-                              </span>
-                            ) : (
-                              <span className="bg-transparent text-transparent px-4 py-1.5">
-                                {/* Placeholder */}
-                              </span>
-                            )}
+                        );
+                      } else {
+                        const booking = item;
+                        return (
+                          <div key={`service-${booking.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+                            <div className="mb-3">
+                              <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{booking.patientName}</h4>
+                              <p className="text-indigo-600 font-bold text-[12px]">
+                                Medical Service Booking
+                              </p>
+                            </div>
                             
-                            {appt.status === 'Cancelled' ? (
-                              <span className="text-rose-400 font-bold text-[11px]">Admin Cancelled</span>
-                            ) : appt.status === 'Pending' ? (
-                              <button 
-                                onClick={() => setAppointmentToCancel(appt.id)}
-                                className="text-rose-500 font-bold text-[11px] hover:text-white hover:bg-rose-500 px-3 py-1.5 rounded-full transition-colors border border-rose-100 hover:border-rose-500"
-                              >
-                                Admin Cancel
-                              </button>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {(appointmentFilter === 'All' || appointmentFilter === 'Services') && serviceBookings.map(booking => (
-                      <div key={`service-${booking.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
-                        <div className="mb-3">
-                          <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{booking.patientName}</h4>
-                          <p className="text-indigo-600 font-bold text-[12px]">
-                            Medical Service Booking
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
-                          <p className="text-slate-600 font-bold text-[13px]">
-                            {booking.serviceName}
-                          </p>
-                          <p className="text-blue-500 font-medium text-[12px] mt-0.5">
-                            Lab & Diagnostic
-                          </p>
-                        </div>
-                        
-                        <div className="mb-4 flex items-center justify-between">
-                          <p className="text-slate-500 font-bold text-[13px]">Amount:</p>
-                          <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
-                            <span className="text-blue-600 text-[10px] mr-0.5">LKR</span> 
-                            {booking.price ? parseFloat(booking.price).toLocaleString() : '0'}
-                          </p>
-                        </div>
+                            <div className="mb-4 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
+                              <p className="text-slate-600 font-bold text-[13px]">
+                                {booking.serviceName}
+                              </p>
+                              <p className="text-blue-500 font-medium text-[12px] mt-0.5">
+                                Lab & Diagnostic
+                              </p>
+                            </div>
+                            
+                            <div className="mb-4 flex items-center justify-between">
+                              <p className="text-slate-500 font-bold text-[13px]">Amount:</p>
+                              <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
+                                <span className="text-blue-600 text-[10px] mr-0.5">LKR</span> 
+                                {booking.price ? parseFloat(booking.price).toLocaleString() : '0'}
+                              </p>
+                            </div>
 
-                        <div className="mt-auto flex flex-col gap-4">
-                          <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
-                            <span className="flex items-center gap-1.5 text-blue-600 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100">
-                              <Calendar size={13} className="text-blue-500" />
-                              {new Date(booking.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {booking.time}
-                            </span>
-                            
-                            {booking.status === 'Pending' && (
-                              <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
-                                PENDING
-                              </span>
-                            )}
+                            <div className="mt-auto flex flex-col gap-4">
+                              <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                                <span className="flex items-center gap-1.5 text-blue-600 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100">
+                                  <Calendar size={13} className="text-blue-500" />
+                                  {new Date(booking.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {booking.time}
+                                </span>
+                                
+                                {booking.status === 'Pending' && (
+                                  <span className="bg-amber-50 text-amber-600 px-3 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-amber-100">
+                                    PENDING
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                {booking.status === 'Completed' || booking.status === 'Confirmed' ? (
+                                  <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
+                                    {booking.status.toUpperCase()}
+                                  </span>
+                                ) : booking.status === 'Cancelled' ? (
+                                  <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
+                                    CANCELED
+                                  </span>
+                                ) : (
+                                  <span className="bg-transparent text-transparent px-4 py-1.5">
+                                    {/* Placeholder */}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          
-                          <div className="flex items-center justify-between">
-                            {booking.status === 'Completed' || booking.status === 'Confirmed' ? (
-                              <span className="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-emerald-100">
-                                {booking.status.toUpperCase()}
-                              </span>
-                            ) : booking.status === 'Cancelled' ? (
-                              <span className="bg-rose-50 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border border-rose-100">
-                                CANCELED
-                              </span>
-                            ) : (
-                              <span className="bg-transparent text-transparent px-4 py-1.5">
-                                {/* Placeholder */}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      }
+                    })}
                   </div>
-                  {((appointmentFilter === 'All' && appointments.length === 0 && serviceBookings.length === 0) ||
-                    (appointmentFilter === 'Doctor' && appointments.length === 0) ||
-                    (appointmentFilter === 'Services' && serviceBookings.length === 0)) && (
-                    <div className="p-10 text-center bg-white rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm">
+                  
+                  {combinedAppointments.length === 0 && (
+                    <div className="p-10 text-center bg-white rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm mt-4">
                       <p className="text-indigo-600 font-medium">No appointments found for this filter.</p>
+                    </div>
+                  )}
+
+                  {totalAppointmentPages > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-6 pt-6 border-t border-indigo-50/50">
+                      {Array.from({ length: totalAppointmentPages }, (_, i) => (
+                        <button
+                          key={i + 1}
+                          onClick={() => setAppointmentCurrentPage(i + 1)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
+                            appointmentCurrentPage === i + 1 
+                              ? 'bg-[#1e293b] text-white shadow-md' 
+                              : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>

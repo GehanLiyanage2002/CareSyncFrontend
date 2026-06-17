@@ -16,6 +16,23 @@ import AddDoctorModal from '../components/admin/AddDoctorModal';
 import PatientDetailsModal from '../components/admin/PatientDetailsModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
+const AuthorizedImage = ({ url, token, alt }) => {
+  const [imgSrc, setImgSrc] = useState(null);
+  useEffect(() => {
+    let objectUrl = null;
+    axios.get(url, { headers: { Authorization: token }, responseType: 'blob' })
+      .then(res => {
+         objectUrl = URL.createObjectURL(res.data);
+         setImgSrc(objectUrl);
+      })
+      .catch(err => console.error(err));
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [url, token]);
+
+  if (!imgSrc) return <div className="flex justify-center items-center h-full w-full bg-slate-100 animate-pulse text-xs text-slate-400">Loading...</div>;
+  return <img src={imgSrc} alt={alt} className="w-full h-full object-cover" />;
+};
+
 const AdminDashboard = () => {
  const [activeTab, setActiveTab] = useState('Overview');
  const [stats, setStats] = useState(null);
@@ -1250,6 +1267,38 @@ const AdminDashboard = () => {
  <p className="text-slate-800 font-semibold text-sm">{selectedDoctor.mobile_number || 'N/A'}</p>
  </div>
  </div>
+ </div>
+
+ {/* Medical ID Cards */}
+ <div className="mt-6 pt-6 border-t border-slate-100">
+   <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3">Medical ID Cards</p>
+   <div className="grid grid-cols-2 gap-4">
+     {selectedDoctor.has_id_card_front ? (
+       <div className="flex flex-col items-center gap-2">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Side</span>
+         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+           <AuthorizedImage url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/front`} token={token} alt="ID Card Front" />
+         </div>
+       </div>
+     ) : (
+       <div className="flex flex-col items-center justify-center h-32 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Side Missing</span>
+       </div>
+     )}
+
+     {selectedDoctor.has_id_card_rear ? (
+       <div className="flex flex-col items-center gap-2">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rear Side</span>
+         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+           <AuthorizedImage url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/rear`} token={token} alt="ID Card Rear" />
+         </div>
+       </div>
+     ) : (
+       <div className="flex flex-col items-center justify-center h-32 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rear Side Missing</span>
+       </div>
+     )}
+   </div>
  </div>
 
  <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">

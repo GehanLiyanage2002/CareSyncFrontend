@@ -47,6 +47,8 @@ const DoctorRegister = () => {
   const [specialization, setSpecialization]   = useState('');
   const [experience, setExperience]           = useState('');
   const [bio, setBio]                         = useState('');
+  const [idCardFront, setIdCardFront]         = useState(null);
+  const [idCardRear, setIdCardRear]           = useState(null);
   
   const role                                  = 'Doctor'; // default & fixed
 
@@ -103,6 +105,14 @@ const DoctorRegister = () => {
       setError('Please capture your Face ID for biometric login.');
       return;
     }
+    if (!idCardFront) {
+      setError('Please upload the front of your Medical ID Card.');
+      return;
+    }
+    if (!idCardRear) {
+      setError('Please upload the rear of your Medical ID Card.');
+      return;
+    }
 
     // SQL Injection validation
     const validation = validateFormFields({ 
@@ -122,16 +132,21 @@ const DoctorRegister = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/auth/register', {
-        full_name: fullName.trim(),
-        email,
-        mobile_number: mobileNumber.trim(),
-        password,
-        role,
-        specialization,
-        experience: experience.toString() + ' Years',
-        bio,
-        faceDescriptor
+      const formData = new FormData();
+      formData.append('full_name', fullName.trim());
+      formData.append('email', email);
+      formData.append('mobile_number', mobileNumber.trim());
+      formData.append('password', password);
+      formData.append('role', role);
+      formData.append('specialization', specialization);
+      formData.append('experience', experience.toString() + ' Years');
+      formData.append('bio', bio);
+      formData.append('faceDescriptor', JSON.stringify(faceDescriptor));
+      formData.append('id_card_front', idCardFront);
+      formData.append('id_card_rear', idCardRear);
+
+      const response = await axios.post('http://127.0.0.1:5000/api/auth/register', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       // Since the backend now sends the OTP via email, we can redirect immediately
@@ -336,6 +351,38 @@ const DoctorRegister = () => {
                   placeholder="Brief description of your background..."
                   className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm font-medium resize-none"
                 ></textarea>
+              </div>
+
+              {/* Medical ID Card Front */}
+              <div>
+                <label htmlFor="reg-id-front" className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-1.5">
+                  Medical ID Card (Front)
+                </label>
+                <input
+                  id="reg-id-front"
+                  name="id_card_front"
+                  type="file"
+                  accept="image/jpeg, image/png, application/pdf"
+                  required
+                  onChange={(e) => setIdCardFront(e.target.files[0])}
+                  className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 text-sm font-medium"
+                />
+              </div>
+
+              {/* Medical ID Card Rear */}
+              <div>
+                <label htmlFor="reg-id-rear" className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-1.5">
+                  Medical ID Card (Rear)
+                </label>
+                <input
+                  id="reg-id-rear"
+                  name="id_card_rear"
+                  type="file"
+                  accept="image/jpeg, image/png, application/pdf"
+                  required
+                  onChange={(e) => setIdCardRear(e.target.files[0])}
+                  className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 text-sm font-medium"
+                />
               </div>
             </div>
 

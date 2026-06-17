@@ -108,7 +108,7 @@ const Register = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left side: Graphic / Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-[#edf4fa] items-center justify-center overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-[#edf4fa] dark:bg-gray-900 items-center justify-center overflow-hidden">
         <div 
           className="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply"
           style={{
@@ -117,20 +117,20 @@ const Register = () => {
           }}
         ></div>
         <div className="relative z-10 w-full max-w-lg p-12 text-center">
-          <div className="w-24 h-24 bg-white rounded-[2rem] mx-auto mb-10 flex items-center justify-center shadow-xl shadow-blue-200/50 rotate-3 hover:rotate-6 transition-transform duration-500">
+          <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[2rem] mx-auto mb-10 flex items-center justify-center shadow-xl shadow-blue-200/50 rotate-3 hover:rotate-6 transition-transform duration-500">
             <span className="text-4xl font-black text-blue-600 tracking-tighter">CS</span>
           </div>
-          <h2 className="text-5xl font-extrabold text-slate-900 mb-6 tracking-tight leading-[1.1]">
+          <h2 className="text-5xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight leading-[1.1]">
             Your Health,<br />Our Priority
           </h2>
-          <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-sm mx-auto">
+          <p className="text-lg text-slate-600 dark:text-gray-300 font-medium leading-relaxed max-w-sm mx-auto">
             Connect with top-tier healthcare professionals in a seamless and modern way.
           </p>
         </div>
       </div>
 
       {/* Right side: Form */}
-      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center items-center p-6 sm:p-12 lg:p-20 relative overflow-y-auto">
+      <div className="w-full lg:w-1/2 bg-white dark:bg-gray-800 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-20 relative overflow-y-auto">
         <div className="w-full max-w-md">
 
           {/* ── Back to Home ────────────────────────────────────────────── */}
@@ -138,7 +138,7 @@ const Register = () => {
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 font-semibold transition-colors duration-150 group"
+              className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-gray-400 hover:text-blue-600 font-semibold transition-colors duration-150 group"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-150">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -149,8 +149,8 @@ const Register = () => {
 
           {/* ── Header ────────────────────────────────────────────── */}
           <div className="mb-8 mt-4">
-            <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Create Account</h1>
-            <p className="mt-2 text-slate-500 text-base font-medium">Join CareSync as a Patient</p>
+            <h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Create Account</h1>
+            <p className="mt-2 text-slate-500 dark:text-gray-400 text-base font-medium">Join CareSync as a Patient</p>
           </div>
 
           {/* ── Error Alert ──────────────────────────────────────────────── */}
@@ -170,7 +170,7 @@ const Register = () => {
 
             {/* Full Name */}
             <div>
-              <label htmlFor="reg-fullname" className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label htmlFor="reg-fullname" className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-1.5">
                 Full Name
               </label>
               <div className="relative">
@@ -188,14 +188,14 @@ const Register = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="John Doe"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="reg-email" className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label htmlFor="reg-email" className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
@@ -213,14 +213,14 @@ const Register = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
 
             {/* Mobile Number */}
             <div>
-              <label htmlFor="reg-mobile" className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label htmlFor="reg-mobile" className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-1.5">
                 Mobile Number
               </label>
               <div className="relative">
@@ -238,13 +238,13 @@ const Register = () => {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   placeholder="+94 77 123 4567"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="reg-password" className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label htmlFor="reg-password" className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -262,12 +262,12 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 6 characters"
-                  className="block w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((p) => !p)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors duration-150"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:text-gray-300 transition-colors duration-150"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   <EyeIcon open={showPassword} />
@@ -277,7 +277,7 @@ const Register = () => {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="reg-confirm-password" className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label htmlFor="reg-confirm-password" className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-1.5">
                 Confirm Password
               </label>
               <div className="relative">
@@ -295,18 +295,18 @@ const Register = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
-                  className={`block w-full pl-12 pr-12 py-3.5 bg-slate-50 border text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent focus:bg-white transition-all duration-200 text-sm font-medium
+                  className={`block w-full pl-12 pr-12 py-3.5 bg-slate-50 border text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium
                     ${confirmPassword && confirmPassword !== password
                       ? 'border-red-300 focus:ring-red-400'
                       : confirmPassword && confirmPassword === password
                         ? 'border-emerald-300 focus:ring-emerald-500'
-                        : 'border-slate-200 focus:ring-emerald-500'
+                        : 'border-slate-200 dark:border-gray-600 focus:ring-emerald-500'
                     }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((p) => !p)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors duration-150"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 dark:text-gray-300 transition-colors duration-150"
                   aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
                   <EyeIcon open={showConfirmPassword} />
@@ -321,13 +321,13 @@ const Register = () => {
             </div>
 
             {/* Role badge (display only, locked to Patient) */}
-            <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+            <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-700/50 rounded-xl px-4 py-3">
               <span className="text-blue-500">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </span>
-              <p className="text-sm text-blue-700 font-semibold">
+              <p className="text-sm text-blue-700 dark:text-blue-300 font-semibold">
                 Registering as: <span className="font-extrabold">Patient</span>
               </p>
             </div>
@@ -340,7 +340,7 @@ const Register = () => {
               className={`w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-white text-sm font-bold shadow-lg transition-all duration-200 ease-out
                 ${loading
                   ? 'bg-emerald-400 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-emerald-300/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 shadow-emerald-300/50 dark:shadow-emerald-900/50 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0'
                 }`}
             >
               {loading ? (
@@ -363,7 +363,7 @@ const Register = () => {
           </p>
 
           {/* Already have account link */}
-          <p className="text-center mt-6 text-sm text-slate-500">
+          <p className="text-center mt-6 text-sm text-slate-500 dark:text-gray-400">
             Already have an account?{' '}
             <button
               type="button"

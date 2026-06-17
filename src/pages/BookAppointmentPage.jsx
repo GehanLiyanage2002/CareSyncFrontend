@@ -124,9 +124,29 @@ const BookAppointmentPage = () => {
           const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
             // Filter out buffer slots for online booking, and extract just the time string
-            const publicSlots = res.data.slots
+            let publicSlots = res.data.slots
               .filter(slotObj => !slotObj.isBuffer)
               .map(slotObj => slotObj.time);
+
+            // Filter out past slots if the selected date is today
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+
+            if (selectedDate.valueDate === todayStr) {
+              const currentHour = now.getHours();
+              const currentMinute = now.getMinutes();
+
+              publicSlots = publicSlots.filter(timeStr => {
+                const [slotHour, slotMinute] = timeStr.split(':').map(Number);
+                if (slotHour > currentHour) return true;
+                if (slotHour === currentHour && slotMinute > currentMinute) return true;
+                return false;
+              });
+            }
+
             setDynamicSlots(publicSlots);
           }
         } catch (error) {
@@ -188,26 +208,6 @@ const BookAppointmentPage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      try {
-        const docId = doctor?.id || doctor?.doctor_id;
-        const res = await axios.post('http://127.0.0.1:5000/api/appointments', {
-          doctor_id: docId,
-          appointment_date: selectedDate.valueDate,
-          start_time: selectedTime,
-          patient_name: formData.fullName,
-          age: parseInt(formData.age),
-          mobile_number: formData.mobileNumber,
-          gender: formData.gender,
-          email: formData.email,
-          payment_method: paymentMethod,
-          is_telemedicine: isTelemedicine
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setTokenNumber(res.data.appointment.token_number);
-          setShowSuccessModal(true);
       const docId = doctor?.id || doctor?.doctor_id;
       const amount = isTelemedicine ? 2500 : doctor.consultationFee;
       
@@ -640,11 +640,11 @@ const BookAppointmentPage = () => {
 
 {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white print:z-50 print:p-0">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white dark:bg-gray-800 print:z-50 print:p-0">
           <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-full print:rounded-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Header / Success Animation */}
             <div className="bg-gradient-to-r from-blue-600 to-teal-500 p-3 text-center text-white relative">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
+              <div className="w-10 h-10 bg-white dark:bg-gray-800/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
                 <CheckCircle className="h-5 w-5 text-white" />
               </div>
               <h4 className="text-base font-bold">Booking Confirmed!</h4>

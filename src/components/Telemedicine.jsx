@@ -6,7 +6,7 @@ const Telemedicine = () => {
   const navigate = useNavigate();
 
   return (
-    <section id="telemedicine" className="py-24 bg-white overflow-hidden">
+    <section id="telemedicine" className="py-24 bg-white dark:bg-gray-800 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-20">
           
@@ -27,13 +27,13 @@ const Telemedicine = () => {
             </div>
 
             {/* Floating Badge */}
-            <div className="absolute -bottom-6 -right-6 md:bottom-8 md:-right-8 z-20 bg-white p-5 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.1)] flex items-center gap-4 animate-[bounce_3s_infinite]">
+            <div className="absolute -bottom-6 -right-6 md:bottom-8 md:-right-8 z-20 bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.1)] flex items-center gap-4 animate-[bounce_3s_infinite]">
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
                 <Video className="text-green-600" size={24} />
               </div>
               <div>
-                <p className="text-slate-800 font-extrabold text-lg">24/7</p>
-                <p className="text-slate-500 text-sm font-medium">Available Online</p>
+                <p className="text-slate-800 dark:text-white font-extrabold text-lg">24/7</p>
+                <p className="text-slate-500 dark:text-gray-400 text-sm font-medium">Available Online</p>
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@ const Telemedicine = () => {
               </span>
             </h2>
             
-            <p className="text-slate-600 text-lg leading-relaxed mb-8 max-w-lg">
+            <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed mb-8 max-w-lg">
               Skip the waiting room. Connect with specialized medical professionals via secure, high-quality video consultations from the comfort of your home.
             </p>
             
@@ -65,8 +65,8 @@ const Telemedicine = () => {
                   <Video className="text-blue-600" size={20} />
                 </div>
                 <div>
-                  <h4 className="text-slate-800 font-bold text-lg mb-1">HD Video Consultations</h4>
-                  <p className="text-slate-500 font-medium">Crystal clear communication with your doctor, as if you were in the clinic.</p>
+                  <h4 className="text-slate-800 dark:text-white font-bold text-lg mb-1">HD Video Consultations</h4>
+                  <p className="text-slate-500 dark:text-gray-400 font-medium">Crystal clear communication with your doctor, as if you were in the clinic.</p>
                 </div>
               </div>
               
@@ -77,8 +77,8 @@ const Telemedicine = () => {
                   <Shield className="text-emerald-600" size={20} />
                 </div>
                 <div>
-                  <h4 className="text-slate-800 font-bold text-lg mb-1">100% Secure & Private</h4>
-                  <p className="text-slate-500 font-medium">End-to-end encrypted calls ensuring your medical data remains completely confidential.</p>
+                  <h4 className="text-slate-800 dark:text-white font-bold text-lg mb-1">100% Secure & Private</h4>
+                  <p className="text-slate-500 dark:text-gray-400 font-medium">End-to-end encrypted calls ensuring your medical data remains completely confidential.</p>
                 </div>
               </div>
             </div>

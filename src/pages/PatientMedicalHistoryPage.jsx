@@ -64,14 +64,14 @@ const PatientMedicalHistoryPage = () => {
       <div className="flex flex-col justify-center items-center h-[500px] text-slate-400">
         <div className="animate-pulse flex flex-col items-center">
           <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-          <p className="font-semibold text-slate-600">Loading your medical history...</p>
+          <p className="font-semibold text-slate-600 dark:text-gray-300">Loading your medical history...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-100 flex flex-col dark:bg-gray-900">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 dark:text-white selection:bg-blue-100 flex flex-col dark:bg-gray-900">
       <Header />
       
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
@@ -105,7 +105,7 @@ const PatientMedicalHistoryPage = () => {
                 dateFormat="eeee, MMMM d"
                 className="bg-transparent border-none text-sm font-bold text-slate-700 dark:text-gray-200 focus:ring-0 cursor-pointer outline-none w-full min-w-[150px] placeholder:text-slate-400"
                 isClearable
-                clearButtonClassName="after:bg-slate-200 after:text-slate-600 dark:after:bg-gray-700 dark:after:text-gray-300"
+                clearButtonClassName="after:bg-slate-200 after:text-slate-600 dark:text-gray-300 dark:after:bg-gray-700 dark:after:text-gray-300"
               />
             </div>
           </div>

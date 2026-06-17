@@ -171,7 +171,7 @@ const Header = () => {
                         setIsDropdownOpen(false);
                         navigate('/edit-profile');
                       }}
-                      className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
+                      className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
                     >
                       Manage your CareSync Profile
                     </button>
@@ -182,7 +182,7 @@ const Header = () => {
                     
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/dashboard' : '/patient/dashboard'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Home className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Dashboard</span>
@@ -190,7 +190,7 @@ const Header = () => {
                     
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/kanban' : '/patient/appointments'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Calendar className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointments Board' : 'My Appointments'}</span>
@@ -198,7 +198,7 @@ const Header = () => {
 
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/history' : '/patient/medical-profile'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
@@ -208,7 +208,7 @@ const Header = () => {
                     {user?.role === 'Patient' && (
                       <button 
                         onClick={() => { setIsDropdownOpen(false); navigate('/patient/medical-history'); }}
-                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                       >
                         <History className="text-slate-500 dark:text-slate-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">Medical History</span>
@@ -222,7 +222,7 @@ const Header = () => {
                           setIsDropdownOpen(false);
                           navigate('/doctor/reviews');
                         }}
-                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                       >
                         <Star className="text-amber-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">My Reviews</span>
@@ -231,7 +231,7 @@ const Header = () => {
 
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Settings className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>

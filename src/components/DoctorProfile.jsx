@@ -274,7 +274,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
           <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Header / Success Animation */}
             <div className="bg-gradient-to-r from-blue-600 to-teal-500 p-3 text-center text-white relative">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
+              <div className="w-10 h-10 bg-white dark:bg-gray-800/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
                 <CheckCircle className="h-5 w-5 text-white" />
               </div>
               <h4 className="text-base font-bold">Booking Confirmed!</h4>

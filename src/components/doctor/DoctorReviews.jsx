@@ -72,7 +72,7 @@ const DoctorReviews = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Average Rating Card */}
         <div className="bg-gradient-to-br from-amber-400 to-amber-500 rounded-3xl p-6 text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/20 flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800/20 backdrop-blur flex items-center justify-center flex-shrink-0">
             <Star size={32} className="fill-white text-white" />
           </div>
           <div>
@@ -137,7 +137,7 @@ const DoctorReviews = () => {
         ) : (
           <div className="divide-y divide-slate-50 dark:divide-gray-700/50">
             {reviews.map((review) => (
-              <div key={review.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-gray-700/20 transition-colors">
+              <div key={review.id} className="p-6 hover:bg-slate-50 dark:bg-gray-900/50 dark:hover:bg-gray-700/20 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     {/* Avatar */}

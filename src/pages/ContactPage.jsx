@@ -5,16 +5,16 @@ import Footer from '../components/Footer';
 
 const ContactPage = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-800">
       <Header />
       
       {/* Content Section */}
-      <section className="pt-24 pb-20 bg-white">
+      <section className="pt-24 pb-20 bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Header */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] dark:text-white tracking-tight">
               Contact Us
             </h2>
           </div>
@@ -38,7 +38,7 @@ const ContactPage = () => {
             
             {/* Left Side: Contact Form */}
             <div className="w-full lg:w-2/3">
-              <h3 className="text-2xl font-bold text-[#0a192f] mb-6">Get in Touch</h3>
+              <h3 className="text-2xl font-bold text-[#0a192f] dark:text-white mb-6">Get in Touch</h3>
               <form className="space-y-6">
                 <div>
                   <textarea 
@@ -90,7 +90,7 @@ const ContactPage = () => {
                   <Home size={32} strokeWidth={1} />
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-[#0a192f]">Colombo, Sri Lanka.</h4>
+                  <h4 className="text-base font-semibold text-[#0a192f] dark:text-white">Colombo, Sri Lanka.</h4>
                   <p className="text-sm text-gray-500">123 Health Ave, Colombo 00100</p>
                 </div>
               </div>
@@ -100,7 +100,7 @@ const ContactPage = () => {
                   <Smartphone size={32} strokeWidth={1} />
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-[#0a192f]">+94 11 234 5678</h4>
+                  <h4 className="text-base font-semibold text-[#0a192f] dark:text-white">+94 11 234 5678</h4>
                   <p className="text-sm text-gray-500">Mon to Fri 9am to 6pm</p>
                 </div>
               </div>
@@ -110,7 +110,7 @@ const ContactPage = () => {
                   <Mail size={32} strokeWidth={1} />
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-[#0a192f]">support@caresync.com</h4>
+                  <h4 className="text-base font-semibold text-[#0a192f] dark:text-white">support@caresync.com</h4>
                   <p className="text-sm text-gray-500">Send us your query anytime!</p>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -120,6 +121,73 @@
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* ─── Accessibility Styles ─────────────────────────────────── */
+
+/* High Contrast */
+.a11y-contrast {
+  filter: contrast(150%) brightness(1.05);
+}
+.a11y-contrast img,
+.a11y-contrast video {
+  filter: contrast(120%);
+}
+
+/* Highlight Links */
+.a11y-highlight-links a {
+  outline: 2px solid #2563eb !important;
+  outline-offset: 2px !important;
+  background-color: rgba(37, 99, 235, 0.08) !important;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+/* Text Spacing */
+.a11y-text-spacing * {
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+/* Pause Animations */
+.a11y-pause-animations *,
+.a11y-pause-animations *::before,
+.a11y-pause-animations *::after {
+  animation-play-state: paused !important;
+  transition-duration: 0s !important;
+}
+
+/* Hide Images */
+.a11y-hide-images img,
+.a11y-hide-images video,
+.a11y-hide-images svg:not([class*="lucide"]):not([aria-hidden="false"]) {
+  visibility: hidden !important;
+}
+
+/* Dyslexia Friendly Font */
+.a11y-dyslexia,
+.a11y-dyslexia * {
+  font-family: 'Lexend', sans-serif !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.1em !important;
+}
+
+/* Big Cursor */
+.a11y-big-cursor,
+.a11y-big-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath fill='%232563eb' stroke='white' stroke-width='1.5' d='M4 4l7.07 17 2.51-7.39L21 11.07z'/%3E%3C/svg%3E") 0 0, auto !important;
+}
+
+/* Line Height */
+.a11y-line-height,
+.a11y-line-height * {
+  line-height: 1.9 !important;
+}
+
+/* Text Align */
+.a11y-align-left * { text-align: left !important; }
+.a11y-align-center * { text-align: center !important; }
+.a11y-align-right * { text-align: right !important; }
+
 
 /* Dark mode overrides for react-datepicker */
 .dark .react-datepicker {

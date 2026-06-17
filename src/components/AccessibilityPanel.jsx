@@ -178,10 +178,10 @@ const AccessibilityPanel = () => {
         <div className="px-3 pb-3 pt-2">
           <button
             onClick={reset}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-md shadow-blue-200"
+            className="w-full flex items-center justify-center gap-2 px-2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-md shadow-blue-200"
           >
-            <RotateCcw size={15} />
-            Reset All Accessibility Settings
+            <RotateCcw size={16} className="shrink-0" />
+            <span className="text-center leading-tight">Reset All Settings</span>
           </button>
         </div>
       </div>

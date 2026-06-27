@@ -148,7 +148,7 @@ const FaceCapture = ({ onCapture, mode = 'register', buttonText = 'Capture Face 
         </button>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes scan {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(256px); }

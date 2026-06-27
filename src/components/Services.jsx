@@ -28,10 +28,10 @@ const Services = ({ isPage }) => {
   };
 
   useEffect(() => {
-    if (services.length === 0) {
+    if (!services || services.length === 0) {
       dispatch(fetchServices());
     }
-  }, [dispatch, services.length]);
+  }, [dispatch, services?.length]);
 
   useEffect(() => {
     const handleServiceEvent = () => dispatch(fetchServices());
@@ -65,7 +65,7 @@ const Services = ({ isPage }) => {
     return Stethoscope;
   };
 
-  const filteredServices = services.filter(service => 
+  const filteredServices = (services || []).filter(service => 
     service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

@@ -60,7 +60,7 @@ const Testimonials = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:5000/api/reviews/public/recent');
-        if (response.data.success && response.data.reviews.length > 0) {
+        if (response.data.success && response.data.reviews?.length > 0) {
           setReviews(response.data.reviews);
         } else {
           setReviews(fallbackTestimonials);

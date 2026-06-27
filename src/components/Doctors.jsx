@@ -17,10 +17,10 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    if (doctors.length === 0) {
+    if (!doctors || doctors.length === 0) {
       dispatch(fetchDoctors());
     }
-  }, [dispatch, doctors.length]);
+  }, [dispatch, doctors?.length]);
 
   useEffect(() => {
     const handleAvailability = (data) => dispatch(updateDoctorAvailability(data));
@@ -35,9 +35,9 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
     };
   }, [dispatch]);
 
-  const specializations = ['All', ...new Set(doctors.map(d => d.specialization || 'General Practitioner'))];
+  const specializations = ['All', ...new Set((doctors || []).map(d => d.specialization || 'General Practitioner'))];
 
-  const filteredDoctors = doctors.filter(doctor => {
+  const filteredDoctors = (doctors || []).filter(doctor => {
     const matchesSearch = (doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
                           (doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     const matchesSpec = selectedSpecialization === 'All' || (doctor.specialization || 'General Practitioner') === selectedSpecialization;

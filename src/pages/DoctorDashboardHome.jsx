@@ -134,9 +134,9 @@ const DoctorDashboardHome = () => {
           </div>
           
           {/* Availability Toggle */}
-          <div className="relative z-10 bg-white dark:bg-gray-800/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+          <div className="relative z-10 bg-white/20 dark:bg-gray-800/10 backdrop-blur-md border border-white/30 p-5 rounded-2xl flex items-center gap-4 shadow-sm">
             <div className="flex flex-col">
-              <span className="font-bold text-lg">{isAvailable ? 'Available' : 'Unavailable'}</span>
+              <span className="font-bold text-lg text-white">{isAvailable ? 'Available' : 'Unavailable'}</span>
               <span className="text-teal-50 text-sm">{isAvailable ? 'Accepting new patients' : 'Paused for now'}</span>
             </div>
             
@@ -150,9 +150,7 @@ const DoctorDashboardHome = () => {
             </button>
           </div>
 
-          {/* Decorative background shapes */}
-          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl transition-transform duration-700"></div>
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl transition-transform duration-700"></div>
+
         </div>
 
         {/* Summary Cards Grid */}

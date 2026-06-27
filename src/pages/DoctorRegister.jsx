@@ -47,7 +47,13 @@ const DoctorRegister = () => {
   const [specialization, setSpecialization]   = useState('');
   const [experience, setExperience]           = useState('');
   const [bio, setBio]                         = useState('');
+  const [idCardFront, setIdCardFront]         = useState(null);
+  const [idCardRear, setIdCardRear]           = useState(null);
   
+  // Drag and drop states
+  const [isDraggingFront, setIsDraggingFront] = useState(false);
+  const [isDraggingRear, setIsDraggingRear]   = useState(false);
+
   const role                                  = 'Doctor'; // default & fixed
 
   const [showPassword, setShowPassword]           = useState(false);
@@ -57,6 +63,26 @@ const DoctorRegister = () => {
 
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleDragOverFront = (e) => { e.preventDefault(); setIsDraggingFront(true); };
+  const handleDragLeaveFront = (e) => { e.preventDefault(); setIsDraggingFront(false); };
+  const handleDropFront = (e) => {
+    e.preventDefault();
+    setIsDraggingFront(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setIdCardFront(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleDragOverRear = (e) => { e.preventDefault(); setIsDraggingRear(true); };
+  const handleDragLeaveRear = (e) => { e.preventDefault(); setIsDraggingRear(false); };
+  const handleDropRear = (e) => {
+    e.preventDefault();
+    setIsDraggingRear(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setIdCardRear(e.dataTransfer.files[0]);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,6 +111,10 @@ const DoctorRegister = () => {
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match. Please try again.');
+      return;
+    }
+    if (!idCardFront || !idCardRear) {
+      setError('Please provide photos for both front and back of your Medical Council ID.');
       return;
     }
     if (!specialization) {
@@ -122,16 +152,25 @@ const DoctorRegister = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/auth/register', {
-        full_name: fullName.trim(),
-        email,
-        mobile_number: mobileNumber.trim(),
-        password,
-        role,
-        specialization,
-        experience: experience.toString() + ' Years',
-        bio,
-        faceDescriptor
+      const formData = new FormData();
+      formData.append('full_name', fullName.trim());
+      formData.append('email', email);
+      formData.append('mobile_number', mobileNumber.trim());
+      formData.append('password', password);
+      formData.append('role', role);
+      formData.append('specialization', specialization);
+      formData.append('experience', experience.toString() + ' Years');
+      formData.append('bio', bio);
+      if (faceDescriptor) {
+        formData.append('faceDescriptor', JSON.stringify(faceDescriptor));
+      }
+      if (idCardFront) formData.append('id_card_front', idCardFront);
+      if (idCardRear) formData.append('id_card_rear', idCardRear);
+
+      const response = await axios.post('http://127.0.0.1:5000/api/auth/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       // Since the backend now sends the OTP via email, we can redirect immediately
@@ -336,6 +375,78 @@ const DoctorRegister = () => {
                   placeholder="Brief description of your background..."
                   className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm font-medium resize-none"
                 ></textarea>
+              </div>
+            </div>
+
+            {/* Identity Verification Section */}
+            <div className="space-y-4 p-5 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-700/40">
+              <div className="flex flex-col">
+                <h3 className="text-sm font-bold text-indigo-800 dark:text-indigo-300">Medical Council Verification</h3>
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">Please upload clear photos of the front and back of your medical ID.</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                {/* Front ID */}
+                <div className="relative group">
+                  <label 
+                    htmlFor="reg-id-front" 
+                    onDragOver={handleDragOverFront}
+                    onDragLeave={handleDragLeaveFront}
+                    onDrop={handleDropFront}
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${isDraggingFront ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/40' : 'border-indigo-200 dark:border-indigo-700/50 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30'}`}
+                  >
+                    {idCardFront ? (
+                      <img src={URL.createObjectURL(idCardFront)} alt="Front ID Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-8 h-8 mb-2 text-indigo-400 dark:text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                        </svg>
+                        <p className="text-sm font-semibold text-slate-700 dark:text-gray-200">Front Side</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-1 truncate max-w-[150px] px-2">Click to upload</p>
+                      </div>
+                    )}
+                    <input id="reg-id-front" name="id_card_front" type="file" accept="image/*" required onChange={(e) => setIdCardFront(e.target.files[0])} className="hidden" />
+                  </label>
+                  {idCardFront && (
+                    <div className="absolute top-2 right-2 bg-indigo-500 text-white p-1 rounded-full shadow-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rear ID */}
+                <div className="relative group">
+                  <label 
+                    htmlFor="reg-id-rear" 
+                    onDragOver={handleDragOverRear}
+                    onDragLeave={handleDragLeaveRear}
+                    onDrop={handleDropRear}
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${isDraggingRear ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/40' : 'border-indigo-200 dark:border-indigo-700/50 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30'}`}
+                  >
+                    {idCardRear ? (
+                      <img src={URL.createObjectURL(idCardRear)} alt="Rear ID Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-8 h-8 mb-2 text-indigo-400 dark:text-indigo-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                        </svg>
+                        <p className="text-sm font-semibold text-slate-700 dark:text-gray-200">Back Side</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-1 truncate max-w-[150px] px-2">Click to upload</p>
+                      </div>
+                    )}
+                    <input id="reg-id-rear" name="id_card_rear" type="file" accept="image/*" required onChange={(e) => setIdCardRear(e.target.files[0])} className="hidden" />
+                  </label>
+                  {idCardRear && (
+                    <div className="absolute top-2 right-2 bg-indigo-500 text-white p-1 rounded-full shadow-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

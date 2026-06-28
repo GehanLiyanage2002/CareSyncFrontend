@@ -20,10 +20,10 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const [loginRole, setLoginRole] = useState(location.state?.role || 'Patient');
-  const [useFaceId, setUseFaceId] = useState(loginRole === 'Doctor');
+  const [useFaceId, setUseFaceId] = useState(false);
 
   React.useEffect(() => {
-    setUseFaceId(loginRole === 'Doctor');
+    setUseFaceId(false);
     setError('');
   }, [loginRole]);
 

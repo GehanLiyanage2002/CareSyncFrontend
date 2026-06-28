@@ -60,6 +60,7 @@ const DoctorRegister = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [faceDescriptor, setFaceDescriptor] = useState(null);
+  const [showBiometric, setShowBiometric] = useState(false);
 
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
@@ -89,8 +90,8 @@ const DoctorRegister = () => {
     setError('');
 
     // ── Client-side validation ────────────────────────────────────────────────
-    if (!fullName.trim()) {
-      setError('Please enter your full name.');
+    if (!fullName.trim() || !/^[a-zA-Z\s]+$/.test(fullName.trim())) {
+      setError('Please enter a valid full name (letters and spaces only).');
       return;
     }
     if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email)) {
@@ -101,8 +102,8 @@ const DoctorRegister = () => {
       setError('Please enter your mobile number.');
       return;
     }
-    if (!/^[0-9+\-\s]{7,15}$/.test(mobileNumber.trim())) {
-      setError('Please enter a valid mobile number.');
+    if (!/^[0-9]{10}$/.test(mobileNumber.trim())) {
+      setError('Please enter a valid 10-digit mobile number.');
       return;
     }
     if (password.length < 6) {
@@ -127,10 +128,6 @@ const DoctorRegister = () => {
     }
     if (!bio.trim()) {
       setError('Please provide a professional bio.');
-      return;
-    }
-    if (!faceDescriptor) {
-      setError('Please capture your Face ID for biometric login.');
       return;
     }
 
@@ -257,7 +254,7 @@ const DoctorRegister = () => {
                   autoComplete="name"
                   required
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => setFullName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                   placeholder="Dr. John Doe"
                   className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
@@ -307,7 +304,7 @@ const DoctorRegister = () => {
                   autoComplete="tel"
                   required
                   value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
+                  onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   placeholder="+94 77 123 4567"
                   className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
@@ -541,8 +538,43 @@ const DoctorRegister = () => {
 
             {/* Face Capture Section */}
             <div className="mt-6 mb-4">
-              <p className="text-sm font-semibold text-slate-700 dark:text-gray-200 mb-2">Biometric Verification</p>
-              <FaceCapture onCapture={setFaceDescriptor} mode="register" />
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-semibold text-slate-700 dark:text-gray-200">
+                  Biometric Verification <span className="text-xs font-normal text-slate-500">(Optional)</span>
+                </p>
+              </div>
+              {showBiometric ? (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowBiometric(false);
+                      setFaceDescriptor(null);
+                    }}
+                    className="absolute -top-10 right-0 z-10 text-xs font-semibold text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    Remove
+                  </button>
+                  <FaceCapture onCapture={setFaceDescriptor} mode="register" />
+                </div>
+              ) : (
+                <div className="bg-slate-50 dark:bg-gray-800/50 border border-dashed border-slate-300 dark:border-gray-700 rounded-xl p-6 text-center flex flex-col items-center justify-center gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-indigo-400 dark:text-indigo-500">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5M20.25 16.5v1.5A2.25 2.25 0 0118 20.25h-1.5M7.5 20.25H6A2.25 2.25 0 013.75 18v-1.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 10h.01M15 10h.01M12 11v3M9 16c1.5 1.5 4.5 1.5 6 0" />
+                  </svg>
+                  <p className="text-sm text-slate-500 dark:text-gray-400">
+                    Use facial recognition for faster and secure login.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowBiometric(true)}
+                    className="mt-1 text-sm font-semibold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-300 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Enable Biometrics
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}

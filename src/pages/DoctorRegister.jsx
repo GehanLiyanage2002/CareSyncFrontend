@@ -102,8 +102,8 @@ const DoctorRegister = () => {
       setError('Please enter your mobile number.');
       return;
     }
-    if (!/^[0-9]{10}$/.test(mobileNumber.trim())) {
-      setError('Please enter a valid 10-digit mobile number.');
+    if (!/^07[0-9]{8}$/.test(mobileNumber.trim())) {
+      setError('Please enter a valid 10-digit mobile number starting with 07.');
       return;
     }
     if (password.length < 6) {
@@ -305,7 +305,7 @@ const DoctorRegister = () => {
                   required
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="+94 77 123 4567"
+                  placeholder="071 234 5678"
                   className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>

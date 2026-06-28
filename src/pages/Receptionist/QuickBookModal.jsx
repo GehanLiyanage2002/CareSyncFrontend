@@ -149,7 +149,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  patient_name: patient.full_name,
  age: 30, // Default age
  mobile_number: patient.mobile_number || '0000000000',
- gender: patient.gender || 'Other',
+ gender: patient.gender || '',
  email: patient.email || '',
  payment_method: paymentMethod,
  is_telemedicine: false

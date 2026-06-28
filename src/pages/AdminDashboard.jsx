@@ -7,7 +7,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-f
 import { 
  LayoutDashboard, Users, UserRound, Calendar, DollarSign, 
  LogOut, Activity, TrendingUp, CheckCircle, XCircle, Stethoscope,
- Search, X, Filter, Trash2
+ Search, X, Filter, Trash2, AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
@@ -16,21 +16,26 @@ import AddDoctorModal from '../components/admin/AddDoctorModal';
 import PatientDetailsModal from '../components/admin/PatientDetailsModal';
 import ErrorBoundary from '../components/ErrorBoundary';
 
-const AuthorizedImage = ({ url, token, alt }) => {
-  const [imgSrc, setImgSrc] = useState(null);
+const imageCache = {};
+
+const AuthorizedImage = ({ url, token, alt, onClick, className = "w-full h-full object-cover" }) => {
+  const [imgSrc, setImgSrc] = useState(imageCache[url] || null);
   useEffect(() => {
-    let objectUrl = null;
+    if (imageCache[url]) {
+      setImgSrc(imageCache[url]);
+      return;
+    }
     axios.get(url, { headers: { Authorization: token }, responseType: 'blob' })
       .then(res => {
-         objectUrl = URL.createObjectURL(res.data);
+         const objectUrl = URL.createObjectURL(res.data);
+         imageCache[url] = objectUrl;
          setImgSrc(objectUrl);
       })
       .catch(err => console.error(err));
-    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [url, token]);
 
   if (!imgSrc) return <div className="flex justify-center items-center h-full w-full bg-slate-100 animate-pulse text-xs text-slate-400">Loading...</div>;
-  return <img src={imgSrc} alt={alt} className="w-full h-full object-cover" />;
+  return <img src={imgSrc} alt={alt} className={className} onClick={onClick} style={onClick ? { cursor: 'pointer' } : {}} />;
 };
 
 const AdminDashboard = () => {
@@ -41,6 +46,7 @@ const AdminDashboard = () => {
  const [appointments, setAppointments] = useState([]);
  const [earnings, setEarnings] = useState([]);
  const [loading, setLoading] = useState(true);
+ const [isApproving, setIsApproving] = useState(false);
  
  const [searchQuery, setSearchQuery] = useState('');
  const [doctorSearchQuery, setDoctorSearchQuery] = useState('');
@@ -53,6 +59,8 @@ const AdminDashboard = () => {
 
  const [doctorCurrentPage, setDoctorCurrentPage] = useState(1);
  const doctorsPerPage = 6;
+ 
+ const [enlargedImage, setEnlargedImage] = useState(null);
 
  const [appointmentCurrentPage, setAppointmentCurrentPage] = useState(1);
  const appointmentsPerPage = 8;
@@ -278,20 +286,23 @@ const AdminDashboard = () => {
  };
 
  const handleApproveDoctor = async (id, currentStatus) => {
- try {
- const res = await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${id}/approve`, {
- is_approved: !currentStatus
- }, config);
- toast.success(res.data.message);
- fetchDoctors(); // Refresh list
- if (selectedDoctor && selectedDoctor.id === id) {
- setSelectedDoctor({ ...selectedDoctor, is_approved: !currentStatus });
- }
- } catch (err) {
- toast.error('Failed to update doctor status');
- console.error(err);
- }
- };
+  if (isApproving) return;
+  setIsApproving(true);
+  try {
+  const res = await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${id}/approve`, {
+  is_approved: !currentStatus
+  }, config);
+  toast.success(res.data.message);
+  if (selectedDoctor && selectedDoctor.id === id) {
+  setSelectedDoctor({ ...selectedDoctor, is_approved: !currentStatus });
+  }
+  } catch (err) {
+  toast.error(err.response?.data?.message || 'Failed to update doctor status');
+  console.error(err);
+  } finally {
+  setIsApproving(false);
+  }
+  };
 
  const handleDeleteDoctor = (doctor) => {
  setDoctorToDelete(doctor);
@@ -583,7 +594,7 @@ const AdminDashboard = () => {
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
  <img 
- src={`http://127.0.0.1:5000/api/users/profile-image/${earn.doctor_id}?t=${Date.now()}`} 
+ src={`http://127.0.0.1:5000/api/users/profile-image/${earn.doctor_id}`} 
  alt={earn.doctor_name} 
  className="w-full h-full object-cover" 
  onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name ? earn.doctor_name.charAt(0).toUpperCase() : 'DR'; }} 
@@ -746,7 +757,7 @@ const AdminDashboard = () => {
  <div className="flex justify-between items-start">
  <div className="flex gap-4">
  <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
- <img src={`http://127.0.0.1:5000/api/users/profile-image/${doctor.id}?t=${Date.now()}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
+ <img src={`http://127.0.0.1:5000/api/users/profile-image/${doctor.id}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
  </div>
  <div className="flex flex-col justify-center">
  <div className="flex items-center gap-3 mb-1 flex-wrap">
@@ -1228,20 +1239,27 @@ const AdminDashboard = () => {
  <div className="px-8 pb-8">
  <div className="flex justify-between items-start mb-6">
  <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
- <img src={`http://127.0.0.1:5000/api/users/profile-image/${selectedDoctor.id}?t=${Date.now()}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
+ <img src={`http://127.0.0.1:5000/api/users/profile-image/${selectedDoctor.id}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
  </div>
  
  {/* Toggle Switch */}
  <div className="flex flex-col items-end gap-2 mt-4">
  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Account Status</span>
- <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleApproveDoctor(selectedDoctor.id, selectedDoctor.is_approved)}>
- <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${selectedDoctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'}`}>
- <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedDoctor.is_approved ? 'translate-x-6' : 'translate-x-0'}`}></div>
- </div>
- <span className={`text-sm font-black uppercase tracking-wider ${selectedDoctor.is_approved ? 'text-blue-600' : 'text-rose-500'}`}>
- {selectedDoctor.is_approved ? 'Approved' : 'Suspended'}
- </span>
- </div>
+  {selectedDoctor.specialization === 'Not Specified' ? (
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-600 rounded-lg text-sm font-bold">
+      <AlertCircle size={16} />
+      <span>Profile Incomplete</span>
+    </div>
+  ) : (
+    <div className={`flex items-center gap-3 ${isApproving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => !isApproving && handleApproveDoctor(selectedDoctor.id, selectedDoctor.is_approved)}>
+    <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${selectedDoctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'}`}>
+    <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedDoctor.is_approved ? 'translate-x-6' : 'translate-x-0'}`}></div>
+    </div>
+    <span className={`text-sm font-black uppercase tracking-wider ${selectedDoctor.is_approved ? 'text-blue-600' : 'text-rose-500'}`}>
+    {selectedDoctor.is_approved ? 'Approved' : 'Suspended'}
+    </span>
+    </div>
+  )}
  </div>
  </div>
 
@@ -1276,8 +1294,13 @@ const AdminDashboard = () => {
      {selectedDoctor.has_id_card_front ? (
        <div className="flex flex-col items-center gap-2">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Side</span>
-         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-           <AuthorizedImage url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/front`} token={token} alt="ID Card Front" />
+         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm cursor-pointer">
+           <AuthorizedImage 
+             url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/front`} 
+             token={token} 
+             alt="ID Card Front" 
+             onClick={() => setEnlargedImage(`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/front`)}
+           />
          </div>
        </div>
      ) : (
@@ -1289,8 +1312,13 @@ const AdminDashboard = () => {
      {selectedDoctor.has_id_card_rear ? (
        <div className="flex flex-col items-center gap-2">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rear Side</span>
-         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-           <AuthorizedImage url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/rear`} token={token} alt="ID Card Rear" />
+         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm cursor-pointer">
+           <AuthorizedImage 
+             url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/rear`} 
+             token={token} 
+             alt="ID Card Rear" 
+             onClick={() => setEnlargedImage(`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/rear`)}
+           />
          </div>
        </div>
      ) : (
@@ -1317,7 +1345,7 @@ const AdminDashboard = () => {
 
  {/* Custom Confirmation Modal */}
  {doctorToDelete && (
- <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+ <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-sm">
  <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all">
  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-100 mb-4 mx-auto">
  <Trash2 className="text-rose-600" size={24} />
@@ -1372,6 +1400,29 @@ const AdminDashboard = () => {
  </div>
  </div>
  )}
+
+  {/* Enlarged Image Modal */}
+  {enlargedImage && (
+  <div 
+    className="fixed inset-0 z-[130] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+    onClick={() => setEnlargedImage(null)}
+  >
+    <button 
+      className="absolute top-6 right-6 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+      onClick={() => setEnlargedImage(null)}
+    >
+      <X size={32} />
+    </button>
+    <div className="max-w-[90vw] h-[90vh] p-4 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+      <AuthorizedImage 
+        url={enlargedImage} 
+        token={token} 
+        alt="Enlarged ID Card" 
+        className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" 
+      />
+    </div>
+  </div>
+  )}
 
  </div>
  );

@@ -16,6 +16,7 @@ const DoctorDashboardHome = () => {
   const navigate = useNavigate();
 
   const [isAvailable, setIsAvailable] = useState(true);
+  const [isApproved, setIsApproved] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -29,6 +30,7 @@ const DoctorDashboardHome = () => {
         });
         if (profileRes.data.profile) {
           setIsAvailable(profileRes.data.profile.is_available);
+          setIsApproved(profileRes.data.profile.is_approved);
         }
 
         // Fetch today's appointments
@@ -73,12 +75,27 @@ const DoctorDashboardHome = () => {
       }
     };
 
+    const handleProfileUpdated = (data) => {
+      if (data.doctor_id === user?.id && data.is_approved !== undefined) {
+        setIsApproved(data.is_approved);
+        if (data.is_approved) {
+          toast.success('Your account has been approved by the Admin!', { icon: '🎉' });
+        } else {
+          toast('Your account approval has been revoked.', { icon: '⚠️' });
+        }
+      } else if (data.doctor_id === user?.id) {
+         setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
     socket.on('slotBooked', handleSlotBooked);
     socket.on('appointmentStatusChanged', handleStatusChanged);
+    socket.on('doctorProfileUpdated', handleProfileUpdated);
 
     return () => {
       socket.off('slotBooked', handleSlotBooked);
       socket.off('appointmentStatusChanged', handleStatusChanged);
+      socket.off('doctorProfileUpdated', handleProfileUpdated);
     };
   }, [user]);
 
@@ -274,10 +291,22 @@ const DoctorDashboardHome = () => {
         </div>
 
         {/* Schedule Manager */}
-        <ScheduleManager />
+        {isApproved ? (
+          <ScheduleManager />
+        ) : (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 p-8 rounded-[2rem] shadow-sm mb-8 flex flex-col items-center justify-center text-center mt-6">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+              <Clock className="w-8 h-8 text-amber-600" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-amber-900">Account Pending Approval</h3>
+            <p className="text-amber-700 max-w-md font-medium">
+              You must wait for an administrator to verify and approve your account before you can manage your schedule and accept appointments.
+            </p>
+          </div>
+        )}
         
         {/* Fee Manager */}
-        <FeeManager />
+        {isApproved && <FeeManager />}
         
       </main>
     </div>

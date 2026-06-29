@@ -139,7 +139,8 @@ export default function TelemedicineVideoRoom() {
     const displayVideo = async () => {
       try {
         if (remoteRendererRef.current) {
-          remoteRendererRef.current.dispose();
+          try { remoteRendererRef.current.dispose(); } catch(e){}
+          remoteRendererRef.current = null;
         }
         if (remoteVideoRef.current) {
           remoteVideoRef.current.innerHTML = '';
@@ -165,7 +166,10 @@ export default function TelemedicineVideoRoom() {
         await displayVideo();
       } else {
         if (remoteVideoRef.current) remoteVideoRef.current.innerHTML = '';
-        if (remoteRendererRef.current) remoteRendererRef.current.dispose();
+        if (remoteRendererRef.current) {
+           try { remoteRendererRef.current.dispose(); } catch(e){}
+           remoteRendererRef.current = null;
+        }
       }
     });
   };
@@ -218,8 +222,14 @@ export default function TelemedicineVideoRoom() {
     clearInterval(timerRef.current);
     if(call) call.hangUp().catch(()=>{});
     
-    if (localRendererRef.current) localRendererRef.current.dispose();
-    if (remoteRendererRef.current) remoteRendererRef.current.dispose();
+    if (localRendererRef.current) {
+       try { localRendererRef.current.dispose(); } catch(e){}
+       localRendererRef.current = null;
+    }
+    if (remoteRendererRef.current) {
+       try { remoteRendererRef.current.dispose(); } catch(e){}
+       remoteRendererRef.current = null;
+    }
     
     setCall(null);
     setCallAgent(null);

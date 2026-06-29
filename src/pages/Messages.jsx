@@ -19,6 +19,9 @@ const Messages = () => {
   const [messageToReply, setMessageToReply] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [replying, setReplying] = useState(false);
+  
+  const [timeFilter, setTimeFilter] = useState('All Time');
+  const [customDateRange, setCustomDateRange] = useState({ start: '', end: '' });
 
   const fetchMessages = async () => {
     try {
@@ -128,18 +131,79 @@ const Messages = () => {
     );
   }
 
+  const filteredMessages = messages.filter(msg => {
+    const msgDate = new Date(msg.created_at);
+    const now = new Date();
+    
+    if (timeFilter === 'Today') {
+      return msgDate.toDateString() === now.toDateString();
+    } else if (timeFilter === 'This Week') {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      return msgDate >= startOfWeek;
+    } else if (timeFilter === 'This Month') {
+      return msgDate.getMonth() === now.getMonth() && msgDate.getFullYear() === now.getFullYear();
+    } else if (timeFilter === 'Custom' && customDateRange.start && customDateRange.end) {
+      const start = new Date(customDateRange.start);
+      const end = new Date(customDateRange.end);
+      end.setHours(23, 59, 59, 999);
+      return msgDate >= start && msgDate <= end;
+    }
+    
+    return true;
+  });
+
   return (
     <div className="p-6 bg-slate-50 dark:bg-gray-900 min-h-screen w-full">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Mail className="h-6 w-6 text-blue-600" />
-            Contact Messages
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage messages from the Contact Us page.</p>
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Mail className="h-6 w-6 text-blue-600" />
+              Contact Messages
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage messages from the Contact Us page.</p>
+          </div>
+          
+          <div className="flex flex-col items-start lg:items-end gap-3 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0">
+            <div className="flex p-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm min-w-max">
+              {['All Time', 'Today', 'This Week', 'This Month', 'Custom'].map(filter => (
+                <button
+                  key={filter}
+                  onClick={() => setTimeFilter(filter)}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-all ${
+                    timeFilter === filter 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+            
+            {timeFilter === 'Custom' && (
+              <div className="flex items-center gap-3 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+                <input 
+                  type="date" 
+                  value={customDateRange.start}
+                  onChange={e => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))}
+                  className="px-4 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500">TO</span>
+                <input 
+                  type="date" 
+                  value={customDateRange.end}
+                  onChange={e => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))}
+                  className="px-4 py-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
-        {messages.length === 0 ? (
+        {filteredMessages.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center border border-gray-100 dark:border-gray-700">
             <MailOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">No messages yet</h3>
@@ -147,7 +211,7 @@ const Messages = () => {
           </div>
         ) : (
           <div className="grid gap-6">
-            {messages.map((message) => (
+            {filteredMessages.map((message) => (
               <div 
                 key={message.id} 
                 className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border p-6 transition-all duration-200 ${

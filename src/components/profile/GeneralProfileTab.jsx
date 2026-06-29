@@ -483,8 +483,8 @@ const GeneralProfileTab = () => {
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-white mb-6">Security Settings</h2>
         
-        {/* Face ID Enrollment (Doctors Only) */}
-        {user?.role === 'Doctor' && (
+        {/* Face ID Enrollment */}
+        {(user?.role === 'Doctor' || user?.role === 'Patient') && (
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-blue-50/80 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/50">
               <div className="flex items-center gap-4 mb-4 sm:mb-0">

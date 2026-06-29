@@ -9,7 +9,7 @@ import Header from '../components/Header';
 import { Video, Calendar, Clock, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const CalendarIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
@@ -55,7 +55,7 @@ const PatientDashboardHome = () => {
     if (isRescheduleModalOpen && selectedAppointment) {
       const fetchDates = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${selectedAppointment.doctor_id}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/configured-dates/${selectedAppointment.doctor_id}`);
           if (res.data.success) {
             setConfiguredDates(res.data.dates.map(d => new Date(d).toDateString()));
           }
@@ -74,7 +74,7 @@ const PatientDashboardHome = () => {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${selectedAppointment.doctor_id}?date=${newDate}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${selectedAppointment.doctor_id}?date=${newDate}`);
           if (res.data.success) {
             setAvailableSlots(res.data.slots || []);
           }
@@ -92,12 +92,12 @@ const PatientDashboardHome = () => {
     const fetchAppointments = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5000/api/appointments/patient/my-appointments',
+          'http://127.0.0.1:5000/api/appointments/patient/my-appointments',
           { headers: { Authorization: token } }
         );
         if (response.data.success) {
           const upcoming = response.data.appointments.find(a => 
-            (a.status === 'pending' || a.status === 'confirmed') && a.is_telemedicine
+            (a.status?.toLowerCase() === 'pending' || a.status?.toLowerCase() === 'in progress') && a.is_telemedicine
           );
           setUpcomingTelemedicine(upcoming);
           setAppointments(response.data.appointments || []);
@@ -126,7 +126,7 @@ const PatientDashboardHome = () => {
   const handleCancel = async (id) => {
     if (!window.confirm('Are you sure you want to cancel this appointment? Cancellations are only allowed up to 1 hour before.')) return;
     try {
-      const res = await axios.put(`http://localhost:5000/api/appointments/${id}/cancel`, {}, {
+      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${id}/cancel`, {}, {
         headers: { Authorization: token }
       });
       if (res.data.success) {
@@ -150,7 +150,7 @@ const PatientDashboardHome = () => {
   const handleReschedule = async () => {
     if (!newDate || !newTime) return alert('Please select a new date and time');
     try {
-      const res = await axios.put(`http://localhost:5000/api/appointments/${selectedAppointment.id}/reschedule`, {
+      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${selectedAppointment.id}/reschedule`, {
         new_date: newDate,
         new_time: newTime
       }, {
@@ -169,7 +169,7 @@ const PatientDashboardHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white selection:bg-blue-100 flex flex-col">
       <Header />
       
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
@@ -185,14 +185,14 @@ const PatientDashboardHome = () => {
             </p>
           </div>
           {/* Decorative background shapes */}
-          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
         </div>
 
         {upcomingTelemedicine && (
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 mb-8 text-white flex flex-col md:flex-row items-center justify-between shadow-xl">
             <div className="flex items-center gap-4 mb-4 md:mb-0">
-              <div className="bg-white/20 p-4 rounded-full">
+              <div className="bg-white dark:bg-gray-800/20 p-4 rounded-full">
                 <Video className="w-8 h-8 text-white" />
               </div>
               <div>
@@ -204,7 +204,7 @@ const PatientDashboardHome = () => {
             </div>
             <button
               onClick={() => navigate(`/telemedicine/${upcomingTelemedicine.id}`)}
-              className="px-6 py-3 bg-white text-blue-600 hover:bg-blue-50 font-bold rounded-xl shadow-lg transition"
+              className="px-6 py-3 bg-white dark:bg-gray-800 text-blue-600 hover:bg-blue-50 font-bold rounded-xl shadow-lg transition"
             >
               Join Video Call
             </button>
@@ -215,7 +215,7 @@ const PatientDashboardHome = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Card 1: Upcoming Appointments */}
-          <div className="bg-white rounded-3xl p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-blue-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-7 shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 hover:border-blue-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="flex items-center justify-between mb-5 relative z-10">
               <div className="p-3.5 bg-blue-100 text-blue-700 rounded-2xl group-hover:rotate-6 transition-transform duration-300">
@@ -223,12 +223,12 @@ const PatientDashboardHome = () => {
               </div>
               <span className="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 shadow-sm">Next 7 Days</span>
             </div>
-            <h3 className="text-slate-500 text-sm font-semibold mb-1 uppercase tracking-wider">Upcoming Appointments</h3>
-            <p className="text-3xl font-extrabold text-slate-800">2 Scheduled</p>
+            <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Upcoming Appointments</h3>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">2 Scheduled</p>
           </div>
 
           {/* Card 2: Recent Diagnoses */}
-          <div className="bg-white rounded-3xl p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-emerald-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-7 shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 hover:border-emerald-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="flex items-center justify-between mb-5 relative z-10">
               <div className="p-3.5 bg-emerald-100 text-emerald-700 rounded-2xl group-hover:rotate-6 transition-transform duration-300">
@@ -236,12 +236,12 @@ const PatientDashboardHome = () => {
               </div>
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm">New Updates</span>
             </div>
-            <h3 className="text-slate-500 text-sm font-semibold mb-1 uppercase tracking-wider">Recent Diagnoses</h3>
-            <p className="text-3xl font-extrabold text-slate-800">1 Added</p>
+            <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Recent Diagnoses</h3>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">1 Added</p>
           </div>
 
           {/* Card 3: Medical Profile Status */}
-          <div className="bg-white rounded-3xl p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-purple-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-7 shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 hover:border-purple-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="flex items-center justify-between mb-5 relative z-10">
               <div className="p-3.5 bg-purple-100 text-purple-700 rounded-2xl group-hover:rotate-6 transition-transform duration-300">
@@ -249,25 +249,25 @@ const PatientDashboardHome = () => {
               </div>
               <span className="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100 shadow-sm">Looking Good</span>
             </div>
-            <h3 className="text-slate-500 text-sm font-semibold mb-1 uppercase tracking-wider">Medical Profile Status</h3>
-            <p className="text-3xl font-extrabold text-slate-800">95% Complete</p>
+            <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Medical Profile Status</h3>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">95% Complete</p>
           </div>
         </div>
 
         {/* Your Appointments Section */}
-        <div className="mt-12 bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-          <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <div className="mt-12 bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-gray-700">
+          <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
             <Calendar className="w-6 h-6 text-blue-600" />
             Your Appointments
           </h3>
           {appointments.filter(app => app.status === 'pending').length > 0 ? (
             <div className="space-y-4">
               {appointments.filter(app => app.status === 'pending').map(app => (
-                <div key={app.id} className="flex flex-col md:flex-row items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow">
+                <div key={app.id} className="flex flex-col md:flex-row items-center justify-between p-5 bg-slate-50 dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 hover:shadow-md transition-shadow">
                   <div className="flex-1 mb-4 md:mb-0">
-                    <p className="font-bold text-lg text-slate-800">Dr. {app.doctor_name}</p>
-                    <p className="text-slate-500 text-sm">{app.doctor_specialization}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-slate-600 font-medium">
+                    <p className="font-bold text-lg text-slate-800 dark:text-white">Dr. {app.doctor_name}</p>
+                    <p className="text-slate-500 dark:text-gray-400 text-sm">{app.doctor_specialization}</p>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-slate-600 dark:text-gray-300 font-medium">
                       <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {new Date(app.appointment_date).toLocaleDateString()}</span>
                       <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {app.start_time}</span>
                       <span className={`px-2 py-1 rounded-md text-xs font-bold capitalize ${app.status === 'cancelled' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>{app.status}</span>
@@ -281,7 +281,7 @@ const PatientDashboardHome = () => {
                     })() && (
                       <button onClick={() => openRescheduleModal(app)} className="flex-1 md:flex-none px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded-xl transition-colors">Reschedule</button>
                     )}
-                    {(app.status === 'pending' || app.status === 'confirmed') && (
+                    {(app.status?.toLowerCase() === 'pending' || app.status?.toLowerCase() === 'in progress') && (
                       <button onClick={() => handleCancel(app.id)} className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-xl transition-colors">Cancel</button>
                     )}
                   </div>
@@ -289,7 +289,7 @@ const PatientDashboardHome = () => {
               ))}
             </div>
           ) : (
-            <p className="text-slate-500 text-center py-6">You have no upcoming appointments.</p>
+            <p className="text-slate-500 dark:text-gray-400 text-center py-6">You have no upcoming appointments.</p>
           )}
         </div>
         
@@ -297,7 +297,7 @@ const PatientDashboardHome = () => {
         <div className="mt-12 flex justify-center">
           <button 
             onClick={() => window.location.href = '/'}
-            className="flex items-center gap-2 px-6 py-3 bg-white text-slate-600 hover:text-blue-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:border-blue-200 transition-all duration-300 group"
+            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:text-blue-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 dark:border-gray-600 hover:border-blue-200 transition-all duration-300 group"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 group-hover:-translate-x-1 transition-transform">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
@@ -311,14 +311,14 @@ const PatientDashboardHome = () => {
       {/* Reschedule Modal */}
       {isRescheduleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
-            <button onClick={() => setIsRescheduleModalOpen(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+            <button onClick={() => setIsRescheduleModalOpen(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-gray-300 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-2xl font-bold text-slate-800 mb-6">Reschedule Appointment</h3>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Reschedule Appointment</h3>
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">New Date</label>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-2">New Date</label>
                 <div className="relative w-full">
                   <DatePicker 
                     selected={newDate ? new Date(newDate) : null} 
@@ -332,9 +332,9 @@ const PatientDashboardHome = () => {
                     }}
                     minDate={new Date(Date.now() + 86400000)}
                     filterDate={(date) => configuredDates.includes(date.toDateString())}
-                    dayClassName={(date) => configuredDates.includes(date.toDateString()) ? "font-bold text-blue-700 bg-blue-100 rounded-full" : "text-slate-500"}
+                    dayClassName={(date) => configuredDates.includes(date.toDateString()) ? "font-bold text-blue-700 bg-blue-100 rounded-full" : "text-slate-500 dark:text-gray-400"}
                     wrapperClassName="w-full"
-                    className="w-full p-3 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                    className="w-full p-3 pr-10 border border-slate-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
                     placeholderText="Select a date"
                     renderCustomHeader={({
                       date,
@@ -343,15 +343,15 @@ const PatientDashboardHome = () => {
                       prevMonthButtonDisabled,
                       nextMonthButtonDisabled,
                     }) => (
-                      <div className="flex justify-between items-center px-2 py-1 bg-white">
-                        <span className="font-bold text-slate-800 text-sm ml-1">
+                      <div className="flex justify-between items-center px-2 py-1 bg-white dark:bg-gray-800">
+                        <span className="font-bold text-slate-800 dark:text-white text-sm ml-1">
                           {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
                         </span>
                         <div className="flex gap-1">
-                          <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${prevMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-700'}`}>
+                          <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${prevMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-700 dark:text-gray-200'}`}>
                             <ChevronUp className="w-4 h-4" />
                           </button>
-                          <button onClick={increaseMonth} disabled={nextMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${nextMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-700'}`}>
+                          <button onClick={increaseMonth} disabled={nextMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${nextMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-700 dark:text-gray-200'}`}>
                             <ChevronDown className="w-4 h-4" />
                           </button>
                         </div>
@@ -362,9 +362,9 @@ const PatientDashboardHome = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">New Time</label>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-gray-200 mb-2">New Time</label>
                 {loadingSlots ? (
-                  <p className="text-sm text-slate-500">Loading slots...</p>
+                  <p className="text-sm text-slate-500 dark:text-gray-400">Loading slots...</p>
                 ) : availableSlots.length > 0 ? (
                   <>
                     <div className="grid grid-cols-2 gap-3 mb-4">
@@ -375,7 +375,7 @@ const PatientDashboardHome = () => {
                           className={`p-3 rounded-xl border text-sm font-bold transition-all duration-200 ${
                             newTime === slot 
                               ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-[1.02]' 
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                              : 'bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-200 border-slate-200 dark:border-gray-600 hover:bg-slate-50 hover:border-slate-300'
                           }`}
                         >
                           {formatTimeAMPM(slot)}
@@ -383,12 +383,12 @@ const PatientDashboardHome = () => {
                       ))}
                     </div>
                     {Math.ceil(availableSlots.length / slotsPerPage) > 1 && (
-                      <div className="flex items-center justify-between px-2 text-sm font-bold text-slate-500">
+                      <div className="flex items-center justify-between px-2 text-sm font-bold text-slate-500 dark:text-gray-400">
                         <button 
                           type="button"
                           disabled={slotPage === 1}
                           onClick={() => setSlotPage(p => p - 1)}
-                          className={`flex items-center px-4 py-2 rounded-xl border transition-colors ${slotPage === 1 ? 'opacity-40 cursor-not-allowed border-slate-100 bg-slate-50' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'}`}
+                          className={`flex items-center px-4 py-2 rounded-xl border transition-colors ${slotPage === 1 ? 'opacity-40 cursor-not-allowed border-slate-100 dark:border-gray-700 bg-slate-50' : 'border-slate-200 bg-white dark:bg-gray-800 hover:bg-slate-50 text-slate-700 dark:text-gray-200'}`}
                         >
                           &lt; Prev
                         </button>
@@ -397,7 +397,7 @@ const PatientDashboardHome = () => {
                           type="button"
                           disabled={slotPage === Math.ceil(availableSlots.length / slotsPerPage)}
                           onClick={() => setSlotPage(p => p + 1)}
-                          className={`flex items-center px-4 py-2 rounded-xl border transition-colors ${slotPage === Math.ceil(availableSlots.length / slotsPerPage) ? 'opacity-40 cursor-not-allowed border-slate-100 bg-slate-50' : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'}`}
+                          className={`flex items-center px-4 py-2 rounded-xl border transition-colors ${slotPage === Math.ceil(availableSlots.length / slotsPerPage) ? 'opacity-40 cursor-not-allowed border-slate-100 dark:border-gray-700 bg-slate-50' : 'border-slate-200 bg-white dark:bg-gray-800 hover:bg-slate-50 text-slate-700 dark:text-gray-200'}`}
                         >
                           Next &gt;
                         </button>

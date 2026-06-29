@@ -122,7 +122,7 @@ const Header = () => {
                 {user?.name || user?.full_name ? (
                   <div className="w-full h-full flex items-center justify-center relative">
                     <img 
-                      src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                      src={user?.profile_image || `http://127.0.0.1:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
                       alt="Avatar" 
                       className="w-full h-full object-cover rounded-full" 
                       onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} 
@@ -153,7 +153,7 @@ const Header = () => {
                   <div className="flex flex-col items-center pt-2 pb-4 px-6">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-white dark:border-slate-800 mb-3 relative overflow-hidden">
                       <img 
-                        src={user?.profile_image || `http://localhost:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                        src={user?.profile_image || `http://127.0.0.1:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
                         alt="Avatar" 
                         className="w-full h-full object-cover" 
                         onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} 
@@ -171,7 +171,7 @@ const Header = () => {
                         setIsDropdownOpen(false);
                         navigate('/edit-profile');
                       }}
-                      className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
+                      className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
                     >
                       Manage your CareSync Profile
                     </button>
@@ -182,7 +182,7 @@ const Header = () => {
                     
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/dashboard' : '/patient/dashboard'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Home className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Dashboard</span>
@@ -190,7 +190,7 @@ const Header = () => {
                     
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/kanban' : '/patient/appointments'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Calendar className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointments Board' : 'My Appointments'}</span>
@@ -198,7 +198,7 @@ const Header = () => {
 
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/history' : '/patient/medical-profile'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
@@ -208,7 +208,7 @@ const Header = () => {
                     {user?.role === 'Patient' && (
                       <button 
                         onClick={() => { setIsDropdownOpen(false); navigate('/patient/medical-history'); }}
-                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                       >
                         <History className="text-slate-500 dark:text-slate-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">Medical History</span>
@@ -222,7 +222,7 @@ const Header = () => {
                           setIsDropdownOpen(false);
                           navigate('/doctor/reviews');
                         }}
-                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                       >
                         <Star className="text-amber-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">My Reviews</span>
@@ -231,7 +231,7 @@ const Header = () => {
 
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
                     >
                       <Settings className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>

@@ -9,13 +9,14 @@ import ScheduleManager from '../components/doctor/ScheduleManager';
 import FeeManager from '../components/doctor/FeeManager';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const [isAvailable, setIsAvailable] = useState(true);
+  const [isApproved, setIsApproved] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -24,21 +25,28 @@ const DoctorDashboardHome = () => {
     const fetchData = async () => {
       try {
         // Fetch doctor profile to get availability status
-        const profileRes = await axios.get('http://localhost:5000/api/users/doctor-profile', {
+        const profileRes = await axios.get('http://127.0.0.1:5000/api/users/doctor-profile', {
           headers: { Authorization: token }
         });
         if (profileRes.data.profile) {
           setIsAvailable(profileRes.data.profile.is_available);
+          setIsApproved(profileRes.data.profile.is_approved);
         }
 
         // Fetch today's appointments
-        const aptRes = await axios.get('http://localhost:5000/api/appointments/doctor/my-appointments', {
+        const aptRes = await axios.get('http://127.0.0.1:5000/api/appointments/doctor/my-appointments', {
           headers: { Authorization: token }
         });
         
         if (aptRes.data.appointments) {
-          // For now, we display all fetched appointments as "Today's" or we could filter by date
-          setAppointments(aptRes.data.appointments);
+          const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+          
+          const todaysAppointments = aptRes.data.appointments.filter(apt => {
+            const aptDateStr = new Date(apt.appointment_date).toLocaleDateString('en-CA');
+            return aptDateStr === todayStr;
+          });
+          
+          setAppointments(todaysAppointments);
         }
       } catch (error) {
         console.error("Error fetching dashboard data", error);
@@ -67,12 +75,27 @@ const DoctorDashboardHome = () => {
       }
     };
 
+    const handleProfileUpdated = (data) => {
+      if (data.doctor_id === user?.id && data.is_approved !== undefined) {
+        setIsApproved(data.is_approved);
+        if (data.is_approved) {
+          toast.success('Your account has been approved by the Admin!', { icon: '🎉' });
+        } else {
+          toast('Your account approval has been revoked.', { icon: '⚠️' });
+        }
+      } else if (data.doctor_id === user?.id) {
+         setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
     socket.on('slotBooked', handleSlotBooked);
     socket.on('appointmentStatusChanged', handleStatusChanged);
+    socket.on('doctorProfileUpdated', handleProfileUpdated);
 
     return () => {
       socket.off('slotBooked', handleSlotBooked);
       socket.off('appointmentStatusChanged', handleStatusChanged);
+      socket.off('doctorProfileUpdated', handleProfileUpdated);
     };
   }, [user]);
 
@@ -82,7 +105,7 @@ const DoctorDashboardHome = () => {
     setIsAvailable(newStatus);
     
     try {
-      await axios.put('http://localhost:5000/api/appointments/doctor/availability', {}, {
+      await axios.put('http://127.0.0.1:5000/api/appointments/doctor/availability', {}, {
         headers: { Authorization: token }
       });
       
@@ -107,17 +130,17 @@ const DoctorDashboardHome = () => {
   };
 
   // Calculate stats
-  const pendingCount = appointments.filter(a => a.status === 'pending' || a.status === 'confirmed').length;
+  const pendingCount = appointments.filter(a => a.status?.toLowerCase() === 'pending' || a.status?.toLowerCase() === 'in progress').length;
   const completedCount = appointments.filter(a => a.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-teal-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white selection:bg-teal-100 flex flex-col">
       <Header />
       
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
         
         {/* Welcome Banner & Availability Toggle */}
-        <div className="bg-gradient-to-br from-teal-600 to-teal-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-teal-200 text-white mb-8 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-gradient-to-br from-teal-600 to-teal-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-teal-200 dark:shadow-none text-white mb-8 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight">
               Welcome back, Dr. {user?.name || user?.full_name || 'Doctor'}! 🩺
@@ -128,9 +151,9 @@ const DoctorDashboardHome = () => {
           </div>
           
           {/* Availability Toggle */}
-          <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-5 rounded-2xl flex items-center gap-4 shadow-sm">
+          <div className="relative z-10 bg-white/20 dark:bg-gray-800/10 backdrop-blur-md border border-white/30 p-5 rounded-2xl flex items-center gap-4 shadow-sm">
             <div className="flex flex-col">
-              <span className="font-bold text-lg">{isAvailable ? 'Available' : 'Unavailable'}</span>
+              <span className="font-bold text-lg text-white">{isAvailable ? 'Available' : 'Unavailable'}</span>
               <span className="text-teal-50 text-sm">{isAvailable ? 'Accepting new patients' : 'Paused for now'}</span>
             </div>
             
@@ -139,14 +162,12 @@ const DoctorDashboardHome = () => {
               className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isAvailable ? 'bg-teal-800' : 'bg-slate-400'}`}
             >
               <div 
-                className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${isAvailable ? 'translate-x-6' : 'translate-x-0'}`}
+                className={`bg-white dark:bg-gray-800 w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${isAvailable ? 'translate-x-6' : 'translate-x-0'}`}
               ></div>
             </button>
           </div>
 
-          {/* Decorative background shapes */}
-          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white/10 rounded-full blur-3xl transition-transform duration-700"></div>
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white/10 rounded-full blur-3xl transition-transform duration-700"></div>
+
         </div>
 
         {/* Summary Cards Grid */}
@@ -154,7 +175,7 @@ const DoctorDashboardHome = () => {
           {/* Card 1: Pending Appointments */}
           <div 
             onClick={() => navigate('/doctor/kanban')}
-            className="bg-white rounded-3xl p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-teal-100 transition-all duration-300 group cursor-pointer relative overflow-hidden"
+            className="bg-white dark:bg-gray-800 rounded-3xl p-7 shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 hover:border-teal-100 transition-all duration-300 group cursor-pointer relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-teal-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="flex items-center justify-between mb-5 relative z-10">
@@ -163,14 +184,14 @@ const DoctorDashboardHome = () => {
               </div>
               <span className="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-1.5 rounded-full border border-teal-100 shadow-sm">Today</span>
             </div>
-            <h3 className="text-slate-500 text-sm font-semibold mb-1 uppercase tracking-wider">Pending Appointments</h3>
-            <p className="text-3xl font-extrabold text-slate-800">{loading ? '-' : pendingCount} Scheduled</p>
+            <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Pending Appointments</h3>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">{loading ? '-' : pendingCount} Scheduled</p>
           </div>
 
           {/* Card 2: Completed Consultations */}
           <div 
             onClick={() => navigate('/doctor/history')}
-            className="bg-white rounded-3xl p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-blue-100 transition-all duration-300 group cursor-pointer relative overflow-hidden"
+            className="bg-white dark:bg-gray-800 rounded-3xl p-7 shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 hover:border-blue-100 transition-all duration-300 group cursor-pointer relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="flex items-center justify-between mb-5 relative z-10">
@@ -179,12 +200,12 @@ const DoctorDashboardHome = () => {
               </div>
               <span className="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 shadow-sm">This Week</span>
             </div>
-            <h3 className="text-slate-500 text-sm font-semibold mb-1 uppercase tracking-wider">Completed Consultations</h3>
-            <p className="text-3xl font-extrabold text-slate-800">{loading ? '-' : completedCount} Patients</p>
+            <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Completed Consultations</h3>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">{loading ? '-' : completedCount} Patients</p>
           </div>
 
           {/* Card 3: Total Patients */}
-          <div className="bg-white rounded-3xl p-7 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 hover:border-purple-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-7 shadow-sm border border-slate-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 hover:border-purple-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-300"></div>
             <div className="flex items-center justify-between mb-5 relative z-10">
               <div className="p-3.5 bg-purple-100 text-purple-700 rounded-2xl group-hover:rotate-6 transition-transform duration-300">
@@ -192,15 +213,15 @@ const DoctorDashboardHome = () => {
               </div>
               <span className="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100 shadow-sm">All Time</span>
             </div>
-            <h3 className="text-slate-500 text-sm font-semibold mb-1 uppercase tracking-wider">Total Unique Patients</h3>
-            <p className="text-3xl font-extrabold text-slate-800">148</p>
+            <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Total Unique Patients</h3>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">148</p>
           </div>
         </div>
 
         {/* Today's Appointments Section */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-          <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-slate-100 dark:border-gray-700 overflow-hidden mb-8">
+          <div className="p-6 border-b border-slate-100 dark:border-gray-700 bg-slate-50 dark:bg-gray-900/50 flex items-center justify-between">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Clock className="w-5 h-5 text-teal-600" />
               Today's Appointments
             </h3>
@@ -215,45 +236,44 @@ const DoctorDashboardHome = () => {
           
           <div className="overflow-x-auto">
             {loading ? (
-              <div className="p-10 text-center text-slate-500 font-medium animate-pulse">Loading appointments...</div>
+              <div className="p-10 text-center text-slate-500 dark:text-gray-400 font-medium animate-pulse">Loading appointments...</div>
             ) : appointments.length === 0 ? (
-              <div className="p-10 text-center text-slate-500 font-medium">No appointments scheduled for today. Take a break! ☕</div>
+              <div className="p-10 text-center text-slate-500 dark:text-gray-400 font-medium">No appointments scheduled for today. Take a break! ☕</div>
             ) : (
-              <table className="w-full text-left border-collapse">
+              <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                    <th className="px-6 py-4 font-semibold">Token Number</th>
-                    <th className="px-6 py-4 font-semibold">Patient Name</th>
-                    <th className="px-6 py-4 font-semibold">Age/Gender</th>
-                    <th className="px-6 py-4 font-semibold">Time</th>
-                    <th className="px-6 py-4 font-semibold">Contact</th>
+                  <tr className="bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-gray-400 text-xs uppercase tracking-wider">
+                    <th className="px-6 py-4 font-semibold text-left">Token</th>
+                    <th className="px-6 py-4 font-semibold text-left">Patient Name</th>
+                    <th className="px-6 py-4 font-semibold text-center">Age/Gender</th>
+                    <th className="px-6 py-4 font-semibold text-center">Time</th>
+                    <th className="px-6 py-4 font-semibold text-center">Contact</th>
                     <th className="px-6 py-4 font-semibold text-right">Status</th>
-                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {appointments.map((apt) => (
-                    <tr key={apt.id} className="hover:bg-slate-50/80 transition-colors group">
-                      <td className="px-6 py-4 whitespace-nowrap font-bold text-teal-700">
+                    <tr key={apt.id} className="hover:bg-slate-50 dark:bg-gray-900/80 dark:hover:bg-gray-800 transition-colors group">
+                      <td className="px-6 py-4 whitespace-nowrap font-bold text-teal-700 text-left">
                         {apt.token_number || '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
+                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800 dark:text-white text-left">
                         {apt.patient_name || 'Unknown Patient'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-gray-300 text-center">
                         {apt.patient_age ? `${apt.patient_age} Yrs` : '-'} {apt.patient_gender ? `/ ${apt.patient_gender}` : ''}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-gray-300 font-medium text-center">
                         {apt.start_time ? apt.start_time.substring(0, 5) : (apt.appointment_time || '-')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-gray-300 text-center">
                         {apt.patient_contact || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${
                           apt.status === 'completed' 
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : apt.status === 'confirmed'
+                            : apt.status?.toLowerCase() === 'in progress'
                             ? 'bg-blue-50 text-blue-700 border-blue-200'
                             : apt.status === 'cancelled'
                             ? 'bg-rose-50 text-rose-700 border-rose-200'
@@ -261,16 +281,6 @@ const DoctorDashboardHome = () => {
                         }`}>
                           {apt.status ? apt.status.charAt(0).toUpperCase() + apt.status.slice(1) : 'Pending'}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {apt.is_telemedicine && apt.status !== 'completed' && apt.status !== 'cancelled' && (
-                          <button
-                            onClick={() => navigate(`/telemedicine/${apt.id}`)}
-                            className="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
-                          >
-                            Start Video Call
-                          </button>
-                        )}
                       </td>
                     </tr>
                   ))}
@@ -281,10 +291,22 @@ const DoctorDashboardHome = () => {
         </div>
 
         {/* Schedule Manager */}
-        <ScheduleManager />
+        {isApproved ? (
+          <ScheduleManager />
+        ) : (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 p-8 rounded-[2rem] shadow-sm mb-8 flex flex-col items-center justify-center text-center mt-6">
+            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+              <Clock className="w-8 h-8 text-amber-600" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-amber-900">Account Pending Approval</h3>
+            <p className="text-amber-700 max-w-md font-medium">
+              You must wait for an administrator to verify and approve your account before you can manage your schedule and accept appointments.
+            </p>
+          </div>
+        )}
         
         {/* Fee Manager */}
-        <FeeManager />
+        {isApproved && <FeeManager />}
         
       </main>
     </div>

@@ -30,7 +30,7 @@ const BookServicePage = () => {
   const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/reviews/public/recent')
+    axios.get('http://127.0.0.1:5000/api/reviews/public/recent')
       .then(res => {
         if (res.data.success && res.data.reviews) {
           setReviews(res.data.reviews);
@@ -53,7 +53,7 @@ const BookServicePage = () => {
       if (!service.id) return;
       setLoadingDates(true);
       try {
-        const res = await axios.get(`http://localhost:5000/api/services/${service.id}/schedules`, {
+        const res = await axios.get(`http://127.0.0.1:5000/api/services/${service.id}/schedules`, {
           headers: { Authorization: token }
         });
         if (res.data.success && res.data.schedules) {
@@ -110,7 +110,28 @@ const BookServicePage = () => {
     return slots;
   };
 
-  const dynamicSlots = generateSlots(selectedDateObj);
+  let dynamicSlots = generateSlots(selectedDateObj);
+
+  if (selectedDateObj) {
+    const now = new Date();
+    const scheduleDate = new Date(selectedDateObj.schedule_date);
+    
+    if (
+      scheduleDate.getFullYear() === now.getFullYear() &&
+      scheduleDate.getMonth() === now.getMonth() &&
+      scheduleDate.getDate() === now.getDate()
+    ) {
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      
+      dynamicSlots = dynamicSlots.filter(timeStr => {
+        const [slotHour, slotMinute] = timeStr.split(':').map(Number);
+        if (slotHour > currentHour) return true;
+        if (slotHour === currentHour && slotMinute > currentMinute) return true;
+        return false;
+      });
+    }
+  }
 
   const validateForm = () => {
     const newErrors = {};
@@ -123,23 +144,84 @@ const BookServicePage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      try {
-        const res = await axios.post('http://localhost:5000/api/services/book', {
-          service_id: service.id,
-          date: selectedDateObj.schedule_date,
-          time: selectedTime,
-          amount_paid: service.price || 0
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setBookingId(res.data.booking.id);
-          setShowSuccessModal(true);
+      const amount = service.price || 0;
+      
+      const submitBooking = async () => {
+        try {
+          const res = await axios.post('http://localhost:5000/api/services/book', {
+            service_id: service.id,
+            date: selectedDateObj.schedule_date,
+            time: selectedTime,
+            amount_paid: amount
+          }, {
+            headers: { Authorization: token }
+          });
+          
+          if (res.data.success) {
+            setBookingId(res.data.booking.id);
+            setShowSuccessModal(true);
+          }
+        } catch (error) {
+          console.error("Booking failed", error);
+          alert(error.response?.data?.message || 'Booking failed');
         }
-      } catch (error) {
-        console.error("Booking failed", error);
-        alert(error.response?.data?.message || 'Booking failed');
+      };
+
+      if (paymentMethod === 'Online') {
+        const order_id = `SRV-${Date.now()}`;
+        try {
+          const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
+            order_id: order_id,
+            amount: amount,
+            currency: 'LKR'
+          });
+
+          if (hashRes.data) {
+            const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
+
+            const payment = {
+              sandbox: true,
+              merchant_id: merchant_id,
+              return_url: window.location.href,
+              cancel_url: window.location.href,
+              notify_url: "http://localhost:5000/api/payment/notify",
+              order_id: order_id,
+              items: `Service Booking: ${service.name}`,
+              amount: formattedAmount,
+              currency: 'LKR',
+              hash: hash,
+              first_name: user?.name || user?.full_name || 'Patient',
+              last_name: '',
+              email: user?.email || 'test@example.com',
+              phone: '0000000000',
+              address: 'Sri Lanka',
+              city: 'Colombo',
+              country: 'Sri Lanka'
+            };
+
+            window.payhere.onCompleted = function onCompleted(orderId) {
+              console.log("Payment completed. OrderID:" + orderId);
+              submitBooking();
+            };
+
+            window.payhere.onDismissed = function onDismissed() {
+              console.log("Payment dismissed");
+              alert("Payment was dismissed. Booking not completed.");
+            };
+
+            window.payhere.onError = function onError(error) {
+              console.log("Error:"  + error);
+              alert("Payment error occurred.");
+            };
+
+            window.payhere.startPayment(payment);
+          }
+        } catch (error) {
+          console.error("Hash generation failed", error);
+          alert("Failed to initialize payment gateway");
+        }
+      } else {
+        submitBooking();
       }
     }
   };
@@ -389,10 +471,10 @@ const BookServicePage = () => {
 
       {/* Success Booking Receipt Modal */}
         {showSuccessModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white print:z-50 print:p-0">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white dark:bg-gray-800 print:z-50 print:p-0">
             <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-full print:rounded-none">
               <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-8 text-center text-white">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
+                <div className="w-16 h-16 bg-white dark:bg-gray-800/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
                   <CheckCircle className="h-10 w-10 text-white" />
                 </div>
                 <h4 className="text-2xl font-bold">Booking Confirmed!</h4>

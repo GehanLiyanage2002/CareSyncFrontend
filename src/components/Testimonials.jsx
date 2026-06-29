@@ -4,7 +4,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { Marquee } from './magicui/Marquee';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const Testimonials = () => {
   const [reviews, setReviews] = useState([]);
@@ -59,8 +59,8 @@ const Testimonials = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/reviews/public/recent');
-        if (response.data.success && response.data.reviews.length > 0) {
+        const response = await axios.get('http://127.0.0.1:5000/api/reviews/public/recent');
+        if (response.data.success && response.data.reviews?.length > 0) {
           setReviews(response.data.reviews);
         } else {
           setReviews(fallbackTestimonials);
@@ -93,7 +93,7 @@ const Testimonials = () => {
   }, []);
 
   return (
-    <section id="testimonials" className="relative py-24 bg-[#edf4fa] overflow-hidden">
+    <section id="testimonials" className="relative py-24 bg-[#edf4fa] dark:bg-gray-900 overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -101,7 +101,7 @@ const Testimonials = () => {
           alt="Doctors Background" 
           className="w-full h-full object-cover object-center opacity-[0.03] mix-blend-multiply"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#edf4fa]/50 to-[#edf4fa]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#edf4fa]/50 to-[#edf4fa] dark:from-gray-900/50 dark:to-gray-900"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,7 +111,7 @@ const Testimonials = () => {
           <p className="text-[#3b82f6] text-sm font-bold tracking-[0.2em] uppercase mb-3">
             Read Testimonials
           </p>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[#111827] tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#111827] dark:text-white tracking-tight">
             Our Patient Says
           </h2>
         </div>
@@ -126,11 +126,11 @@ const Testimonials = () => {
             <Marquee pauseOnHover className="py-4" repeat={4}>
               {reviews.map((testimonial, index) => {
                 const profileImg = testimonial.patient_id 
-                  ? `http://localhost:5000/api/users/profile-image/${testimonial.patient_id}?t=${imgKey}`
+                  ? `http://127.0.0.1:5000/api/users/profile-image/${testimonial.patient_id}?t=${imgKey}`
                   : (testimonial.image || placeholderImages[index % placeholderImages.length]);
 
                 return (
-                  <div key={`${testimonial.id || index}-${index}`} className="magic-border-card min-w-[300px] max-w-[350px] flex-shrink-0 bg-white rounded-3xl p-8 shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 group relative">
+                  <div key={`${testimonial.id || index}-${index}`} className="magic-border-card min-w-[300px] max-w-[350px] flex-shrink-0 bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 group relative">
                     
                     {/* Profile Image with Badge */}
                     <div className="relative mb-6">
@@ -159,12 +159,12 @@ const Testimonials = () => {
                     </div>
                     
                     {/* Testimonial Text */}
-                    <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-6 px-2 italic">
+                    <p className="text-slate-500 dark:text-gray-400 text-sm md:text-base leading-relaxed mb-6 px-2 italic">
                       "{testimonial.comment}"
                     </p>
                     
                     {/* Patient Info */}
-                    <h4 className="text-[#111827] font-bold text-lg mt-auto">
+                    <h4 className="text-[#111827] dark:text-white font-bold text-lg mt-auto">
                       {testimonial.patient_name}
                     </h4>
                     <p className="text-[#3b82f6] text-[10px] font-bold tracking-[0.2em] uppercase mt-1">

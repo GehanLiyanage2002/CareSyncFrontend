@@ -4,43 +4,46 @@ import { useNavigate } from 'react-router-dom';
 const Footer = () => {
   const navigate = useNavigate();
   return (
-    <footer className="bg-[#f8fafc] text-gray-600 py-16 border-t border-gray-100">
+    <footer className="bg-[#f8fafc] dark:bg-gray-900 text-gray-600 dark:text-gray-400 py-16 border-t border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
           
           {/* Opening Hours */}
           <div>
-            <h4 className="text-[#111827] text-xl font-bold mb-6">Opening Hours</h4>
+            <h4 className="text-[#111827] dark:text-white text-xl font-bold mb-6">Opening Hours</h4>
             <div className="flex justify-between py-3 border-b border-gray-200 text-sm text-gray-500">
               <span>Sunday : Closed</span>
             </div>
             <div className="flex justify-between py-3 border-b border-gray-200 text-sm text-gray-500">
               <span>Monday, Tuesday - Friday</span>
-              <span className="font-medium text-gray-700">8:00 AM - 3:30 PM</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">8:00 AM - 3:30 PM</span>
             </div>
             <div className="flex justify-between py-3 border-b border-gray-200 text-sm text-gray-500">
               <span>Saturday</span>
-              <span className="font-medium text-gray-700">10:30 AM - 5:30 PM</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">10:30 AM - 5:30 PM</span>
             </div>
           </div>
 
           {/* Our Clinic */}
           <div>
-            <h4 className="text-[#111827] text-xl font-bold mb-6">Our Clinic</h4>
+            <h4 className="text-[#111827] dark:text-white text-xl font-bold mb-6">Our Clinic</h4>
+            <p className="text-gray-400 text-sm mb-2 hover:text-blue-500 transition-colors cursor-pointer">
+              071 8021528
+            </p>
             <p className="text-gray-400 text-sm mb-4 hover:text-blue-500 transition-colors cursor-pointer">
               hello@company.co
             </p>
             <p className="text-gray-400 text-sm leading-relaxed">
-              123 Digital Art Street,<br />
-              San Diego, CA 92123
+              Dr Samantha Medical Center,<br />
+              Hidagoda, Badulla
             </p>
           </div>
 
           {/* Socials */}
           <div>
-            <h4 className="text-[#111827] text-xl font-bold mb-6">Socials</h4>
+            <h4 className="text-[#111827] dark:text-white text-xl font-bold mb-6">Socials</h4>
             <div className="flex gap-4 mb-6">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-[#3b82f6] hover:text-white transition-colors cursor-pointer text-gray-600">
+              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center hover:bg-[#3b82f6] dark:hover:bg-[#3b82f6] hover:text-white transition-colors cursor-pointer text-gray-600 dark:text-gray-400">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
               </div>
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-[#3b82f6] hover:text-white transition-colors cursor-pointer text-gray-600">
@@ -58,16 +61,29 @@ const Footer = () => {
               <p>Design: CareSync Team</p>
               <p>Distributed By: IIT 08</p>
               
-              <button 
-                onClick={() => navigate('/login', { state: { role: 'Admin' } })}
-                className="mt-6 opacity-10 hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
-                title="System Administration"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                  <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
-                </svg>
-                <span>Admin</span>
-              </button>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => navigate('/login', { state: { role: 'Admin' } })}
+                  className="mt-6 opacity-10 hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
+                  title="System Administration"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                    <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
+                  </svg>
+                  <span>Admin</span>
+                </button>
+
+                <button 
+                  onClick={() => navigate('/login', { state: { role: 'Receptionist' } })}
+                  className="mt-6 opacity-10 hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
+                  title="Receptionist Access"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                  <span>Receptionist</span>
+                </button>
+              </div>
             </div>
           </div>
           

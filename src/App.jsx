@@ -17,7 +17,7 @@ import DoctorDashboardHome from './pages/DoctorDashboardHome';
 import DoctorKanbanPage from './pages/DoctorKanbanPage';
 import DoctorHistoryPage from './pages/DoctorHistoryPage';
 import DoctorReviewsPage from './pages/DoctorReviewsPage';
-import ReceptionistDashboard from './pages/ReceptionistDashboard';
+import ReceptionistDashboard from './pages/Receptionist/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import EditProfilePage from './pages/EditProfilePage';
 import BookAppointmentPage from './pages/BookAppointmentPage';
@@ -27,6 +27,11 @@ import TelemedicineVideoRoom from './pages/TelemedicineVideoRoom';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import Chatbot from './components/Chatbot';
+import AccessibilityPanel from './components/AccessibilityPanel';
+import { AccessibilityProvider } from './context/AccessibilityContext';
+import ForgotPassword from './pages/ForgotPassword';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 const Unauthorized = () => (
   <div className="flex h-screen items-center justify-center bg-gray-50">
@@ -39,7 +44,6 @@ const Unauthorized = () => (
 
 // A simple generic dashboard that redirects based on user role 
 // (or just shows a generic message if role isn't handled here)
-import { useSelector } from 'react-redux';
 const GenericDashboardRedirect = () => {
   const { user } = useSelector((state) => state.auth);
   
@@ -55,11 +59,17 @@ const GenericDashboardRedirect = () => {
 };
 
 function App() {
+  const { user } = useSelector((state) => state.auth);
+  const showChatbot = !user || user.role === 'Patient';
+  const showAccessibility = !user || (user.role !== 'Admin' && user.role !== 'Receptionist');
+
   return (
+    <AccessibilityProvider>
     <div className="antialiased text-gray-900 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans">
       <Toaster position="top-right" />
       <ScrollToTop />
-      <Chatbot />
+      {showChatbot && <Chatbot />}
+      {showAccessibility && <AccessibilityPanel />}
       <Router>
         <Routes>
           {/* Public Routes */}
@@ -71,6 +81,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/doctor-register" element={<DoctorRegister />} />
           <Route path="/verify-otp" element={<OtpVerification />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           
           {/* Book Appointment Route */}
@@ -216,6 +227,7 @@ function App() {
         </Routes>
       </Router>
     </div>
+    </AccessibilityProvider>
   );
 }
 

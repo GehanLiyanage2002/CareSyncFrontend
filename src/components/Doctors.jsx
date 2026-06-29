@@ -6,7 +6,7 @@ import { fetchDoctors, updateDoctorAvailability, updateDoctorFee } from '../feat
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   const navigate = useNavigate();
@@ -17,10 +17,10 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    if (doctors.length === 0) {
+    if (!doctors || doctors.length === 0) {
       dispatch(fetchDoctors());
     }
-  }, [dispatch, doctors.length]);
+  }, [dispatch, doctors?.length]);
 
   useEffect(() => {
     const handleAvailability = (data) => dispatch(updateDoctorAvailability(data));
@@ -35,9 +35,9 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
     };
   }, [dispatch]);
 
-  const specializations = ['All', ...new Set(doctors.map(d => d.specialization || 'General Practitioner'))];
+  const specializations = ['All', ...new Set((doctors || []).map(d => d.specialization || 'General Practitioner'))];
 
-  const filteredDoctors = doctors.filter(doctor => {
+  const filteredDoctors = (doctors || []).filter(doctor => {
     const matchesSearch = (doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
                           (doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     const matchesSpec = selectedSpecialization === 'All' || (doctor.specialization || 'General Practitioner') === selectedSpecialization;
@@ -56,7 +56,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   };
 
   return (
-    <section id="doctors" className={`${hideHeader ? 'pb-24 pt-4' : 'py-24'} bg-white relative overflow-hidden transition-colors duration-300`}>
+    <section id="doctors" className={`${hideHeader ? 'pb-24 pt-4' : 'py-24'} bg-white dark:bg-gray-800 relative overflow-hidden transition-colors duration-300`}>
       
       {/* Decorative Dots - Left */}
       <div className="absolute top-1/4 left-10 hidden lg:block opacity-30 z-0">
@@ -89,8 +89,8 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
           </div>
         )}
 
-        {/* Search & Filter Section */}
-        <div className="max-w-4xl mx-auto mb-12 flex flex-col gap-6">
+        {/* Search Section */}
+        <div className="max-w-4xl mx-auto mb-8 flex flex-col gap-6">
           {/* Search Bar */}
           <div className="relative max-w-2xl mx-auto w-full">
             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
@@ -104,9 +104,13 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
               className="block w-full pl-14 pr-6 py-4 border border-slate-200 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xl transition-all duration-300 font-medium text-lg"
             />
           </div>
+        </div>
 
-          {/* Specialization Filter Pills */}
-          <div className="flex gap-3 justify-start md:justify-center overflow-x-auto pb-4 hide-scrollbar snap-x px-2">
+        {/* Specialization Filter Pills */}
+        <div 
+          className="flex gap-3 overflow-x-auto pb-4 px-4 mb-12 w-max max-w-full mx-auto snap-x"
+          style={{ scrollbarWidth: 'thin' }}
+        >
             {specializations.map((spec, idx) => (
               <button
                 key={idx}
@@ -121,7 +125,6 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
               </button>
             ))}
           </div>
-        </div>
 
         {/* Carousel / Doctors Grid */}
         {filteredDoctors.length > 0 ? (
@@ -130,7 +133,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
             {/* Left Scroll Button */}
             <button 
               onClick={() => scroll('left')}
-              className="hidden md:flex absolute -left-4 lg:-left-12 z-20 w-10 h-10 bg-white shadow-md rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+              className="hidden md:flex absolute -left-4 lg:-left-12 z-20 w-10 h-10 bg-white dark:bg-gray-800 shadow-md rounded-full items-center justify-center text-slate-500 dark:text-gray-400 hover:text-blue-600 transition-colors"
             >
               <ChevronLeft size={24} />
             </button>
@@ -160,7 +163,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
 
                   {/* Info */}
                   <h3 className="text-xl font-bold text-[#1e3a8a] dark:text-white mb-1 transition-colors">
-                    {doctor.name}
+                    {doctor.name?.match(/^Dr\.?\s/i) ? doctor.name : `Dr. ${doctor.name}`}
                   </h3>
                   <p className="text-[#0ea5e9] font-medium text-sm mb-2">
                     {doctor.specialization || 'General Practitioner'}
@@ -194,7 +197,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
             {/* Right Scroll Button */}
             <button 
               onClick={() => scroll('right')}
-              className="hidden md:flex absolute -right-4 lg:-right-12 z-20 w-10 h-10 bg-white shadow-md rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors"
+              className="hidden md:flex absolute -right-4 lg:-right-12 z-20 w-10 h-10 bg-white dark:bg-gray-800 shadow-md rounded-full items-center justify-center text-slate-500 dark:text-gray-400 hover:text-blue-600 transition-colors"
             >
               <ChevronRight size={24} />
             </button>
@@ -202,7 +205,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-slate-500 text-lg font-medium">
+            <p className="text-slate-500 dark:text-gray-400 text-lg font-medium">
               No doctors found matching "{searchTerm}"
             </p>
           </div>

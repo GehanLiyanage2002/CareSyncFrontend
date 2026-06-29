@@ -10,7 +10,7 @@ import {
   Baby, Sparkles, Search, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const Services = ({ isPage }) => {
   const navigate = useNavigate();
@@ -28,10 +28,10 @@ const Services = ({ isPage }) => {
   };
 
   useEffect(() => {
-    if (services.length === 0) {
+    if (!services || services.length === 0) {
       dispatch(fetchServices());
     }
-  }, [dispatch, services.length]);
+  }, [dispatch, services?.length]);
 
   useEffect(() => {
     const handleServiceEvent = () => dispatch(fetchServices());
@@ -65,16 +65,16 @@ const Services = ({ isPage }) => {
     return Stethoscope;
   };
 
-  const filteredServices = services.filter(service => 
+  const filteredServices = (services || []).filter(service => 
     service.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <section id="services" className={`${isPage ? 'pb-24 pt-4' : 'py-24'} bg-white`}>
+    <section id="services" className={`${isPage ? 'pb-24 pt-4' : 'py-24'} bg-white dark:bg-gray-800`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-10">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] tracking-tight mb-8">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] dark:text-white tracking-tight mb-8">
             Our Medical Services
           </h2>
           
@@ -88,7 +88,7 @@ const Services = ({ isPage }) => {
               placeholder="Search services..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 rounded-full bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all duration-300 font-medium"
+              className="block w-full pl-12 pr-4 py-3.5 border border-slate-200 dark:border-gray-600 rounded-full bg-white dark:bg-gray-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-[0_5px_15px_rgba(0,0,0,0.05)] transition-all duration-300 font-medium"
             />
           </div>
         </div>
@@ -103,7 +103,7 @@ const Services = ({ isPage }) => {
             {/* Left Scroll Button */}
             <button 
               onClick={() => scroll('left')}
-              className="hidden md:flex absolute -left-4 lg:-left-8 z-20 w-12 h-12 bg-white shadow-lg rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors border border-slate-100"
+              className="hidden md:flex absolute -left-4 lg:-left-8 z-20 w-12 h-12 bg-white dark:bg-gray-800 shadow-lg rounded-full items-center justify-center text-slate-500 dark:text-gray-400 hover:text-blue-600 transition-colors border border-slate-100 dark:border-gray-700"
             >
               <ChevronLeft size={28} />
             </button>
@@ -125,7 +125,7 @@ const Services = ({ isPage }) => {
                       {service.has_image ? (
                         <div className="w-20 h-20 rounded-full border-2 border-white dark:border-gray-800 shadow-sm overflow-hidden group-hover:scale-105 transition-transform duration-300">
                           <img 
-                            src={`http://localhost:5000/api/services/${service.id}/image`} 
+                            src={`http://127.0.0.1:5000/api/services/${service.id}/image`} 
                             alt={service.name} 
                             className="w-full h-full object-cover"
                           />
@@ -168,14 +168,14 @@ const Services = ({ isPage }) => {
             {/* Right Scroll Button */}
             <button 
               onClick={() => scroll('right')}
-              className="hidden md:flex absolute -right-4 lg:-right-8 z-20 w-12 h-12 bg-white shadow-lg rounded-full items-center justify-center text-slate-500 hover:text-blue-600 transition-colors border border-slate-100"
+              className="hidden md:flex absolute -right-4 lg:-right-8 z-20 w-12 h-12 bg-white dark:bg-gray-800 shadow-lg rounded-full items-center justify-center text-slate-500 dark:text-gray-400 hover:text-blue-600 transition-colors border border-slate-100 dark:border-gray-700"
             >
               <ChevronRight size={28} />
             </button>
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-slate-500 text-lg font-medium">
+            <p className="text-slate-500 dark:text-gray-400 text-lg font-medium">
               No services found matching "{searchTerm}"
             </p>
           </div>

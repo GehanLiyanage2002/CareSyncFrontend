@@ -42,7 +42,7 @@ const PatientReviewsList = ({ title = "Patient Reviews", subtitle = "What patien
                   <Star key={s} size={14} className={s <= Math.round(reviewStats.average_rating) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200 dark:fill-gray-600 dark:text-gray-600'} />
                 ))}
               </div>
-              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">{reviewStats.total_reviews} review{reviewStats.total_reviews !== 1 ? 's' : ''}</span>
+              <span className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider">{reviewStats.total_reviews} review{reviewStats.total_reviews !== 1 ? 's' : ''}</span>
             </div>
           </div>
         )}
@@ -87,7 +87,7 @@ const PatientReviewsList = ({ title = "Patient Reviews", subtitle = "What patien
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-200 to-blue-400 dark:from-blue-600 dark:to-blue-800 flex items-center justify-center text-white font-bold text-2xl border-4 border-white dark:border-gray-800 shadow-md group-hover:border-blue-50 dark:group-hover:border-gray-700 transition-colors duration-300 overflow-hidden">
                       {hasImage ? (
                         <img 
-                          src={`http://localhost:5000/api/users/profile-image/${patientId}?t=${imgKey}`} 
+                          src={`http://127.0.0.1:5000/api/users/profile-image/${patientId}?t=${imgKey}`} 
                           alt={review.patient_name} 
                           className="w-full h-full object-cover"
                           onError={(e) => {

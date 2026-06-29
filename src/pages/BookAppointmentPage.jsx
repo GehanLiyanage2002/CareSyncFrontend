@@ -7,7 +7,7 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const BookAppointmentPage = () => {
   const location = useLocation();
@@ -84,7 +84,7 @@ const BookAppointmentPage = () => {
       const fetchDates = async () => {
         setLoadingDates(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${docId}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/configured-dates/${docId}`);
           if (res.data.success && res.data.dates) {
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -121,9 +121,33 @@ const BookAppointmentPage = () => {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
+          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
-            setDynamicSlots(res.data.slots);
+            // Filter out buffer slots for online booking, and extract just the time string
+            let publicSlots = res.data.slots
+              .filter(slotObj => !slotObj.isBuffer)
+              .map(slotObj => slotObj.time);
+
+            // Filter out past slots if the selected date is today
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+
+            if (selectedDate.valueDate === todayStr) {
+              const currentHour = now.getHours();
+              const currentMinute = now.getMinutes();
+
+              publicSlots = publicSlots.filter(timeStr => {
+                const [slotHour, slotMinute] = timeStr.split(':').map(Number);
+                if (slotHour > currentHour) return true;
+                if (slotHour === currentHour && slotMinute > currentMinute) return true;
+                return false;
+              });
+            }
+
+            setDynamicSlots(publicSlots);
           }
         } catch (error) {
           console.error("Failed to fetch slots", error);
@@ -184,30 +208,91 @@ const BookAppointmentPage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      try {
-        const docId = doctor?.id || doctor?.doctor_id;
-        const res = await axios.post('http://localhost:5000/api/appointments', {
-          doctor_id: docId,
-          appointment_date: selectedDate.valueDate,
-          start_time: selectedTime,
-          patient_name: formData.fullName,
-          age: parseInt(formData.age),
-          mobile_number: formData.mobileNumber,
-          gender: formData.gender,
-          email: formData.email,
-          payment_method: paymentMethod,
-          is_telemedicine: isTelemedicine
-        }, {
-          headers: { Authorization: token }
-        });
-        
-        if (res.data.success) {
-          setTokenNumber(res.data.appointment.token_number);
-          setShowSuccessModal(true);
+      const docId = doctor?.id || doctor?.doctor_id;
+      const amount = isTelemedicine ? 2500 : doctor.consultationFee;
+      
+      const submitBooking = async () => {
+        try {
+          const res = await axios.post('http://localhost:5000/api/appointments', {
+            doctor_id: docId,
+            appointment_date: selectedDate.valueDate,
+            start_time: selectedTime,
+            patient_name: formData.fullName,
+            age: parseInt(formData.age),
+            mobile_number: formData.mobileNumber,
+            gender: formData.gender,
+            email: formData.email,
+            payment_method: paymentMethod,
+            is_telemedicine: isTelemedicine
+          }, {
+            headers: { Authorization: token }
+          });
+          
+          if (res.data.success) {
+            setTokenNumber(res.data.appointment.token_number);
+            setShowSuccessModal(true);
+          }
+        } catch (error) {
+          console.error("Booking failed", error);
+          alert(error.response?.data?.message || 'Booking failed');
         }
-      } catch (error) {
-        console.error("Booking failed", error);
-        alert(error.response?.data?.message || 'Booking failed');
+      };
+
+      if (paymentMethod === 'Online') {
+        const order_id = `APT-${Date.now()}`;
+        try {
+          const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
+            order_id: order_id,
+            amount: amount,
+            currency: 'LKR'
+          });
+
+          if (hashRes.data) {
+            const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
+
+            const payment = {
+              sandbox: true,
+              merchant_id: merchant_id,
+              return_url: window.location.href,
+              cancel_url: window.location.href,
+              notify_url: "http://localhost:5000/api/payment/notify",
+              order_id: order_id,
+              items: `Appointment with ${doctor?.name || 'Doctor'}`,
+              amount: formattedAmount,
+              currency: 'LKR',
+              hash: hash,
+              first_name: formData.fullName,
+              last_name: '',
+              email: formData.email || 'test@example.com',
+              phone: formData.mobileNumber,
+              address: 'Sri Lanka',
+              city: 'Colombo',
+              country: 'Sri Lanka'
+            };
+
+            window.payhere.onCompleted = function onCompleted(orderId) {
+              console.log("Payment completed. OrderID:" + orderId);
+              submitBooking();
+            };
+
+            window.payhere.onDismissed = function onDismissed() {
+              console.log("Payment dismissed");
+              alert("Payment was dismissed. Booking not completed.");
+            };
+
+            window.payhere.onError = function onError(error) {
+              console.log("Error:"  + error);
+              alert("Payment error occurred.");
+            };
+
+            window.payhere.startPayment(payment);
+          }
+        } catch (error) {
+          console.error("Hash generation failed", error);
+          alert("Failed to initialize payment gateway");
+        }
+      } else {
+        submitBooking();
       }
     }
   };
@@ -366,7 +451,6 @@ const BookAppointmentPage = () => {
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
-                    <option value="Other">Other</option>
                   </select>
                   {errors.gender && <p className="text-rose-500 text-xs mt-1">{errors.gender}</p>}
                 </div>
@@ -555,11 +639,11 @@ const BookAppointmentPage = () => {
 
 {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white print:z-50 print:p-0">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white dark:bg-gray-800 print:z-50 print:p-0">
           <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-full print:rounded-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Header / Success Animation */}
             <div className="bg-gradient-to-r from-blue-600 to-teal-500 p-3 text-center text-white relative">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
+              <div className="w-10 h-10 bg-white dark:bg-gray-800/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
                 <CheckCircle className="h-5 w-5 text-white" />
               </div>
               <h4 className="text-base font-bold">Booking Confirmed!</h4>

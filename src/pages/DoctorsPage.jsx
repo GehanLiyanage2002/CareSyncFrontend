@@ -12,12 +12,16 @@ const DoctorsPage = () => {
   const service = location.state?.service;
   const isTelemedicine = service === 'Telemedicine';
 
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-800">
       <Header />
       
       {/* Content Section */}
-      <section className="pt-20 pb-10 bg-white relative">
+      <section className="pt-20 pb-10 bg-white dark:bg-gray-800 relative">
         {selectedDoctor ? (
           <DoctorProfile 
             doctor={selectedDoctor} 
@@ -27,7 +31,7 @@ const DoctorsPage = () => {
         ) : (
           <>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
-              <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] tracking-tight mb-8">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-[#0a192f] dark:text-white tracking-tight mb-8">
                 Our Specialist
               </h2>
             </div>

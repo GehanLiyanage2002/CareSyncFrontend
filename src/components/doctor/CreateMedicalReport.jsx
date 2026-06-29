@@ -27,7 +27,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
       const fetchReport = async () => {
         setIsLoading(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/reports/appointment/${appointment.id}`, {
+          const res = await axios.get(`http://127.0.0.1:5000/api/reports/appointment/${appointment.id}`, {
             headers: { Authorization: token }
           });
           if (res.data.success && res.data.report) {
@@ -116,14 +116,14 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
 
       let res;
       if (isEditMode && existingReport) {
-        res = await axios.put(`http://localhost:5000/api/reports/${existingReport.id}`, data, {
+        res = await axios.put(`http://127.0.0.1:5000/api/reports/${existingReport.id}`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: token,
           },
         });
       } else {
-        res = await axios.post('http://localhost:5000/api/reports', data, {
+        res = await axios.post('http://127.0.0.1:5000/api/reports', data, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: token,
@@ -153,7 +153,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
           </h3>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-full hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all"
+            className="p-2 text-slate-400 hover:text-slate-800 dark:text-white dark:hover:text-white rounded-full hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 shadow-sm transition-all"
           >
             <X size={20} />
           </button>
@@ -162,7 +162,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
         {isLoading ? (
           <div className="flex-1 flex flex-col items-center justify-center min-h-[300px]">
             <div className="w-10 h-10 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
-            <p className="text-slate-500 font-semibold">Loading report details...</p>
+            <p className="text-slate-500 dark:text-gray-400 font-semibold">Loading report details...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5 overflow-y-auto custom-scrollbar">
@@ -219,7 +219,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
             <label className="block text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Upload PDF or Scanned Photo
             </label>
-            <div className="relative border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-2xl p-6 hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors text-center group cursor-pointer">
+            <div className="relative border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-2xl p-6 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-gray-700/50 transition-colors text-center group cursor-pointer">
               <input 
                 type="file" 
                 accept=".pdf, .jpg, .jpeg, .png" 

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const PatientReviews = () => {
   const { token } = useSelector((state) => state.auth);
@@ -14,7 +14,7 @@ const PatientReviews = () => {
   const fetchReviews = async () => {
     try {
       const res = await axios.get(
-        'http://localhost:5000/api/reviews/patient/my-reviews',
+        'http://127.0.0.1:5000/api/reviews/patient/my-reviews',
         { headers: { Authorization: token } }
       );
       if (res.data.success) {
@@ -71,12 +71,12 @@ const PatientReviews = () => {
       {/* ── Hero Banner ── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 p-6 md:p-8 text-white shadow-xl shadow-amber-200/60 dark:shadow-amber-900/30">
         {/* decorative blobs */}
-        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white dark:bg-gray-800/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white dark:bg-gray-800/10 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-6">
           {/* Big star */}
-          <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-sm flex flex-col items-center justify-center shadow-inner flex-shrink-0">
+          <div className="w-20 h-20 rounded-3xl bg-white dark:bg-gray-800/20 backdrop-blur-sm flex flex-col items-center justify-center shadow-inner flex-shrink-0">
             <Star size={28} className="fill-white text-white mb-0.5" />
             <span className="text-2xl font-black leading-none">{avgRating ?? '—'}</span>
           </div>
@@ -87,18 +87,18 @@ const PatientReviews = () => {
               Reviews you've submitted after completed appointments
             </p>
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3.5 py-1.5 text-sm font-bold">
+              <div className="flex items-center gap-1.5 bg-white dark:bg-gray-800/20 backdrop-blur-sm rounded-full px-3.5 py-1.5 text-sm font-bold">
                 <MessageSquare size={13} />
                 {reviews.length} Review{reviews.length !== 1 ? 's' : ''}
               </div>
               {readCount > 0 && (
-                <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3.5 py-1.5 text-sm font-bold">
+                <div className="flex items-center gap-1.5 bg-white dark:bg-gray-800/20 backdrop-blur-sm rounded-full px-3.5 py-1.5 text-sm font-bold">
                   <CheckCheck size={13} />
                   {readCount} Read by doctor
                 </div>
               )}
               {unreadCount > 0 && (
-                <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3.5 py-1.5 text-sm font-bold">
+                <div className="flex items-center gap-1.5 bg-white dark:bg-gray-800/20 backdrop-blur-sm rounded-full px-3.5 py-1.5 text-sm font-bold">
                   <Clock size={13} />
                   {unreadCount} Pending read
                 </div>

@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('http://127.0.0.1:5000');
 
 const statusConfig = {
   pending: {
@@ -16,8 +16,8 @@ const statusConfig = {
     color: 'bg-amber-50 text-amber-700 border-amber-200',
     icon: ClockIcon,
   },
-  confirmed: {
-    label: 'Confirmed',
+  'in progress': {
+    label: 'In Progress',
     color: 'bg-blue-50 text-blue-700 border-blue-200',
     icon: CheckCircle,
   },
@@ -47,8 +47,8 @@ const PatientAppointmentsPage = () => {
     const fetchAppointments = async () => {
       try {
         const [appRes, servRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/appointments/patient/my-appointments', { headers: { Authorization: token } }),
-          axios.get('http://localhost:5000/api/services/bookings', { headers: { Authorization: token } })
+          axios.get('http://127.0.0.1:5000/api/appointments/patient/my-appointments', { headers: { Authorization: token } }),
+          axios.get('http://127.0.0.1:5000/api/services/bookings', { headers: { Authorization: token } })
         ]);
         if (appRes.data.success) {
           setAppointments(appRes.data.appointments);
@@ -82,7 +82,7 @@ const PatientAppointmentsPage = () => {
         )
       );
       toast(`Appointment status updated to ${status}`, {
-        icon: status === 'completed' ? '✅' : status === 'cancelled' ? '❌' : status === 'confirmed' ? '📋' : '🕐',
+        icon: status === 'completed' ? '✅' : status === 'cancelled' ? '❌' : status === 'in progress' ? '📋' : '🕐',
       });
     };
 
@@ -93,7 +93,7 @@ const PatientAppointmentsPage = () => {
   const filters = [
     { key: 'all', label: 'All' },
     { key: 'pending', label: 'Pending' },
-    { key: 'confirmed', label: 'Confirmed' },
+    { key: 'in progress', label: 'In Progress' },
     { key: 'completed', label: 'Completed' },
     { key: 'cancelled', label: 'Cancelled' },
   ];
@@ -102,7 +102,7 @@ const PatientAppointmentsPage = () => {
   const standardizedServices = serviceBookings.map(s => ({ 
     ...s, 
     itemType: 'Services',
-    status: s.status ? s.status.toLowerCase() : 'confirmed'
+    status: s.status ? s.status.toLowerCase() : 'in progress'
   }));
 
   const allItems = [...standardizedAppointments, ...standardizedServices];
@@ -131,7 +131,7 @@ const PatientAppointmentsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-blue-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white selection:bg-blue-100 flex flex-col">
       <Header />
 
       <main className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10">
@@ -140,16 +140,16 @@ const PatientAppointmentsPage = () => {
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900">My Appointments</h1>
-            <p className="text-slate-500 mt-1 text-sm font-medium">
+            <p className="text-slate-500 dark:text-gray-400 mt-1 text-sm font-medium">
               Track and manage all your past and upcoming visits.
             </p>
           </div>
           
-          <div className="flex items-center gap-1 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-800 p-1.5 rounded-full border border-slate-200 dark:border-gray-600 shadow-sm">
             <button 
               onClick={() => setAppointmentTypeFilter('All')}
               className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-                appointmentTypeFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                appointmentTypeFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900'
               }`}
             >
               All
@@ -157,7 +157,7 @@ const PatientAppointmentsPage = () => {
             <button 
               onClick={() => setAppointmentTypeFilter('Doctor')}
               className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-                appointmentTypeFilter === 'Doctor' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                appointmentTypeFilter === 'Doctor' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900'
               }`}
             >
               Doctor
@@ -165,7 +165,7 @@ const PatientAppointmentsPage = () => {
             <button 
               onClick={() => setAppointmentTypeFilter('Services')}
               className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-                appointmentTypeFilter === 'Services' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                appointmentTypeFilter === 'Services' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900'
               }`}
             >
               Services
@@ -182,13 +182,13 @@ const PatientAppointmentsPage = () => {
               className={`px-4 py-2 text-sm font-bold rounded-xl border transition-all duration-200 ${
                 filter === f.key
                   ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-100'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'
+                  : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 border-slate-200 dark:border-gray-600 hover:border-blue-300 hover:text-blue-600'
               }`}
             >
               {f.label}
               {f.key !== 'all' && (
                 <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-black ${
-                  filter === f.key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                  filter === f.key ? 'bg-white dark:bg-gray-800/20 text-white' : 'bg-slate-100 text-slate-500 dark:text-gray-400'
                 }`}>
                   {typeFilteredItems.filter((a) => a.status === f.key).length}
                 </span>
@@ -201,12 +201,12 @@ const PatientAppointmentsPage = () => {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4" />
-            <p className="font-semibold text-slate-500">Loading your appointments...</p>
+            <p className="font-semibold text-slate-500 dark:text-gray-400">Loading your appointments...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-400 bg-white rounded-3xl border border-slate-100 shadow-sm">
+          <div className="flex flex-col items-center justify-center py-24 text-slate-400 bg-white dark:bg-gray-800 rounded-3xl border border-slate-100 dark:border-gray-700 shadow-sm">
             <Calendar className="w-16 h-16 text-slate-200 mb-4" />
-            <p className="text-lg font-bold text-slate-500">No appointments found</p>
+            <p className="text-lg font-bold text-slate-500 dark:text-gray-400">No appointments found</p>
             <p className="text-sm mt-1">
               {filter !== 'all' ? `No ${filter} appointments.` : "Book an appointment to get started."}
             </p>
@@ -227,7 +227,7 @@ const PatientAppointmentsPage = () => {
                 return (
                   <div
                     key={`service-${apt.id}`}
-                    className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
+                    className="bg-white dark:bg-gray-800 rounded-3xl border border-slate-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
                   >
                     <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-extrabold text-xl shadow-md flex-shrink-0">
@@ -235,7 +235,7 @@ const PatientAppointmentsPage = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <h3 className="font-extrabold text-slate-800 text-lg leading-tight">
+                          <h3 className="font-extrabold text-slate-800 dark:text-white text-lg leading-tight">
                             {apt.serviceName || 'Service'}
                           </h3>
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${status.color}`}>
@@ -247,7 +247,7 @@ const PatientAppointmentsPage = () => {
                           <Stethoscope size={13} />
                           Medical Service
                         </p>
-                        <div className="flex flex-wrap gap-3 text-xs text-slate-500 font-semibold">
+                        <div className="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-gray-400 font-semibold">
                           <span className="flex items-center gap-1.5">
                             <Calendar size={13} className="text-slate-400" />
                             {formatDate(apt.date)}
@@ -270,7 +270,7 @@ const PatientAppointmentsPage = () => {
               return (
                 <div
                   key={`doctor-${apt.id}`}
-                  className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
+                  className="bg-white dark:bg-gray-800 rounded-3xl border border-slate-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
                 >
                   <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
                     {/* Doctor Avatar */}
@@ -281,7 +281,7 @@ const PatientAppointmentsPage = () => {
                     {/* Details */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <h3 className="font-extrabold text-slate-800 text-lg leading-tight">
+                        <h3 className="font-extrabold text-slate-800 dark:text-white text-lg leading-tight">
                           {apt.doctor_name || 'Doctor'}
                         </h3>
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${status.color}`}>
@@ -297,7 +297,7 @@ const PatientAppointmentsPage = () => {
                         </p>
                       )}
 
-                      <div className="flex flex-wrap gap-3 text-xs text-slate-500 font-semibold">
+                      <div className="flex flex-wrap gap-3 text-xs text-slate-500 dark:text-gray-400 font-semibold">
                         <span className="flex items-center gap-1.5">
                           <Calendar size={13} className="text-slate-400" />
                           {formatDate(apt.appointment_date)}
@@ -358,7 +358,7 @@ const PatientAppointmentsPage = () => {
         <div className="mt-12 flex justify-center pb-8">
           <button
             onClick={() => navigate('/patient/dashboard')}
-            className="flex items-center gap-2 px-6 py-3 bg-white text-slate-600 hover:text-blue-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:border-blue-200 transition-all duration-300 group"
+            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:text-blue-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 dark:border-gray-600 hover:border-blue-200 transition-all duration-300 group"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 group-hover:-translate-x-1 transition-transform">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

@@ -12,7 +12,7 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  fetchAppointments();
  
  // Set up real-time listener for appointments
- const socket = io('http://127.0.0.1:5000', { reconnection: true });
+ const socket = io('https://caresync-backend-api-gl.azurewebsites.net', { reconnection: true });
  
  socket.on('appointmentStatusChanged', () => {
  fetchAppointments();
@@ -30,7 +30,7 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  const fetchAppointments = async () => {
  try {
  setLoading(true);
- const res = await axios.get(`http://127.0.0.1:5000/api/admin/patients/${patient.id}/appointments`, {
+ const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/patients/${patient.id}/appointments`, {
  headers: { Authorization: token }
  });
  setAppointments(res.data.appointments);

@@ -87,7 +87,7 @@ const PatientReviewsList = ({ title = "Patient Reviews", subtitle = "What patien
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-200 to-blue-400 dark:from-blue-600 dark:to-blue-800 flex items-center justify-center text-white font-bold text-2xl border-4 border-white dark:border-gray-800 shadow-md group-hover:border-blue-50 dark:group-hover:border-gray-700 transition-colors duration-300 overflow-hidden">
                       {hasImage ? (
                         <img 
-                          src={`http://127.0.0.1:5000/api/users/profile-image/${patientId}?t=${imgKey}`} 
+                          src={`https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${patientId}?t=${imgKey}`} 
                           alt={review.patient_name} 
                           className="w-full h-full object-cover"
                           onError={(e) => {

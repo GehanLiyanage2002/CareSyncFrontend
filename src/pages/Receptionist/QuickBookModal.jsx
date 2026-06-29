@@ -48,7 +48,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  const fetchDoctors = async () => {
  setLoadingDoctors(true);
  try {
- const res = await axios.get(`http://127.0.0.1:5000/api/users/doctors`);
+ const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/users/doctors`);
  if (res.data.success) {
  cachedAllDoctors = res.data.doctors;
  setAllDoctors(res.data.doctors);
@@ -86,7 +86,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  setSelectedTime(null);
  setSlotPage(0);
  try {
- const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${selectedDoctor.doctor_id}?date=${selectedDate}`);
+ const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/appointments/slots/${selectedDoctor.doctor_id}?date=${selectedDate}`);
  if (res.data.success) {
  let validSlots = res.data.slots;
  
@@ -155,7 +155,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  is_telemedicine: false
  };
 
- const res = await axios.post('http://127.0.0.1:5000/api/appointments', payload, {
+ const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/appointments', payload, {
  headers: { Authorization: token }
  });
 

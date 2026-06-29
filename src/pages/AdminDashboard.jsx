@@ -108,7 +108,7 @@ const AdminDashboard = () => {
  const handleCancelAppointment = async () => {
  if (!appointmentToCancel) return;
  try {
- const res = await axios.put(`http://127.0.0.1:5000/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
+ const res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/appointments/${appointmentToCancel}/cancel`, {}, config);
  if (res.data.success) {
  toast.success(res.data.message);
  setAppointments(prev => prev.map(appt => appt.id === appointmentToCancel ? { ...appt, status: 'Cancelled' } : appt));
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
 
  const fetchStats = async () => {
  try {
- let url = 'http://127.0.0.1:5000/api/admin/stats';
+ let url = 'https://caresync-backend-api-gl.azurewebsites.net/api/admin/stats';
  const { startDate, endDate } = getFilterDates();
  if (startDate && endDate) {
  url += `?startDate=${startDate}&endDate=${endDate}`;
@@ -163,7 +163,7 @@ const AdminDashboard = () => {
 
  const fetchDoctors = async () => {
  try {
- const res = await axios.get('http://127.0.0.1:5000/api/admin/doctors', config);
+ const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors', config);
  setDoctors(res.data.doctors);
  } catch (err) {
  console.error(err);
@@ -172,7 +172,7 @@ const AdminDashboard = () => {
 
  const fetchServiceBookings = async () => {
  try {
- const res = await axios.get('http://127.0.0.1:5000/api/services/bookings', config);
+ const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/services/bookings', config);
  setServiceBookings(res.data.bookings);
  } catch (err) {
  console.error(err);
@@ -181,7 +181,7 @@ const AdminDashboard = () => {
 
  const fetchPatients = async () => {
  try {
- const res = await axios.get('http://127.0.0.1:5000/api/admin/patients', config);
+ const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/admin/patients', config);
  setPatients(res.data.patients);
  } catch (err) {
  console.error(err);
@@ -190,7 +190,7 @@ const AdminDashboard = () => {
 
  const fetchAppointments = async () => {
  try {
- const res = await axios.get('http://127.0.0.1:5000/api/admin/appointments', config);
+ const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/admin/appointments', config);
  setAppointments(res.data.appointments);
  } catch (err) {
  console.error(err);
@@ -199,7 +199,7 @@ const AdminDashboard = () => {
 
  const fetchEarnings = async () => {
  try {
- let url = 'http://127.0.0.1:5000/api/admin/earnings';
+ let url = 'https://caresync-backend-api-gl.azurewebsites.net/api/admin/earnings';
  const { startDate, endDate } = getFilterDates();
  if (startDate && endDate) {
  url += `?startDate=${startDate}&endDate=${endDate}`;
@@ -232,7 +232,7 @@ const AdminDashboard = () => {
  }, [activeTab, dateFilter, customDates]);
 
  useEffect(() => {
- const socket = io('http://127.0.0.1:5000', { reconnection: true, reconnectionDelay: 1000 });
+ const socket = io('https://caresync-backend-api-gl.azurewebsites.net', { reconnection: true, reconnectionDelay: 1000 });
  socket.on('connect', () => {
  setSocketConnected(true);
  // Refresh data on reconnect (e.g. after server restart)
@@ -290,7 +290,7 @@ const AdminDashboard = () => {
   if (isApproving) return;
   setIsApproving(true);
   try {
-  const res = await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${id}/approve`, {
+  const res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${id}/approve`, {
   is_approved: !currentStatus
   }, config);
   toast.success(res.data.message);
@@ -312,7 +312,7 @@ const AdminDashboard = () => {
  const confirmDeleteDoctor = async () => {
  if (!doctorToDelete) return;
  try {
- const res = await axios.delete(`http://127.0.0.1:5000/api/admin/doctors/${doctorToDelete.id}`, config);
+ const res = await axios.delete(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${doctorToDelete.id}`, config);
  toast.success(res.data.message);
  setDoctorToDelete(null);
  setSelectedDoctor(null);
@@ -596,7 +596,7 @@ const AdminDashboard = () => {
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
  <img 
- src={`http://127.0.0.1:5000/api/users/profile-image/${earn.doctor_id}`} 
+ src={`https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${earn.doctor_id}`} 
  alt={earn.doctor_name} 
  className="w-full h-full object-cover" 
  onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = earn.doctor_name ? earn.doctor_name.charAt(0).toUpperCase() : 'DR'; }} 
@@ -759,7 +759,7 @@ const AdminDashboard = () => {
  <div className="flex justify-between items-start">
  <div className="flex gap-4">
  <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
- <img src={`http://127.0.0.1:5000/api/users/profile-image/${doctor.id}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
+ <img src={`https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${doctor.id}`} alt={doctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = doctor.full_name.charAt(0); }} />
  </div>
  <div className="flex flex-col justify-center">
  <div className="flex items-center gap-3 mb-1 flex-wrap">
@@ -1250,7 +1250,7 @@ const AdminDashboard = () => {
  <div className="px-8 pb-8">
  <div className="flex justify-between items-start mb-6">
  <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
- <img src={`http://127.0.0.1:5000/api/users/profile-image/${selectedDoctor.id}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
+ <img src={`https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${selectedDoctor.id}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
  </div>
  
  {/* Toggle Switch */}
@@ -1307,10 +1307,10 @@ const AdminDashboard = () => {
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Side</span>
          <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm cursor-pointer">
            <AuthorizedImage 
-             url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/front`} 
+             url={`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${selectedDoctor.id}/id-card/front`} 
              token={token} 
              alt="ID Card Front" 
-             onClick={() => setEnlargedImage(`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/front`)}
+             onClick={() => setEnlargedImage(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${selectedDoctor.id}/id-card/front`)}
            />
          </div>
        </div>
@@ -1325,10 +1325,10 @@ const AdminDashboard = () => {
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rear Side</span>
          <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm cursor-pointer">
            <AuthorizedImage 
-             url={`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/rear`} 
+             url={`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${selectedDoctor.id}/id-card/rear`} 
              token={token} 
              alt="ID Card Rear" 
-             onClick={() => setEnlargedImage(`http://127.0.0.1:5000/api/admin/doctors/${selectedDoctor.id}/id-card/rear`)}
+             onClick={() => setEnlargedImage(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${selectedDoctor.id}/id-card/rear`)}
            />
          </div>
        </div>

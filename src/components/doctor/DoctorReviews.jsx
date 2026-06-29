@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
 
 const DoctorReviews = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -16,7 +16,7 @@ const DoctorReviews = () => {
     if (!user?.id) return;
     try {
       const res = await axios.get(
-        `http://127.0.0.1:5000/api/reviews/${user.id}`,
+        `https://caresync-backend-api-gl.azurewebsites.net/api/reviews/${user.id}`,
         { headers: { Authorization: token } }
       );
       if (res.data.success) {
@@ -26,7 +26,7 @@ const DoctorReviews = () => {
           total_reviews: res.data.total_reviews,
         });
         // Auto-mark all as read when doctor opens the reviews page
-        axios.put('http://127.0.0.1:5000/api/reviews/mark-read', {}, {
+        axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/reviews/mark-read', {}, {
           headers: { Authorization: token }
         }).catch(() => {});
       }

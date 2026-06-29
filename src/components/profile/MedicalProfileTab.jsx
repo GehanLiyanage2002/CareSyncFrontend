@@ -66,7 +66,7 @@ const MedicalProfileTab = () => {
 
     try {
       const response = await axios.put(
-        'http://127.0.0.1:5000/api/users/profile',
+        'https://caresync-backend-api-gl.azurewebsites.net/api/users/profile',
         { 
           blood_group: bloodGroup || null, 
           allergies: allergies || null,

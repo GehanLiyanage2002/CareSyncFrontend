@@ -53,7 +53,7 @@ const GeneralProfileTab = () => {
 
     setLoading(prev => ({ ...prev, image: true }));
     try {
-      const res = await axios.put('http://127.0.0.1:5000/api/users/profile-image', formData, {
+      const res = await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image', formData, {
         headers: { 
           Authorization: token,
           'Content-Type': 'multipart/form-data'
@@ -73,7 +73,7 @@ const GeneralProfileTab = () => {
     setLoading(prev => ({ ...prev, faceId: true }));
     try {
       await axios.put(
-        'http://127.0.0.1:5000/api/users/face-id',
+        'https://caresync-backend-api-gl.azurewebsites.net/api/users/face-id',
         { faceDescriptor },
         {
           headers: {
@@ -96,7 +96,7 @@ const GeneralProfileTab = () => {
     const fetchDoctorProfile = async () => {
       if (user?.role === 'Doctor') {
         try {
-          const res = await axios.get('http://127.0.0.1:5000/api/users/doctor-profile', {
+          const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/users/doctor-profile', {
             headers: { Authorization: token }
           });
           if (res.data.profile) {
@@ -135,7 +135,7 @@ const GeneralProfileTab = () => {
 
     setLoading(prev => ({ ...prev, general: true }));
     try {
-      const res = await axios.put('http://127.0.0.1:5000/api/users/general', {
+      const res = await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/users/general', {
         full_name: formData.fullName,
         mobile_number: formData.contactNumber
       }, {
@@ -158,7 +158,7 @@ const GeneralProfileTab = () => {
     }
     setLoading(prev => ({ ...prev, password: true }));
     try {
-      await axios.put('http://127.0.0.1:5000/api/users/password', passwordData, {
+      await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/users/password', passwordData, {
         headers: { Authorization: token }
       });
       toast.success('Password changed successfully');
@@ -188,7 +188,7 @@ const GeneralProfileTab = () => {
 
     setLoading(prev => ({ ...prev, doctor: true }));
     try {
-      await axios.put('http://127.0.0.1:5000/api/users/doctor-profile', doctorData, {
+      await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/users/doctor-profile', doctorData, {
         headers: { Authorization: token }
       });
       toast.success('Professional details updated');
@@ -212,7 +212,7 @@ const GeneralProfileTab = () => {
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 text-3xl font-bold shadow-inner overflow-hidden border-2 border-white dark:border-slate-800">
                 <img 
-                  src={user?.profile_image || `http://127.0.0.1:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`}
+                  src={user?.profile_image || `https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${user?.id}?t=${Date.now()}`}
                   alt="Profile" 
                   className="w-full h-full object-cover"
                   onError={(e) => {

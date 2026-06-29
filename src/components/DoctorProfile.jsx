@@ -6,7 +6,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import PatientReviewsList from './PatientReviewsList';
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
 
 const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   const [doctor, setDoctor] = useState(initialDoctor);
@@ -85,7 +85,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   useEffect(() => {
     const doctorId = doctor.id || doctor.doctor_id;
     if (!doctorId) return;
-    axios.get(`http://127.0.0.1:5000/api/reviews/${doctorId}`)
+    axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/reviews/${doctorId}`)
       .then(res => {
         if (res.data.success) {
           setReviews(res.data.reviews);

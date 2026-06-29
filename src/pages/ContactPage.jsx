@@ -27,7 +27,7 @@ const ContactPage = () => {
     
     setLoading(true);
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/contact-messages', formData);
+      const response = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/contact-messages', formData);
       if (response.data.success) {
         toast.success('Your message has been sent successfully!');
         setFormData({ name: '', email: '', subject: '', message: '' });

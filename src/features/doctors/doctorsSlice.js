@@ -5,7 +5,7 @@ export const fetchDoctors = createAsyncThunk(
   'doctors/fetchDoctors',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users/doctors');
+      const response = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/users/doctors');
       if (response.data.success) {
         return response.data.doctors;
       } else {

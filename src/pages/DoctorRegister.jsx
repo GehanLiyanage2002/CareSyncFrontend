@@ -164,7 +164,7 @@ const DoctorRegister = () => {
       if (idCardFront) formData.append('id_card_front', idCardFront);
       if (idCardRear) formData.append('id_card_rear', idCardRear);
 
-      const response = await axios.post('http://127.0.0.1:5000/api/auth/register', formData, {
+      const response = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/auth/register', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -289,15 +289,17 @@ const Login = () => {
             </div>
 
             {/* Forgot Password */}
-            <div className="flex justify-end">
-              <button 
-                type="button" 
-                onClick={() => navigate('/forgot-password')}
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150"
-              >
-                Forgot password?
-              </button>
-            </div>
+            {!['Admin', 'Receptionist'].includes(loginRole) && (
+              <div className="flex justify-end">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button

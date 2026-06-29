@@ -291,7 +291,11 @@ const DoctorDashboardHome = () => {
         </div>
 
         {/* Schedule Manager */}
-        {isApproved ? (
+        {loading ? (
+          <div className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm mb-8 flex items-center justify-center animate-pulse h-64 mt-6">
+            <span className="text-slate-400 font-medium">Loading schedule manager...</span>
+          </div>
+        ) : isApproved ? (
           <ScheduleManager />
         ) : (
           <div className="bg-amber-50 border border-amber-200 text-amber-800 p-8 rounded-[2rem] shadow-sm mb-8 flex flex-col items-center justify-center text-center mt-6">

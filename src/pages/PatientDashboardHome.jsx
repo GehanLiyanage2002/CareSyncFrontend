@@ -175,7 +175,7 @@ const PatientDashboardHome = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
         
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-blue-200 text-white mb-8 relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-blue-200 dark:shadow-none text-white mb-8 relative overflow-hidden group">
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight">
               Welcome back, {user?.name || user?.firstName || 'Patient'}! 👋
@@ -185,8 +185,8 @@ const PatientDashboardHome = () => {
             </p>
           </div>
           {/* Decorative background shapes */}
-          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white/20 dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white/20 dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
         </div>
 
         {upcomingTelemedicine && (

@@ -45,7 +45,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         ]);
 
         if (profileRes.data.success) {
-          setConsultationFee(profileRes.data.profile?.consultation_fee || 0);
+          setConsultationFee(Number(profileRes.data.profile?.consultation_fee) || 0);
         }
 
         if (appointmentsRes.data.success) {
@@ -149,15 +149,23 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
           setRefreshTrigger(prev => prev + 1);
         }
       };
+
+      const handleFeeChanged = (data) => {
+        if (data.doctor_id === user?.id) {
+          setConsultationFee(Number(data.consultation_fee) || 0);
+        }
+      };
   
       socket.on('slotBooked', handleSlotBooked);
       socket.on('appointmentStatusChanged', handleStatusChanged);
       socket.on('appointmentRescheduled', handleRescheduled);
+      socket.on('doctorFeeChanged', handleFeeChanged);
   
       return () => {
         socket.off('slotBooked', handleSlotBooked);
         socket.off('appointmentStatusChanged', handleStatusChanged);
         socket.off('appointmentRescheduled', handleRescheduled);
+        socket.off('doctorFeeChanged', handleFeeChanged);
       };
     }, [user]);
 
@@ -266,7 +274,8 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-amber-100 dark:border-gray-700">
           <div>
             <p className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1">Total Earnings</p>
-            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">Rs. {totalEarnings}</h4>
+            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">Rs. {totalEarnings.toLocaleString()}</h4>
+            {consultationFee === 0 && <p className="text-[10px] text-red-500 mt-1 font-semibold">Fee not set</p>}
           </div>
           <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
             <span className="font-bold text-xl">Rs</span>

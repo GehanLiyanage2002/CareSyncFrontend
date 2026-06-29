@@ -32,7 +32,7 @@ const PatientDashboardHome = () => {
   const navigate = useNavigate();
   const [upcomingTelemedicine, setUpcomingTelemedicine] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [reportsCount, setReportsCount] = useState(0);
+  const [reportsCount, setReportsCount] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -117,16 +117,29 @@ const PatientDashboardHome = () => {
           { headers: { Authorization: token } }
         );
         if (response.data.success) {
-          setReportsCount(response.data.data.reports?.length || 0);
+          console.log('REPORTS RESPONSE:', response.data);
+          const reportsArray = response.data.reports || [];
+          setReportsCount(Array.isArray(reportsArray) ? reportsArray.length : 0);
+        } else {
+          setReportsCount(0);
         }
       } catch (error) {
         console.error('Error fetching reports:', error);
+        setReportsCount(0);
       }
     };
 
     if (token) {
       fetchAppointments();
       fetchReports();
+      
+      // Real-time polling every 10 seconds
+      const interval = setInterval(() => {
+        fetchAppointments();
+        fetchReports();
+      }, 10000);
+      
+      return () => clearInterval(interval);
     }
   }, [token, refreshTrigger]);
 
@@ -278,7 +291,9 @@ const PatientDashboardHome = () => {
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm">New Updates</span>
             </div>
             <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Recent Diagnoses</h3>
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">{reportsCount} Added</p>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">
+              {reportsCount === null ? 'Loading...' : `${reportsCount} Added`}
+            </p>
           </div>
 
           {/* Card 3: Medical Profile Status */}

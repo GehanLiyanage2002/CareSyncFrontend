@@ -19,7 +19,7 @@ const GlobalQueueMonitor = () => {
  const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/receptionist/all-queues', {
  headers: { Authorization: token }
  });
- setQueues(res.data || []);
+ setQueues(res.data?.data || []);
  } catch (error) {
  console.error('Error fetching global queues:', error);
  } finally {

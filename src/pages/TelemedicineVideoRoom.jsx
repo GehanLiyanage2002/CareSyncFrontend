@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CallClient, VideoStreamRenderer, LocalVideoStream } from '@azure/communication-calling';
 import { AzureCommunicationTokenCredential } from '@azure/communication-common';
 import axios from 'axios';
-import { Mic, MicOff, Video as VideoIcon, VideoOff, PhoneOff, ShieldCheck, Clock, Activity, Signal } from 'lucide-react';
+import { Mic, MicOff, Video as VideoIcon, VideoOff, PhoneOff, ShieldCheck, Clock, Activity, Signal, User } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 

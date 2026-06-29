@@ -162,8 +162,8 @@ const Header = () => {
                         {(user?.name || user?.full_name || 'U').charAt(0).toUpperCase()}
                       </div>
                     </div>
-                    <h3 className="text-xl font-medium text-slate-800 dark:text-white mb-4">
-                      Hi, {user?.name || user?.full_name || 'User'}!
+                    <h3 className="text-xl font-medium text-slate-800 dark:text-white mb-4 text-center">
+                      Hi, {user?.role === 'Doctor' ? 'Dr. ' : ''}{user?.name || user?.full_name || 'User'}!
                     </h3>
                     
                     <button

@@ -29,6 +29,9 @@ import ScrollToTop from './components/ScrollToTop';
 import Chatbot from './components/Chatbot';
 import AccessibilityPanel from './components/AccessibilityPanel';
 import { AccessibilityProvider } from './context/AccessibilityContext';
+import ForgotPassword from './pages/ForgotPassword';
+import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 const Unauthorized = () => (
   <div className="flex h-screen items-center justify-center bg-gray-50">
@@ -41,7 +44,6 @@ const Unauthorized = () => (
 
 // A simple generic dashboard that redirects based on user role 
 // (or just shows a generic message if role isn't handled here)
-import { useSelector } from 'react-redux';
 const GenericDashboardRedirect = () => {
   const { user } = useSelector((state) => state.auth);
   
@@ -59,6 +61,7 @@ const GenericDashboardRedirect = () => {
 function App() {
   const { user } = useSelector((state) => state.auth);
   const showChatbot = !user || user.role === 'Patient';
+  const showAccessibility = !user || (user.role !== 'Admin' && user.role !== 'Receptionist');
 
   return (
     <AccessibilityProvider>
@@ -66,7 +69,7 @@ function App() {
       <Toaster position="top-right" />
       <ScrollToTop />
       {showChatbot && <Chatbot />}
-      <AccessibilityPanel />
+      {showAccessibility && <AccessibilityPanel />}
       <Router>
         <Routes>
           {/* Public Routes */}
@@ -78,6 +81,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/doctor-register" element={<DoctorRegister />} />
           <Route path="/verify-otp" element={<OtpVerification />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           
           {/* Book Appointment Route */}

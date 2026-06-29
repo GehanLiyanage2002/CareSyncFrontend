@@ -12,6 +12,10 @@ const DoctorsPage = () => {
   const service = location.state?.service;
   const isTelemedicine = service === 'Telemedicine';
 
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-800">
       <Header />

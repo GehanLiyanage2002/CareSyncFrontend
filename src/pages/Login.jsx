@@ -20,10 +20,10 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const [loginRole, setLoginRole] = useState(location.state?.role || 'Patient');
-  const [useFaceId, setUseFaceId] = useState(loginRole === 'Doctor');
+  const [useFaceId, setUseFaceId] = useState(false);
 
   React.useEffect(() => {
-    setUseFaceId(loginRole === 'Doctor');
+    setUseFaceId(false);
     setError('');
   }, [loginRole]);
 
@@ -290,7 +290,11 @@ const Login = () => {
 
             {/* Forgot Password */}
             <div className="flex justify-end">
-              <button type="button" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+              <button 
+                type="button" 
+                onClick={() => navigate('/forgot-password')}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150"
+              >
                 Forgot password?
               </button>
             </div>

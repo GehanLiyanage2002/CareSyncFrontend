@@ -27,12 +27,15 @@ const Footer = () => {
           {/* Our Clinic */}
           <div>
             <h4 className="text-[#111827] dark:text-white text-xl font-bold mb-6">Our Clinic</h4>
+            <p className="text-gray-400 text-sm mb-2 hover:text-blue-500 transition-colors cursor-pointer">
+              071 8021528
+            </p>
             <p className="text-gray-400 text-sm mb-4 hover:text-blue-500 transition-colors cursor-pointer">
               hello@company.co
             </p>
             <p className="text-gray-400 text-sm leading-relaxed">
-              123 Digital Art Street,<br />
-              San Diego, CA 92123
+              Dr Samantha Medical Center,<br />
+              Hidagoda, Badulla
             </p>
           </div>
 

@@ -7,7 +7,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-f
 import { 
  LayoutDashboard, Users, UserRound, Calendar, DollarSign, 
  LogOut, Activity, TrendingUp, CheckCircle, XCircle, Stethoscope,
- Search, X, Filter, Trash2, AlertCircle
+ Search, X, Filter, Trash2, AlertCircle, Mail
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
@@ -15,6 +15,7 @@ import AdminServices from '../components/admin/AdminServices';
 import AddDoctorModal from '../components/admin/AddDoctorModal';
 import PatientDetailsModal from '../components/admin/PatientDetailsModal';
 import ErrorBoundary from '../components/ErrorBoundary';
+import Messages from './Messages';
 
 const imageCache = {};
 
@@ -328,6 +329,7 @@ const AdminDashboard = () => {
  { name: 'Patients', icon: <Users /> },
  { name: 'Appointments', icon: <Calendar /> },
  { name: 'Medical Services', icon: <Stethoscope /> },
+ { name: 'Messages', icon: <Mail /> },
  { name: 'Earnings', icon: <DollarSign /> },
  ];
 
@@ -791,7 +793,7 @@ const AdminDashboard = () => {
  
  <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
  <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
- <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+ <span className="flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
  LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
  </span>
  </div>
@@ -1215,7 +1217,16 @@ const AdminDashboard = () => {
 
  {/* MEDICAL SERVICES TAB */}
  {activeTab === 'Medical Services' && (
+ <div className="space-y-6">
  <AdminServices />
+ </div>
+ )}
+
+ {/* MESSAGES TAB */}
+ {activeTab === 'Messages' && (
+ <div className="space-y-6">
+ <Messages />
+ </div>
  )}
 
  </div>

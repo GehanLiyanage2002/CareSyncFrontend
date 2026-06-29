@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
- Users, UserPlus, Calendar, CreditCard, LayoutDashboard, Monitor
+ Users, UserPlus, Calendar, CreditCard, LayoutDashboard, Monitor, Mail
 } from 'lucide-react';
 import { logout } from '../../features/auth/authSlice';
 import WalkInRegistration from './WalkInRegistration';
 import LiveQueue from './LiveQueue';
 import GlobalQueueMonitor from './GlobalQueueMonitor';
+import Messages from '../Messages';
 
 const ReceptionistDashboard = () => {
  const [activeTab, setActiveTab] = useState('Patient Queue');
@@ -33,6 +34,7 @@ const ReceptionistDashboard = () => {
  { name: 'Live Queue', icon: <Monitor /> },
  { name: 'Walk-in', icon: <UserPlus /> },
  { name: 'Booking', icon: <Calendar /> },
+ { name: 'Messages', icon: <Mail /> },
  ];
 
  return (
@@ -99,9 +101,13 @@ const ReceptionistDashboard = () => {
  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
  <Calendar size={32} />
  </div>
- <h3 className="text-xl font-bold text-slate-600 mb-2">Booking System</h3>
- <p className="text-slate-400 font-medium">Under Construction</p>
+ <h2 className="text-xl font-bold text-slate-800 mb-2">Booking System</h2>
+ <p className="text-slate-500">Coming soon in Phase 2</p>
  </div>
+ </div>
+
+ <div className={`${activeTab === 'Messages' ? 'block animate-fadeIn' : 'hidden'}`}>
+ <Messages />
  </div>
 
  </div>

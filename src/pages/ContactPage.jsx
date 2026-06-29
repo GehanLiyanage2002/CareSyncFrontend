@@ -1,9 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Home, Smartphone, Mail } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const ContactPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error('Name, email, and message are required.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/api/contact-messages', formData);
+      if (response.data.success) {
+        toast.success('Your message has been sent successfully!');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-white dark:bg-gray-800">
       <Header />
@@ -39,19 +73,14 @@ const ContactPage = () => {
             {/* Left Side: Contact Form */}
             <div className="w-full lg:w-2/3">
               <h3 className="text-2xl font-bold text-[#0a192f] dark:text-white mb-6">Get in Touch</h3>
-              <form className="space-y-6">
-                <div>
-                  <textarea 
-                    rows="6" 
-                    placeholder="Enter Message" 
-                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium resize-y"
-                  ></textarea>
-                </div>
-                
+              <form onSubmit={handleSubmit} className="space-y-6">                
                 <div className="flex flex-col sm:flex-row gap-6">
                   <div className="w-full sm:w-1/2">
                     <input 
                       type="text" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
                       placeholder="Enter your name" 
                       className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                     />
@@ -59,6 +88,9 @@ const ContactPage = () => {
                   <div className="w-full sm:w-1/2">
                     <input 
                       type="email" 
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
                       placeholder="Email" 
                       className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                     />
@@ -68,16 +100,31 @@ const ContactPage = () => {
                 <div>
                   <input 
                     type="text" 
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
                     placeholder="Enter Subject" 
                     className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                   />
                 </div>
+
+                <div>
+                  <textarea 
+                    rows="6" 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Enter Message" 
+                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium resize-y"
+                  ></textarea>
+                </div>
                 
                 <button 
-                  type="button" 
-                  className="mt-4 w-full sm:w-auto px-10 py-3.5 border border-transparent rounded-xl shadow-lg shadow-blue-600/20 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 uppercase tracking-wide"
+                  type="submit" 
+                  disabled={loading}
+                  className="mt-4 w-full sm:w-auto px-10 py-3.5 border border-transparent rounded-xl shadow-lg shadow-blue-600/20 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 uppercase tracking-wide disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Send Message
+                  {loading ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>

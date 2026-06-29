@@ -22,7 +22,7 @@ const ContactPage = () => {
           {/* Google Map Section */}
           <div className="w-full h-[400px] mb-16 rounded-lg overflow-hidden shadow-sm border border-gray-100">
             <iframe 
-              src="https://maps.google.com/maps?q=Colombo,%20Sri%20Lanka&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+              src="https://maps.google.com/maps?q=Hidagoda,%20Badulla&t=&z=14&ie=UTF8&iwloc=&output=embed" 
               width="100%" 
               height="100%" 
               style={{ border: 0 }} 
@@ -44,7 +44,7 @@ const ContactPage = () => {
                   <textarea 
                     rows="6" 
                     placeholder="Enter Message" 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-sm text-gray-700"
+                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium resize-y"
                   ></textarea>
                 </div>
                 
@@ -53,14 +53,14 @@ const ContactPage = () => {
                     <input 
                       type="text" 
                       placeholder="Enter your name" 
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-700"
+                      className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                     />
                   </div>
                   <div className="w-full sm:w-1/2">
                     <input 
                       type="email" 
                       placeholder="Email" 
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-700"
+                      className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                     />
                   </div>
                 </div>
@@ -69,15 +69,15 @@ const ContactPage = () => {
                   <input 
                     type="text" 
                     placeholder="Enter Subject" 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-700"
+                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                   />
                 </div>
                 
                 <button 
                   type="button" 
-                  className="mt-4 px-8 py-3 border-2 border-blue-600 text-blue-600 font-bold text-sm tracking-wider hover:bg-blue-600 hover:text-white transition-colors duration-300 uppercase"
+                  className="mt-4 w-full sm:w-auto px-10 py-3.5 border border-transparent rounded-xl shadow-lg shadow-blue-600/20 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 uppercase tracking-wide"
                 >
-                  Send
+                  Send Message
                 </button>
               </form>
             </div>
@@ -86,32 +86,32 @@ const ContactPage = () => {
             <div className="w-full lg:w-1/3 flex flex-col gap-8 pt-4 lg:pl-8">
               
               <div className="flex items-start gap-4">
-                <div className="text-gray-400 mt-1">
-                  <Home size={32} strokeWidth={1} />
+                <div className="text-blue-500 mt-1 bg-blue-50 dark:bg-gray-700 p-3 rounded-xl">
+                  <Home size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-[#0a192f] dark:text-white">Colombo, Sri Lanka.</h4>
-                  <p className="text-sm text-gray-500">123 Health Ave, Colombo 00100</p>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">Dr Samantha Medical Center</h4>
+                  <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Hidagoda, Badulla</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="text-gray-400 mt-1">
-                  <Smartphone size={32} strokeWidth={1} />
+                <div className="text-blue-500 mt-1 bg-blue-50 dark:bg-gray-700 p-3 rounded-xl">
+                  <Smartphone size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-[#0a192f] dark:text-white">+94 11 234 5678</h4>
-                  <p className="text-sm text-gray-500">Mon to Fri 9am to 6pm</p>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">071 8021528</h4>
+                  <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Mon to Fri 9am to 6pm</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="text-gray-400 mt-1">
-                  <Mail size={32} strokeWidth={1} />
+                <div className="text-blue-500 mt-1 bg-blue-50 dark:bg-gray-700 p-3 rounded-xl">
+                  <Mail size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-[#0a192f] dark:text-white">support@caresync.com</h4>
-                  <p className="text-sm text-gray-500">Send us your query anytime!</p>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">support@caresync.com</h4>
+                  <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Send us your query anytime!</p>
                 </div>
               </div>
 

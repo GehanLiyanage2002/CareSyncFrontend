@@ -62,6 +62,10 @@ const MedicalProfileTab = () => {
       return showToast(validation.message, 'error');
     }
 
+    if (emergencyContactNumber && !/^07\d{8}$/.test(emergencyContactNumber)) {
+      return showToast('Contact number must be exactly 10 digits and start with 07.', 'error');
+    }
+
     setLoading(true);
 
     try {
@@ -202,9 +206,12 @@ const MedicalProfileTab = () => {
                   <input
                     type="text"
                     value={emergencyContactName}
-                    onChange={(e) => setEmergencyContactName(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[0-9]/g, '');
+                      setEmergencyContactName(val);
+                    }}
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
-                    placeholder="Jane Doe (Spouse)"
+                    placeholder="Jane Doe"
                   />
                 </div>
               </div>
@@ -219,9 +226,13 @@ const MedicalProfileTab = () => {
                   <input
                     type="tel"
                     value={emergencyContactNumber}
-                    onChange={(e) => setEmergencyContactNumber(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setEmergencyContactNumber(val);
+                    }}
+                    maxLength={10}
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="0715507777"
                   />
                 </div>
               </div>

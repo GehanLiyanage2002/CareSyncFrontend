@@ -142,7 +142,7 @@ const PatientDashboard = () => {
         <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-blue-200 dark:shadow-none text-white mb-8 relative overflow-hidden group">
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight">
-              Welcome back, {user?.name || user?.firstName || 'Patient'}! 👋
+              Welcome back, {user?.gender === 'Male' ? 'Mr. ' : user?.gender === 'Female' ? 'Ms. ' : ''}{user?.name || user?.firstName || user?.full_name || 'Patient'}! 👋
             </h2>
             <p className="text-blue-50 text-lg md:text-xl max-w-2xl font-medium leading-relaxed">
               Here is your daily health summary. Stay on track with your upcoming appointments and wellness goals.

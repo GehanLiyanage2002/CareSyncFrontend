@@ -89,8 +89,8 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
           </div>
         )}
 
-        {/* Search & Filter Section */}
-        <div className="max-w-4xl mx-auto mb-12 flex flex-col gap-6">
+        {/* Search Section */}
+        <div className="max-w-4xl mx-auto mb-8 flex flex-col gap-6">
           {/* Search Bar */}
           <div className="relative max-w-2xl mx-auto w-full">
             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
@@ -104,9 +104,13 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
               className="block w-full pl-14 pr-6 py-4 border border-slate-200 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xl transition-all duration-300 font-medium text-lg"
             />
           </div>
+        </div>
 
-          {/* Specialization Filter Pills */}
-          <div className="flex gap-3 justify-start md:justify-center overflow-x-auto pb-4 hide-scrollbar snap-x px-2">
+        {/* Specialization Filter Pills */}
+        <div 
+          className="flex gap-3 overflow-x-auto pb-4 px-4 mb-12 w-max max-w-full mx-auto snap-x"
+          style={{ scrollbarWidth: 'thin' }}
+        >
             {specializations.map((spec, idx) => (
               <button
                 key={idx}
@@ -121,7 +125,6 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
               </button>
             ))}
           </div>
-        </div>
 
         {/* Carousel / Doctors Grid */}
         {filteredDoctors.length > 0 ? (

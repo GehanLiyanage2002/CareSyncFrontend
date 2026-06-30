@@ -15,13 +15,27 @@ const ContactPage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Validation for Name (no numbers allowed)
+    if (name === 'name' && /\d/.test(value)) {
+      return;
+    }
+    
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       toast.error('Name, email, and message are required.');
+      return;
+    }
+    
+    // Strict email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address.');
       return;
     }
     

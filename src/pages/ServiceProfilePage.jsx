@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Activity, MapPin, Check, Calendar, Star, DollarSign, Info } from 'lucide-react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import socket from '../socket';
+import { getCleanImageUrl } from '../utils/urlHelper';
 import { useSelector } from 'react-redux';
 import Header from '../components/Header';
 import Footer from '../components/Footer';

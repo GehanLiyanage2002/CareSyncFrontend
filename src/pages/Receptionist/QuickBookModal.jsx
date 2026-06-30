@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { X, Calendar, Loader, CheckCircle, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getCleanImageUrl } from '../../utils/urlHelper';
 
 let cachedAllDoctors = null;
 
@@ -314,7 +315,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  <div className="relative mb-4 mt-2">
  <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center text-blue-300 overflow-hidden ring-4 ring-white shadow-sm mx-auto">
  <img 
- src={doc.image}
+ src={getCleanImageUrl(doc.image)}
  alt={doc.name}
  className="w-full h-full object-cover"
  onError={(e) => { e.target.style.display='none'; e.target.parentNode.innerHTML = '<span class="text-2xl font-bold uppercase">'+doc.name.substring(0,2)+'</span>'; }}

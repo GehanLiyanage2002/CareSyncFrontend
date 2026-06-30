@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDoctors, updateDoctorAvailability, updateDoctorFee } from '../features/doctors/doctorsSlice';
 import axios from 'axios';
+import { getCleanImageUrl } from '../utils/urlHelper';
 import socket from '../socket';
 
 
@@ -152,7 +153,7 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
                   {/* Image & Badge */}
                   <div className="relative mb-6">
                     <img
-                      src={doctor.image || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=200&q=80'}
+                      src={getCleanImageUrl(doctor.image || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=200&q=80')}
                       alt={doctor.name}
                       className="w-28 h-28 rounded-full object-cover shadow-md"
                     />

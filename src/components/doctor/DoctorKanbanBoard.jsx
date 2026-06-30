@@ -27,6 +27,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [consultationFee, setConsultationFee] = useState(0);
+  const [specialization, setSpecialization] = useState('');
 
   // State for Medical Report Modal
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -391,6 +392,17 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                                     <FileText size={12} /> Report
                                   </button>
                                 )}
+                                {task.status === 'in progress' && specialization === 'Psychology' && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(`/telemedicine/${task.id}`, '_blank');
+                                    }}
+                                    className="px-2.5 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white rounded-lg text-xs font-black flex items-center gap-1 transition-all border border-blue-200 dark:border-blue-800/50 shadow-sm"
+                                  >
+                                    <Video size={12} /> Join Call
+                                  </button>
+                                )}
                               </div>
                               <div className="flex items-center gap-3 text-xs font-bold mt-2">
                                 <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 rounded-lg border border-blue-100 dark:border-transparent">
@@ -520,6 +532,18 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                 >
                   <FileText size={18} />
                   Write Medical Report
+                </button>
+              )}
+              {selectedTask.status === 'in progress' && specialization === 'Psychology' && (
+                <button 
+                  onClick={() => {
+                    window.open(`/telemedicine/${selectedTask.id}`, '_blank');
+                    setSelectedTask(null);
+                  }}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <Video size={18} />
+                  Join Video Call
                 </button>
               )}
             </div>

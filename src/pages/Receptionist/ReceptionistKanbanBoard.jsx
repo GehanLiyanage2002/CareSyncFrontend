@@ -225,7 +225,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  <div className="flex items-center gap-6 border-b border-slate-100 pb-6">
  <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 /30 flex items-center justify-center text-blue-600 text-3xl font-black shadow-inner overflow-hidden border border-blue-200">
  <img 
- src={`http://127.0.0.1:5000/api/users/profile-image/${selectedTask.patient_id}`}
+ src={`${import.meta.env.VITE_API_URL}/api/users/profile-image/${selectedTask.patient_id}`}
  alt={selectedTask.patientName}
  className="w-full h-full object-cover"
  onError={(e) => {

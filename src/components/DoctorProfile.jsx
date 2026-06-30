@@ -91,16 +91,24 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
       }
     };
 
+    const handlePatientsUpdated = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({ ...prev, patients: data.patients }));
+      }
+    };
+
     socket.on('doctorFeeChanged', handleFeeChanged);
     socket.on('doctorAvailabilityChanged', handleAvailabilityChanged);
     socket.on('doctorProfileUpdated', handleProfileUpdated);
+    socket.on('doctorPatientsUpdated', handlePatientsUpdated);
 
     return () => {
       socket.off('doctorFeeChanged', handleFeeChanged);
       socket.off('doctorAvailabilityChanged', handleAvailabilityChanged);
       socket.off('doctorProfileUpdated', handleProfileUpdated);
+      socket.off('doctorPatientsUpdated', handlePatientsUpdated);
     };
-  }, [doctor.id, doctor.doctor_id]);
+  }, [doctor?.id, doctor?.doctor_id, socket]);
 
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
@@ -184,12 +192,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
             </div>
 
             {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-3 w-full mt-4">
-              <div className="bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-2xl p-3 text-center transition-colors duration-300">
-                <Heart className="h-5 w-5 text-rose-500 mx-auto mb-1" />
-                <span className="block text-xs text-gray-500 dark:text-gray-400">Success</span>
-                <span className="text-sm font-bold text-rose-600 dark:text-rose-400">{doctor.successRate}</span>
-              </div>
+            <div className="grid grid-cols-2 gap-3 w-full mt-4">
               <div className="bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 rounded-2xl p-3 text-center transition-colors duration-300">
                 <Award className="h-5 w-5 text-blue-500 mx-auto mb-1" />
                 <span className="block text-xs text-gray-500 dark:text-gray-400">Exp.</span>

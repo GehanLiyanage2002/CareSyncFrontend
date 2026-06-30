@@ -390,13 +390,30 @@ const AdminDashboard = () => {
  const totalDoctorPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
 
  // Appointments Pagination Logic
+ const { startDate: apptStartDate, endDate: apptEndDate } = getFilterDates();
+ 
+ const filterApptByDate = (itemDateStr) => {
+ if (!apptStartDate || !apptEndDate) return true;
+ try {
+ const itemDateString = format(new Date(itemDateStr), 'yyyy-MM-dd');
+ return itemDateString >= apptStartDate && itemDateString <= apptEndDate;
+ } catch (e) {
+ return true;
+ }
+ };
+
  let combinedAppointments = [];
  if (appointmentFilter === 'All' || appointmentFilter === 'Doctor') {
- combinedAppointments = [...combinedAppointments, ...(appointments || []).map(a => ({...a, _type: 'Doctor'}))];
+ const validAppts = (appointments || []).filter(a => filterApptByDate(a.date));
+ combinedAppointments = [...combinedAppointments, ...validAppts.map(a => ({...a, _type: 'Doctor'}))];
  }
  if (appointmentFilter === 'All' || appointmentFilter === 'Services') {
- combinedAppointments = [...combinedAppointments, ...(serviceBookings || []).map(s => ({...s, _type: 'Service'}))];
+ const validBookings = (serviceBookings || []).filter(s => filterApptByDate(s.date));
+ combinedAppointments = [...combinedAppointments, ...validBookings.map(s => ({...s, _type: 'Service'}))];
  }
+ 
+ combinedAppointments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
 
  const indexOfLastAppointment = appointmentCurrentPage * appointmentsPerPage;
  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;

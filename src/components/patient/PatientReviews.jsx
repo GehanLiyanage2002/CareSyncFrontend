@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
 
 const PatientReviews = () => {
   const { token } = useSelector((state) => state.auth);
@@ -14,7 +14,7 @@ const PatientReviews = () => {
   const fetchReviews = async () => {
     try {
       const res = await axios.get(
-        'http://127.0.0.1:5000/api/reviews/patient/my-reviews',
+        'https://caresync-backend-api-gl.azurewebsites.net/api/reviews/patient/my-reviews',
         { headers: { Authorization: token } }
       );
       if (res.data.success) {

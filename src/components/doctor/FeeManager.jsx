@@ -14,7 +14,7 @@ const FeeManager = () => {
   useEffect(() => {
     const fetchFee = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/doctor/profile?_t=${Date.now()}`, {
+        const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/profile?_t=${Date.now()}', {
           headers: { Authorization: token }
         });
         if (res.data.success) {
@@ -41,7 +41,7 @@ const FeeManager = () => {
     
     setLoading(true);
     try {
-      const res = await axios.put('http://localhost:5000/api/doctor/fee', 
+      const res = await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/fee', 
         { fee: Number(fee) },
         { headers: { Authorization: token } }
       );

@@ -9,7 +9,7 @@ import Header from '../components/Header';
 import { Video, Calendar, Clock, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
 
 const CalendarIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
@@ -58,7 +58,7 @@ const PatientDashboardHome = () => {
     if (isRescheduleModalOpen && selectedAppointment) {
       const fetchDates = async () => {
         try {
-          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/configured-dates/${selectedAppointment.doctor_id}`);
+          const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/appointments/configured-dates/${selectedAppointment.doctor_id}`);
           if (res.data.success) {
             setConfiguredDates(res.data.dates.map(d => new Date(d).toDateString()));
           }
@@ -77,7 +77,7 @@ const PatientDashboardHome = () => {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${selectedAppointment.doctor_id}?date=${newDate}`);
+          const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/appointments/slots/${selectedAppointment.doctor_id}?date=${newDate}`);
           if (res.data.success) {
             setAvailableSlots(res.data.slots || []);
           }
@@ -95,7 +95,7 @@ const PatientDashboardHome = () => {
     const fetchAppointments = async () => {
       try {
         const response = await axios.get(
-          'http://127.0.0.1:5000/api/appointments/patient/my-appointments',
+          'https://caresync-backend-api-gl.azurewebsites.net/api/appointments/patient/my-appointments',
           { headers: { Authorization: token } }
         );
         if (response.data.success) {
@@ -175,7 +175,7 @@ const PatientDashboardHome = () => {
   const executeCancel = async () => {
     if (!appointmentToCancel) return;
     try {
-      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${appointmentToCancel}/cancel`, {}, {
+      const res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/appointments/${appointmentToCancel}/cancel`, {}, {
         headers: { Authorization: token }
       });
       if (res.data.success) {
@@ -202,7 +202,7 @@ const PatientDashboardHome = () => {
   const handleReschedule = async () => {
     if (!newDate || !newTime) return alert('Please select a new date and time');
     try {
-      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${selectedAppointment.id}/reschedule`, {
+      const res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/appointments/${selectedAppointment.id}/reschedule`, {
         new_date: newDate,
         new_time: newTime
       }, {

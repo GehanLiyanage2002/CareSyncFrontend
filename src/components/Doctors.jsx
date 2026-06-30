@@ -6,7 +6,7 @@ import { fetchDoctors, updateDoctorAvailability, updateDoctorFee } from '../feat
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
 
 const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   const navigate = useNavigate();

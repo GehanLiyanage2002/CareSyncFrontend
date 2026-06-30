@@ -122,7 +122,7 @@ const Header = () => {
                 {user?.name || user?.full_name ? (
                   <div className="w-full h-full flex items-center justify-center relative">
                     <img 
-                      src={user?.profile_image || `http://127.0.0.1:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                      src={user?.profile_image || `https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
                       alt="Avatar" 
                       className="w-full h-full object-cover rounded-full" 
                       onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} 
@@ -153,7 +153,7 @@ const Header = () => {
                   <div className="flex flex-col items-center pt-2 pb-4 px-6">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-md border-4 border-white dark:border-slate-800 mb-3 relative overflow-hidden">
                       <img 
-                        src={user?.profile_image || `http://127.0.0.1:5000/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
+                        src={user?.profile_image || `https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${user?.id}?t=${Date.now()}`} 
                         alt="Avatar" 
                         className="w-full h-full object-cover" 
                         onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} 

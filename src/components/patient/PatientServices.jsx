@@ -26,8 +26,8 @@ const PatientServices = () => {
   const fetchServicesAndBookings = async () => {
     try {
       const [servicesRes, bookingsRes] = await Promise.all([
-        axios.get('http://127.0.0.1:5000/api/services', { headers: { Authorization: token } }),
-        axios.get('http://127.0.0.1:5000/api/services/bookings', { headers: { Authorization: token } })
+        axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/services', { headers: { Authorization: token } }),
+        axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/services/bookings', { headers: { Authorization: token } })
       ]);
       
       if (servicesRes.data.success) {
@@ -62,13 +62,13 @@ const PatientServices = () => {
     const order_id = `PSRV-${Date.now()}`;
     
     try {
-      const res = await axios.post('http://127.0.0.1:5000/api/services/book', {
+      const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/services/book', {
         service_id: selectedService.id,
         date,
         time,
         amount_paid: selectedService.price
       }, { headers: { Authorization: token } });
-      const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
+      const hashRes = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/payment/generate-hash', {
         order_id: order_id,
         amount: amount,
         currency: 'LKR'
@@ -91,7 +91,7 @@ const PatientServices = () => {
           merchant_id: merchant_id,
           return_url: window.location.href,
           cancel_url: window.location.href,
-          notify_url: "http://localhost:5000/api/payment/notify",
+          notify_url: "https://caresync-backend-api-gl.azurewebsites.net/api/payment/notify",
           order_id: order_id,
           items: `Service: ${selectedService.name}`,
           amount: formattedAmount,
@@ -109,7 +109,7 @@ const PatientServices = () => {
         window.payhere.onCompleted = async function onCompleted(orderId) {
           console.log("Payment completed. OrderID:" + orderId);
           try {
-            const res = await axios.post('http://localhost:5000/api/services/book', {
+            const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/services/book', {
               service_id: selectedService.id,
               date,
               time,

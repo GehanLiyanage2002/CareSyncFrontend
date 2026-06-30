@@ -21,7 +21,7 @@ const ReviewModal = ({ appointment, onClose, onReviewSubmitted }) => {
     setSubmitting(true);
     try {
       await axios.post(
-        'http://127.0.0.1:5000/api/reviews',
+        'https://caresync-backend-api-gl.azurewebsites.net/api/reviews',
         {
           appointment_id: appointment.id,
           doctor_id: appointment.doctor_id,

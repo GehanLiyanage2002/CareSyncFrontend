@@ -79,7 +79,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  fd.append('image', avatarFile);
  setLoading(p => ({ ...p, image: true }));
  try {
- await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${doctorId}/profile-image`, fd, {
+ await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${doctorId}/profile-image`, fd, {
  headers: { Authorization: token, 'Content-Type': 'multipart/form-data' }
  });
  } catch (err) {
@@ -100,7 +100,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  }
  setLoading(p => ({ ...p, basic: true }));
  try {
- const res = await axios.post('http://127.0.0.1:5000/api/admin/doctors', {
+ const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors', {
  ...basic,
  ...professional,
  consultation_fee: fee || undefined
@@ -129,7 +129,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  for (const entry of scheduleEntries) {
  const d = entry.date;
  const schedule_date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
- await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${createdId}/schedule`, {
+ await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${createdId}/schedule`, {
  schedule_date,
  start_time: entry.start_time,
  end_time: entry.end_time,
@@ -151,7 +151,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  if (!fee || isNaN(fee) || Number(fee) <= 0) { toast.error('Enter a valid fee.'); return; }
  setLoading(p => ({ ...p, fee: true }));
  try {
- await axios.put(`http://127.0.0.1:5000/api/admin/doctors/${createdId}/fee`,
+ await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/admin/doctors/${createdId}/fee`,
  { fee: Number(fee) },
  { headers: { Authorization: token } }
  );

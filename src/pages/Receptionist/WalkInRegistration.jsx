@@ -41,7 +41,7 @@ const WalkInRegistration = () => {
  useEffect(() => {
  const fetchAllPatients = async () => {
  try {
- const response = await axios.get(`http://127.0.0.1:5000/api/receptionist/all-patients`, {
+ const response = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/receptionist/all-patients`, {
  headers: { Authorization: token }
  });
  setAllPatients(response.data);
@@ -113,7 +113,7 @@ const WalkInRegistration = () => {
 
  try {
  const res = await axios.post(
- 'http://127.0.0.1:5000/api/receptionist/register-patient',
+ 'https://caresync-backend-api-gl.azurewebsites.net/api/receptionist/register-patient',
  formData,
  {
  headers: { Authorization: token }

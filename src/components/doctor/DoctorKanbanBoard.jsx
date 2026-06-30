@@ -9,7 +9,7 @@ import PatientPastRecordsModal from './PatientPastRecordsModal';
 import PatientMedicalProfileModal from './PatientMedicalProfileModal';
 import { io } from 'socket.io-client';
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
 
 const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   const { token, user } = useSelector((state) => state.auth);
@@ -46,8 +46,8 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
       try {
         // Fetch both profile and appointments
         const [profileRes, appointmentsRes] = await Promise.all([
-          axios.get('http://127.0.0.1:5000/api/doctor/profile', { headers: { Authorization: token } }),
-          axios.get(`http://127.0.0.1:5000/api/doctor/appointments?filter=${dateFilter}`, { headers: { Authorization: token } })
+          axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/profile', { headers: { Authorization: token } }),
+          axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/doctor/appointments?filter=${dateFilter}`, { headers: { Authorization: token } })
         ]);
 
         if (profileRes.data.success) {
@@ -251,7 +251,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
     // Make API call to update status
     try {
       const newStatus = finishColumn.id; // 'pending', 'in progress', 'completed', 'cancelled'
-      await axios.put(`http://127.0.0.1:5000/api/doctor/appointments/${draggableId}/status`, {
+      await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/doctor/appointments/${draggableId}/status`, {
         status: newStatus
       }, {
         headers: { Authorization: token }

@@ -114,7 +114,7 @@ const MedicalProfileTab = () => {
       </div>
 
       {/* Update form card */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm">
         <div className="px-8 pt-8 pb-6 border-b border-slate-100 dark:border-slate-700">
           <h3 className="font-bold text-slate-800 dark:text-white text-lg flex items-center gap-2">
             <HeartPulse className="text-blue-500" size={24} />

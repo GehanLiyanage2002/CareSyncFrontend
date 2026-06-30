@@ -19,7 +19,7 @@ const NotificationBell = () => {
     fetchNotifications();
 
     // Setup Socket.IO
-    const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+    const socket = io(`${import.meta.env.VITE_API_URL}`);
     
     // Join user's room
     socket.emit('join', user.id);
@@ -49,7 +49,7 @@ const NotificationBell = () => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/notifications', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notifications`, {
         headers: { Authorization: token }
       });
       if (res.data.success) {
@@ -63,7 +63,7 @@ const NotificationBell = () => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/notifications/${id}/read`, {}, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/${id}/read`, {}, {
         headers: { Authorization: token }
       });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
@@ -75,7 +75,7 @@ const NotificationBell = () => {
 
   const markAllAsRead = async () => {
     try {
-      await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/notifications/read-all', {}, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/notifications/read-all`, {}, {
         headers: { Authorization: token }
       });
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));

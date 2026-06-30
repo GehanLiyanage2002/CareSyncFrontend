@@ -4,7 +4,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { Marquee } from './magicui/Marquee';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const Testimonials = () => {
   const [reviews, setReviews] = useState([]);
@@ -59,7 +59,7 @@ const Testimonials = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/reviews/public/recent');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/reviews/public/recent`);
         if (response.data.success && response.data.reviews?.length > 0) {
           setReviews(response.data.reviews);
         } else {
@@ -126,7 +126,7 @@ const Testimonials = () => {
             <Marquee pauseOnHover className="py-4" repeat={4}>
               {reviews.map((testimonial, index) => {
                 const profileImg = testimonial.patient_id 
-                  ? `https://caresync-backend-api-gl.azurewebsites.net/api/users/profile-image/${testimonial.patient_id}?t=${imgKey}`
+                  ? `${import.meta.env.VITE_API_URL}/api/users/profile-image/${testimonial.patient_id}?t=${imgKey}`
                   : (testimonial.image || placeholderImages[index % placeholderImages.length]);
 
                 return (

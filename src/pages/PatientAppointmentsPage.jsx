@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const statusConfig = {
   pending: {
@@ -47,8 +47,8 @@ const PatientAppointmentsPage = () => {
     const fetchAppointments = async () => {
       try {
         const [appRes, servRes] = await Promise.all([
-          axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/appointments/patient/my-appointments', { headers: { Authorization: token } }),
-          axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/services/bookings', { headers: { Authorization: token } })
+          axios.get(`${import.meta.env.VITE_API_URL}/api/appointments/patient/my-appointments`, { headers: { Authorization: token } }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/services/bookings`, { headers: { Authorization: token } })
         ]);
         if (appRes.data.success) {
           setAppointments(appRes.data.appointments);

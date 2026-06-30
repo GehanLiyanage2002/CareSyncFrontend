@@ -56,7 +56,7 @@ export default function TelemedicineVideoRoom() {
 
   const setupMeeting = async () => {
     try {
-      const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/telemedicine/token', 
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/telemedicine/token`, 
         { appointmentId: id },
         { headers: { Authorization: token } }
       );
@@ -205,7 +205,7 @@ export default function TelemedicineVideoRoom() {
 
     if (role === 'Doctor') {
       try {
-        await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/telemedicine/end', 
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/telemedicine/end`, 
           { appointmentId: id },
           { headers: { Authorization: token } }
         );

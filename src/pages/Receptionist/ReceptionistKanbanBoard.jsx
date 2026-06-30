@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  const { user } = useSelector((state) => state.auth);

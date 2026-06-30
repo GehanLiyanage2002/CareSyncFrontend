@@ -108,7 +108,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/auth/register', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         full_name: fullName.trim(),
         email,
         mobile_number: mobileNumber.trim(),

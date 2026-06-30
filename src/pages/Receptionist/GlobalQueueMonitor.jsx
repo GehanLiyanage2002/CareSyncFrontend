@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { Users, User, Activity, Maximize, Minimize } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const GlobalQueueMonitor = () => {
  const { token } = useSelector((state) => state.auth);
@@ -17,7 +17,7 @@ const GlobalQueueMonitor = () => {
  const fetchGlobalQueues = async () => {
  try {
  setLoading(true);
- const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/receptionist/all-queues', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/receptionist/all-queues`, {
  headers: { Authorization: token }
  });
  setQueues(res.data?.data || []);

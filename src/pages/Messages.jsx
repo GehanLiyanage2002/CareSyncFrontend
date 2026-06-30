@@ -25,7 +25,7 @@ const Messages = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/contact-messages', config);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/contact-messages`, config);
       if (response.data.success) {
         setMessages(response.data.data);
       }
@@ -40,7 +40,7 @@ const Messages = () => {
     fetchMessages();
     
     // Set up Socket.IO connection for real-time updates
-    const socket = io('https://caresync-backend-api-gl.azurewebsites.net', { reconnection: true });
+    const socket = io(`${import.meta.env.VITE_API_URL}`, { reconnection: true });
     
     socket.on('new_contact_message', (newMessage) => {
       console.log('Received new message via socket:', newMessage);
@@ -55,7 +55,7 @@ const Messages = () => {
 
   const handleMarkAsRead = async (id) => {
     try {
-      const response = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/contact-messages/${id}/read`, {}, config);
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/contact-messages/${id}/read`, {}, config);
       if (response.data.success) {
         setMessages(messages.map(msg => 
           msg.id === id ? { ...msg, status: 'read' } : msg
@@ -76,7 +76,7 @@ const Messages = () => {
     if (!messageToDelete) return;
     
     try {
-      const response = await axios.delete(`https://caresync-backend-api-gl.azurewebsites.net/api/contact-messages/${messageToDelete}`, config);
+      const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/contact-messages/${messageToDelete}`, config);
       if (response.data.success) {
         setMessages(messages.filter(msg => msg.id !== messageToDelete));
         toast.success('Message deleted');
@@ -103,7 +103,7 @@ const Messages = () => {
     
     setReplying(true);
     try {
-      const response = await axios.post(`https://caresync-backend-api-gl.azurewebsites.net/api/contact-messages/${messageToReply.id}/reply`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/contact-messages/${messageToReply.id}/reply`, {
         replyText,
         email: messageToReply.email,
         subject: messageToReply.subject

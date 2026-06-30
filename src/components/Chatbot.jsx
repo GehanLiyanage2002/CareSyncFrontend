@@ -37,7 +37,7 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/chat', { message: userMessage });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, { message: userMessage });
       if (response.data.success) {
         setMessages((prev) => [...prev, { role: 'assistant', content: response.data.reply }]);
       } else {

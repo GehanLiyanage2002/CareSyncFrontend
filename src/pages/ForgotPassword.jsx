@@ -24,7 +24,7 @@ const ForgotPassword = () => {
     }
     try {
       setLoading(true);
-      const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/auth/forgot-password', { email });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/forgot-password`, { email });
       toast.success(res.data.message || 'OTP sent to your email');
       setStep(2);
     } catch (error) {
@@ -77,7 +77,7 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       const otpValue = otp.join('');
-      const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/auth/reset-password', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/reset-password`, {
         email,
         otp: otpValue,
         newPassword

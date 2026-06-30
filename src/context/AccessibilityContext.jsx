@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   pauseAnimations: false,
   hideImages: false,
   dyslexiaFriendly: 0,
-  bigCursor: false,
+  bigCursor: 0,
   tooltips: false,
   lineHeight: 0,
   saturationLevel: 0,
@@ -181,10 +181,9 @@ export const AccessibilityProvider = ({ children }) => {
     }
 
     // Big Cursor
-    if (settings.bigCursor) {
-      html.classList.add('a11y-big-cursor');
-    } else {
-      html.classList.remove('a11y-big-cursor');
+    html.classList.remove('a11y-big-cursor-1', 'a11y-big-cursor-2', 'a11y-big-cursor-3');
+    if (Number(settings.bigCursor) > 0) {
+      html.classList.add(`a11y-big-cursor-${settings.bigCursor}`);
     }
 
     // Tooltips

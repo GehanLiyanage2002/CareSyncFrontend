@@ -80,6 +80,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
               status: apt.status,
               paymentMethod: apt.payment_method,
               is_rescheduled: apt.is_rescheduled,
+              consultation_fee: apt.consultation_fee,
               raw_date: apt.appointment_date,
               raw_time: apt.start_time
             };

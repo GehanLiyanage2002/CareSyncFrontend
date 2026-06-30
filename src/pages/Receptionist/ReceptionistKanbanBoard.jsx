@@ -62,6 +62,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  status: apt.status,
  paymentMethod: apt.payment_method,
  is_rescheduled: apt.is_rescheduled,
+ consultation_fee: apt.consultation_fee,
  raw_date: apt.appointment_date,
  raw_time: apt.start_time
  };
@@ -347,7 +348,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  <div className="border-t border-gray-200 pt-4 mt-2 flex justify-between items-center text-base">
  <span className="text-gray-500 font-black uppercase tracking-widest text-xs">Amount Due</span>
  <span className="text-2xl font-black text-slate-800 tracking-tight print:text-black">
- Rs. {billingTask.type === 'Telemedicine' ? '2,500' : (doctor?.consultation_fee?.toLocaleString() || doctor?.consultationFee?.toLocaleString() || '3,000')}
+ Rs. {billingTask.consultation_fee ? billingTask.consultation_fee.toLocaleString() : (doctor?.consultation_fee?.toLocaleString() || doctor?.consultationFee?.toLocaleString() || '3,000')}
  </span>
  </div>
  </div>

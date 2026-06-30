@@ -3,9 +3,9 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 
 const DEFAULT_SETTINGS = {
-  contrast: false,
+  contrast: 0,
   highlightLinks: false,
-  biggerText: false,
+  biggerText: 0,
   textSpacing: false,
   pauseAnimations: false,
   hideImages: false,
@@ -86,10 +86,33 @@ export const AccessibilityProvider = ({ children }) => {
     body.style.filter = '';
     html.classList.remove('a11y-contrast');
 
-    // Setup CSS variables for the overlay
+    let contrast = '100%';
+    let brightness = '1';
+    let invert = '0%';
+    let hueRotate = '0deg';
+
+    switch (Number(settings.contrast)) {
+      case 1: // Invert Colors
+        invert = '100%';
+        break;
+      case 2: // Dark Contrast
+        invert = '100%';
+        hueRotate = '180deg';
+        contrast = '150%';
+        break;
+      case 3: // Light Contrast
+        contrast = '150%';
+        brightness = '1.05';
+        break;
+      default:
+        break;
+    }
+
     html.style.setProperty('--a11y-saturate', `${settings.saturation}%`);
-    html.style.setProperty('--a11y-contrast', settings.contrast ? '150%' : '100%');
-    html.style.setProperty('--a11y-brightness', settings.contrast ? '1.05' : '1');
+    html.style.setProperty('--a11y-contrast', contrast);
+    html.style.setProperty('--a11y-brightness', brightness);
+    html.style.setProperty('--a11y-invert', invert);
+    html.style.setProperty('--a11y-hue-rotate', hueRotate);
 
     // Highlight Links
     if (settings.highlightLinks) {
@@ -99,8 +122,9 @@ export const AccessibilityProvider = ({ children }) => {
     }
 
     // Bigger Text
-    if (settings.biggerText) {
-      html.style.fontSize = '120%';
+    if (Number(settings.biggerText) > 0) {
+      const sizes = ['100%', '110%', '120%', '130%', '140%'];
+      html.style.fontSize = sizes[Number(settings.biggerText)] || '120%';
     } else {
       html.style.fontSize = '';
     }
@@ -180,8 +204,8 @@ export const AccessibilityProvider = ({ children }) => {
       <div 
         className="fixed inset-0 pointer-events-none z-[9990]"
         style={{
-          backdropFilter: `saturate(var(--a11y-saturate, 100%)) contrast(var(--a11y-contrast, 100%)) brightness(var(--a11y-brightness, 100%))`,
-          WebkitBackdropFilter: `saturate(var(--a11y-saturate, 100%)) contrast(var(--a11y-contrast, 100%)) brightness(var(--a11y-brightness, 100%))`
+          backdropFilter: `saturate(var(--a11y-saturate, 100%)) invert(var(--a11y-invert, 0%)) hue-rotate(var(--a11y-hue-rotate, 0deg)) contrast(var(--a11y-contrast, 100%)) brightness(var(--a11y-brightness, 100%))`,
+          WebkitBackdropFilter: `saturate(var(--a11y-saturate, 100%)) invert(var(--a11y-invert, 0%)) hue-rotate(var(--a11y-hue-rotate, 0deg)) contrast(var(--a11y-contrast, 100%)) brightness(var(--a11y-brightness, 100%))`
         }}
       />
       {children}

@@ -696,10 +696,12 @@ const BookAppointmentPage = () => {
         </div>
       )}
 
+      </div>
+
 {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:fixed print:inset-0 print:bg-white dark:bg-gray-800 print:z-50 print:p-0">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-full print:rounded-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:absolute print:inset-0 print:bg-white dark:bg-gray-800 print:z-50 print:p-0">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:m-0 print:w-full print:max-w-none print:h-auto print:overflow-visible print:rounded-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {/* Header / Success Animation */}
             <div className="bg-gradient-to-r from-blue-600 to-teal-500 p-3 text-center text-white relative">
               <div className="w-10 h-10 bg-white dark:bg-gray-800/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-1 border border-white/30 animate-bounce">
@@ -790,7 +792,6 @@ const BookAppointmentPage = () => {
           </div>
         </div>
       )}
-      </div>
 
       <div className="print:hidden">
         <Footer />

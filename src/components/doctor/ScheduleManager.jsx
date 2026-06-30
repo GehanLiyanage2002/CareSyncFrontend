@@ -155,7 +155,7 @@ const ScheduleManager = () => {
           
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* React DatePicker Component */}
-            <div className="space-y-2 relative z-40">
+            <div className="space-y-2 relative z-50">
               <div className="flex justify-between items-end mb-1">
                 <label className="text-sm font-medium text-slate-700 dark:text-gray-200">Select Date</label>
               </div>
@@ -170,12 +170,14 @@ const ScheduleManager = () => {
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm text-slate-700 dark:text-gray-200 font-medium cursor-pointer"
                   wrapperClassName="w-full"
                   popperPlacement="bottom-start"
+                  popperClassName="!z-[100]"
+                  portalId="root-portal"
                 />
               </div>
             </div>
 
             {/* Time Range */}
-            <div className="grid grid-cols-2 gap-4 relative z-50">
+            <div className="grid grid-cols-2 gap-4 relative z-40">
               <div className="space-y-1">
                 <DatePicker
                   selected={getTimeDate(formData.start_time)}
@@ -187,7 +189,8 @@ const ScheduleManager = () => {
                   dateFormat="hh:mm aa"
                   customInput={<CustomTimeInput label="Start with" isStart={true} />}
                   wrapperClassName="w-full"
-                  popperClassName="time-picker-popper"
+                  popperClassName="time-picker-popper !z-[100]"
+                  portalId="root-portal"
                 />
               </div>
               <div className="space-y-1">
@@ -201,7 +204,8 @@ const ScheduleManager = () => {
                   dateFormat="hh:mm aa"
                   customInput={<CustomTimeInput label="End with" isStart={false} />}
                   wrapperClassName="w-full"
-                  popperClassName="time-picker-popper"
+                  popperClassName="time-picker-popper !z-[100]"
+                  portalId="root-portal"
                 />
               </div>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History, Activity } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History, Activity, Video } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -52,11 +52,12 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
 
         if (profileRes.data.success) {
           setConsultationFee(Number(profileRes.data.profile?.consultation_fee) || 0);
+          setSpecialization(profileRes.data.profile?.specialization || '');
         }
 
         if (appointmentsRes.data.success) {
           const appointments = appointmentsRes.data.appointments;
-          
+
           const newTasks = {};
           const cols = {
             'pending': [],
@@ -97,19 +98,19 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
             return [...taskIdsToUpdate].sort((aId, bId) => {
               const a = currentTasks[aId];
               const b = currentTasks[bId];
-              
+
               const dateA = new Date(a.raw_date).getTime();
               const dateB = new Date(b.raw_date).getTime();
-              
+
               // If both dates are valid and different, sort by date
               if (!isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
                 return dateA - dateB;
               }
-              
+
               // Fallback to time sorting
               const timeA = a.raw_time || a.time || "";
               const timeB = b.raw_time || b.time || "";
-              
+
               return timeA.localeCompare(timeB);
             });
           };
@@ -132,55 +133,55 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         setIsLoading(false);
       }
     };
-    
+
     if (token) fetchData();
   }, [token, refreshTrigger, dateFilter]);
 
-    useEffect(() => {
-      const handleSlotBooked = (bookingData) => {
-        if (bookingData.doctor_id === user?.id) {
-          toast.success('New appointment booked! Updating board...', { icon: '📅' });
-          setRefreshTrigger(prev => prev + 1);
-        }
-      };
-  
-      const handleStatusChanged = (data) => {
-        if (data.doctor_id === user?.id) {
-          setRefreshTrigger(prev => prev + 1);
-        }
-      };
-
-      const handleRescheduled = (data) => {
-        if (data.doctor_id === user?.id) {
-          toast.success('Appointment rescheduled! Updating board...', { icon: '🔄' });
-          setRefreshTrigger(prev => prev + 1);
-        }
-      };
-
-      const handleFeeChanged = (data) => {
-        if (data.doctor_id === user?.id) {
-          setConsultationFee(Number(data.consultation_fee) || 0);
-        }
-      };
-
-      const handlePatientUpdated = () => {
+  useEffect(() => {
+    const handleSlotBooked = (bookingData) => {
+      if (bookingData.doctor_id === user?.id) {
+        toast.success('New appointment booked! Updating board...', { icon: '📅' });
         setRefreshTrigger(prev => prev + 1);
-      };
-  
-      socket.on('slotBooked', handleSlotBooked);
-      socket.on('appointmentStatusChanged', handleStatusChanged);
-      socket.on('appointmentRescheduled', handleRescheduled);
-      socket.on('doctorFeeChanged', handleFeeChanged);
-      socket.on('patientUpdated', handlePatientUpdated);
-  
-      return () => {
-        socket.off('slotBooked', handleSlotBooked);
-        socket.off('appointmentStatusChanged', handleStatusChanged);
-        socket.off('appointmentRescheduled', handleRescheduled);
-        socket.off('doctorFeeChanged', handleFeeChanged);
-        socket.off('patientUpdated', handlePatientUpdated);
-      };
-    }, [user]);
+      }
+    };
+
+    const handleStatusChanged = (data) => {
+      if (data.doctor_id === user?.id) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    const handleRescheduled = (data) => {
+      if (data.doctor_id === user?.id) {
+        toast.success('Appointment rescheduled! Updating board...', { icon: '🔄' });
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    const handleFeeChanged = (data) => {
+      if (data.doctor_id === user?.id) {
+        setConsultationFee(Number(data.consultation_fee) || 0);
+      }
+    };
+
+    const handlePatientUpdated = () => {
+      setRefreshTrigger(prev => prev + 1);
+    };
+
+    socket.on('slotBooked', handleSlotBooked);
+    socket.on('appointmentStatusChanged', handleStatusChanged);
+    socket.on('appointmentRescheduled', handleRescheduled);
+    socket.on('doctorFeeChanged', handleFeeChanged);
+    socket.on('patientUpdated', handlePatientUpdated);
+
+    return () => {
+      socket.off('slotBooked', handleSlotBooked);
+      socket.off('appointmentStatusChanged', handleStatusChanged);
+      socket.off('appointmentRescheduled', handleRescheduled);
+      socket.off('doctorFeeChanged', handleFeeChanged);
+      socket.off('patientUpdated', handlePatientUpdated);
+    };
+  }, [user]);
 
   // Derived stats
   const totalAppointments = Object.keys(data.tasks).length;
@@ -192,19 +193,19 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
     return [...taskIdsToUpdate].sort((aId, bId) => {
       const a = currentTasks[aId];
       const b = currentTasks[bId];
-      
+
       const dateA = new Date(a.raw_date).getTime();
       const dateB = new Date(b.raw_date).getTime();
-      
+
       // If both dates are valid and different, sort by date
       if (!isNaN(dateA) && !isNaN(dateB) && dateA !== dateB) {
         return dateA - dateB;
       }
-      
+
       // Fallback to time sorting (works for raw_time or standard time string like '09:00')
       const timeA = a.raw_time || a.time || "";
       const timeB = b.raw_time || b.time || "";
-      
+
       return timeA.localeCompare(timeB);
     });
   };
@@ -229,13 +230,13 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
 
     const finishTaskIds = Array.from(finishColumn.taskIds);
     finishTaskIds.push(draggableId); // Just push it, then sort
-    
+
     const newFinishId = finishColumn.id;
     const updatedTasks = {
       ...data.tasks,
       [draggableId]: { ...data.tasks[draggableId], status: newFinishId }
     };
-    
+
     const sortedFinishTaskIds = sortTaskIdsChronologically(finishTaskIds, updatedTasks);
     const newFinish = { ...finishColumn, taskIds: sortedFinishTaskIds };
 
@@ -269,7 +270,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
 
   return (
     <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
+
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {/* Total Appointments */}
@@ -318,7 +319,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         </div>
       </div>
 
-      
+
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 flex-1 pb-4 items-start">
@@ -329,18 +330,17 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
             return (
               <div key={column.id} className="flex flex-col bg-slate-50/50 dark:bg-gray-900/50 rounded-3xl border border-slate-100 dark:border-gray-700 overflow-hidden shadow-sm h-full">
                 <div className={`p-5 border-b border-slate-100 dark:border-gray-700 flex justify-between items-center
-                  ${column.id === 'pending' ? 'bg-amber-50/80 dark:bg-amber-900/20' : 
-                    column.id === 'in progress' ? 'bg-blue-50/80 dark:bg-blue-900/20' : 
-                    column.id === 'completed' ? 'bg-emerald-50/80 dark:bg-emerald-900/20' : 
-                    'bg-rose-50/80 dark:bg-rose-900/20'}
+                  ${column.id === 'pending' ? 'bg-amber-50/80 dark:bg-amber-900/20' :
+                    column.id === 'in progress' ? 'bg-blue-50/80 dark:bg-blue-900/20' :
+                      column.id === 'completed' ? 'bg-emerald-50/80 dark:bg-emerald-900/20' :
+                        'bg-rose-50/80 dark:bg-rose-900/20'}
                 `}>
                   <h3 className="font-extrabold text-slate-800 dark:text-white flex items-center gap-2 text-sm uppercase tracking-widest">
-                    <span className={`w-3 h-3 rounded-full shadow-sm ${
-                      column.id === 'pending' ? 'bg-amber-500' : 
-                      column.id === 'in progress' ? 'bg-blue-500' : 
-                      column.id === 'completed' ? 'bg-emerald-500' : 
-                      'bg-rose-500'
-                    }`}></span>
+                    <span className={`w-3 h-3 rounded-full shadow-sm ${column.id === 'pending' ? 'bg-amber-500' :
+                      column.id === 'in progress' ? 'bg-blue-500' :
+                        column.id === 'completed' ? 'bg-emerald-500' :
+                          'bg-rose-500'
+                      }`}></span>
                     {column.title}
                   </h3>
                   <span className="bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-200 text-xs font-black px-3 py-1.5 rounded-full shadow-sm border border-slate-100 dark:border-gray-700">
@@ -363,9 +363,8 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               onClick={() => setSelectedTask(task)}
-                              className={`bg-white dark:bg-gray-800 p-5 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 dark:hover:border-blue-600 transition-all ${
-                                snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500 scale-[1.02] rotate-2 z-50' : ''
-                              }`}
+                              className={`bg-white dark:bg-gray-800 p-5 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md hover:border-blue-200 dark:hover:border-blue-600 transition-all ${snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500 scale-[1.02] rotate-2 z-50' : ''
+                                }`}
                             >
                               <div className="flex justify-between items-start mb-4">
                                 <div>
@@ -431,7 +430,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
       {/* Patient Details Modal */}
       {selectedTask && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedTask(null)}>
-          <div 
+          <div
             className="bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
@@ -439,7 +438,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
               <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
                 <User className="text-blue-600" /> Patient Info
               </h3>
-              <button 
+              <button
                 onClick={() => setSelectedTask(null)}
                 className="p-2 text-slate-400 hover:text-slate-800 dark:text-white dark:hover:text-white rounded-full hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 shadow-sm transition-all"
               >
@@ -449,7 +448,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
             <div className="p-8 space-y-6">
               <div className="flex items-center gap-6 border-b border-slate-100 dark:border-gray-700 pb-6">
                 <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-3xl font-black shadow-inner overflow-hidden border border-blue-200 dark:border-blue-800">
-                  <img 
+                  <img
                     src={`http://127.0.0.1:5000/api/users/profile-image/${selectedTask.patient_id}`}
                     alt={selectedTask.patientName}
                     className="w-full h-full object-cover"
@@ -466,7 +465,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                   </div>
                   <h4 className="text-2xl font-black text-slate-800 dark:text-white">{selectedTask.patientName}</h4>
                   <p className="text-sm font-bold text-slate-500 dark:text-gray-400 mt-1 mb-2">{selectedTask.age || '-'} Yrs • {selectedTask.gender || '-'}</p>
-                  
+
                   <button
                     onClick={() => {
                       setSelectedPatientForProfile({
@@ -482,7 +481,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                   </button>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-6 bg-slate-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-slate-100 dark:border-gray-700">
                 <div>
                   <label className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Time & Date</label>
@@ -500,14 +499,14 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                 <div className="col-span-2 pt-4 border-t border-slate-200 dark:border-gray-700">
                   <label className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Payment Method</label>
                   <p className="text-slate-800 dark:text-white font-black flex items-center gap-1.5 mt-2">
-                    <CreditCard size={18} className={selectedTask.paymentMethod === 'Online' ? 'text-emerald-500' : 'text-amber-500'} /> 
+                    <CreditCard size={18} className={selectedTask.paymentMethod === 'Online' ? 'text-emerald-500' : 'text-amber-500'} />
                     {selectedTask.paymentMethod || 'Cash'}
                   </p>
                 </div>
               </div>
             </div>
             <div className="p-5 bg-slate-50 dark:bg-gray-900 border-t border-slate-100 dark:border-gray-700 flex justify-between gap-3">
-              <button 
+              <button
                 onClick={() => {
                   setSelectedPatientForHistory({
                     patient_id: selectedTask.patient_id,
@@ -522,7 +521,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
               </button>
 
               {selectedTask.status === 'completed' && (
-                <button 
+                <button
                   onClick={() => {
                     setSelectedAppointmentForReport(selectedTask);
                     setIsReportModalOpen(true);
@@ -535,7 +534,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                 </button>
               )}
               {selectedTask.status === 'in progress' && specialization === 'Psychology' && (
-                <button 
+                <button
                   onClick={() => {
                     window.open(`/telemedicine/${selectedTask.id}`, '_blank');
                     setSelectedTask(null);
@@ -551,10 +550,10 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         </div>
       )}
 
-      <CreateMedicalReport 
-        isOpen={isReportModalOpen} 
-        onClose={() => setIsReportModalOpen(false)} 
-        appointment={selectedAppointmentForReport} 
+      <CreateMedicalReport
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        appointment={selectedAppointmentForReport}
       />
 
       <PatientPastRecordsModal

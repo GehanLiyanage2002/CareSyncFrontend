@@ -2,14 +2,14 @@ export const containsSqlInjection = (input) => {
   if (typeof input !== 'string') return false;
   
   // Basic patterns to look for common SQL injection attempts
-  const sqlInjectionPattern = /('|;|--|\/\*|\*\/|xp_)/i;
+  // We removed single quotes and semicolons because they are common in normal text (names, bios).
+  // Parameterized queries on the backend already protect against SQL injection.
+  const sqlInjectionPattern = /(--|\/\*|\*\/|xp_)/i;
   
   // Keywords that are often used in SQL injections, checked in combination with special characters
   const sqlKeywordsPattern = /\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|EXEC|TRUNCATE)\b/i;
   
   // If the input contains dangerous special characters or a combination of them, flag it.
-  // Note: We don't flag just keywords because words like "update" or "select" could be normal text.
-  // But semicolons, single quotes followed by SQL keywords, or comments are suspicious.
   if (sqlInjectionPattern.test(input)) {
     return true;
   }

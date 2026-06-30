@@ -140,6 +140,13 @@ export const AccessibilityProvider = ({ children }) => {
       html.classList.remove('a11y-big-cursor');
     }
 
+    // Tooltips
+    if (settings.tooltips) {
+      html.classList.add('a11y-tooltips');
+    } else {
+      html.classList.remove('a11y-tooltips');
+    }
+
     // Line Height
     if (settings.lineHeight) {
       html.classList.add('a11y-line-height');

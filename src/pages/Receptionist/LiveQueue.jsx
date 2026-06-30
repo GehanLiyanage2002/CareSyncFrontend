@@ -4,9 +4,9 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Users, ChevronDown, User, Activity, Calendar, Clock, LayoutDashboard, ListFilter, CheckCircle2, XCircle, Search } from 'lucide-react';
 import ReceptionistKanbanBoard from './ReceptionistKanbanBoard';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const LiveQueue = () => {
  const { token } = useSelector((state) => state.auth);

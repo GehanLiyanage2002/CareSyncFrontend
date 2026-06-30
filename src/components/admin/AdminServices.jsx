@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 import { Plus, Edit2, CheckCircle, XCircle, Settings, Calendar, Clock, MapPin, AlignLeft, Trash2, AlertTriangle, PlusCircle, Search, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -69,13 +69,15 @@ const AdminServices = () => {
  useEffect(() => {
  fetchServices();
  
- const socket = io(`${import.meta.env.VITE_API_URL}`, { reconnection: true });
- 
  socket.on('serviceAdded', fetchServices);
  socket.on('serviceUpdated', fetchServices);
  socket.on('serviceImageUpdated', fetchServices);
  
- return () => socket.disconnect();
+ return () => {
+   socket.off('serviceAdded', fetchServices);
+   socket.off('serviceUpdated', fetchServices);
+   socket.off('serviceImageUpdated', fetchServices);
+ };
  }, [token]);
 
  const handleAvatarPick = (e) => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Check, X, Info, CheckCircle, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
@@ -18,22 +18,19 @@ const NotificationBell = () => {
     // Fetch initial notifications
     fetchNotifications();
 
-    // Setup Socket.IO
-    const socket = io(`${import.meta.env.VITE_API_URL}`);
-    
     // Join user's room
     socket.emit('join', user.id);
 
-    // Listen for new notifications
-    socket.on('newNotification', (notification) => {
+    const handleNewNotification = (notification) => {
       setNotifications(prev => [notification, ...prev]);
       setUnreadCount(prev => prev + 1);
-      
-      // Optional: Show a browser notification or toast here
-    });
+    };
+
+    // Listen for new notifications
+    socket.on('newNotification', handleNewNotification);
 
     return () => {
-      socket.disconnect();
+      socket.off('newNotification', handleNewNotification);
     };
   }, [isAuthenticated, user]);
 

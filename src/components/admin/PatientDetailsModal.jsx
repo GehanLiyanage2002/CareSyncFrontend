@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 import { X, Calendar, Activity, CheckCircle, XCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -11,21 +11,18 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  useEffect(() => {
  fetchAppointments();
  
- // Set up real-time listener for appointments
- const socket = io(`${import.meta.env.VITE_API_URL}`, { reconnection: true });
- 
- socket.on('appointmentStatusChanged', () => {
- fetchAppointments();
- });
- 
- socket.on('slotBooked', () => {
- fetchAppointments();
- });
+  const handleUpdate = () => {
+    fetchAppointments();
+  };
 
- return () => {
- socket.disconnect();
- };
- }, [patient.id]);
+  socket.on('appointmentStatusChanged', handleUpdate);
+  socket.on('slotBooked', handleUpdate);
+
+  return () => {
+    socket.off('appointmentStatusChanged', handleUpdate);
+    socket.off('slotBooked', handleUpdate);
+  };
+  }, [patient.id]);
 
  const fetchAppointments = async () => {
  try {

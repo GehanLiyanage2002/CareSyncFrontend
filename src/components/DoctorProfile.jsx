@@ -3,10 +3,11 @@ import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, Ch
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import { getCleanImageUrl } from '../utils/urlHelper';
+import socket from '../socket';
 import PatientReviewsList from './PatientReviewsList';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   const [doctor, setDoctor] = useState(initialDoctor);
@@ -176,7 +177,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
             <div className="relative mb-6">
               <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 to-teal-400 opacity-20 blur-md scale-110"></div>
               <img
-                src={doctor.image}
+                src={getCleanImageUrl(doctor.image)}
                 alt={doctor.name}
                 className="w-48 h-48 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-xl relative z-10"
               />

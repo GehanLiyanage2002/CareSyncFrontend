@@ -12,7 +12,7 @@ const PatientMedicalProfileModal = ({ patient, onClose }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`http://127.0.0.1:5000/api/doctor/patient/${patient.patient_id}/profile`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/doctor/patient/${patient.patient_id}/profile`, {
           headers: { Authorization: token }
         });
         if (res.data.success) {

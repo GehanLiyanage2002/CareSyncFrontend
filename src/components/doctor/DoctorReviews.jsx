@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Star, MessageSquare, TrendingUp, Users, Award } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const DoctorReviews = () => {
   const { user, token } = useSelector((state) => state.auth);

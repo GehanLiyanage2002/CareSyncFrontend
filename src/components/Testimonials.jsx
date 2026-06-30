@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Quote, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import { getCleanImageUrl } from '../utils/urlHelper';
+import socket from '../socket';
 import { Marquee } from './magicui/Marquee';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const Testimonials = () => {
   const [reviews, setReviews] = useState([]);
@@ -127,7 +128,7 @@ const Testimonials = () => {
               {reviews.map((testimonial, index) => {
                 const profileImg = testimonial.patient_id 
                   ? `${import.meta.env.VITE_API_URL}/api/users/profile-image/${testimonial.patient_id}?t=${imgKey}`
-                  : (testimonial.image || placeholderImages[index % placeholderImages.length]);
+                  : getCleanImageUrl(testimonial.image || placeholderImages[index % placeholderImages.length]);
 
                 return (
                   <div key={`${testimonial.id || index}-${index}`} className="magic-border-card min-w-[300px] max-w-[350px] flex-shrink-0 bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-[0_15px_40px_rgba(0,0,0,0.04)] flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 group relative">

@@ -7,9 +7,9 @@ import toast from 'react-hot-toast';
 import CreateMedicalReport from './CreateMedicalReport';
 import PatientPastRecordsModal from './PatientPastRecordsModal';
 import PatientMedicalProfileModal from './PatientMedicalProfileModal';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   const { token, user } = useSelector((state) => state.auth);
@@ -448,8 +448,8 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
             <div className="p-8 space-y-6">
               <div className="flex items-center gap-6 border-b border-slate-100 dark:border-gray-700 pb-6">
                 <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-3xl font-black shadow-inner overflow-hidden border border-blue-200 dark:border-blue-800">
-                  <img
-                    src={`http://127.0.0.1:5000/api/users/profile-image/${selectedTask.patient_id}`}
+                  <img 
+                    src={`${import.meta.env.VITE_API_URL}/api/users/profile-image/${selectedTask.patient_id}`}
                     alt={selectedTask.patientName}
                     className="w-full h-full object-cover"
                     onError={(e) => {

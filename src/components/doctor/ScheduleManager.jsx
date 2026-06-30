@@ -129,14 +129,14 @@ const ScheduleManager = () => {
       onClick={onClick}
       ref={ref}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <Clock className={isStart ? "text-blue-500" : "text-slate-400"} size={22} strokeWidth={1.5} />
         <div className="flex flex-col items-start">
           <span className={`text-[11px] font-semibold ${isStart ? 'text-blue-500' : 'text-slate-500 dark:text-gray-400'}`}>{label}</span>
-          <span className="text-base font-medium text-slate-700 dark:text-gray-200">{value || '00:00 AM'}</span>
+          <span className="text-base font-medium text-slate-700 dark:text-gray-200 whitespace-nowrap">{value || '00:00 AM'}</span>
         </div>
       </div>
-      <ChevronDown className={isStart ? "text-blue-500" : "text-slate-400"} size={20} />
+      <ChevronDown className={isStart ? "text-blue-500" : "text-slate-400"} size={18} />
     </button>
   ));
 
@@ -155,7 +155,7 @@ const ScheduleManager = () => {
           
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* React DatePicker Component */}
-            <div className="space-y-2 relative z-50">
+            <div className="space-y-2 relative z-40">
               <div className="flex justify-between items-end mb-1">
                 <label className="text-sm font-medium text-slate-700 dark:text-gray-200">Select Date</label>
               </div>
@@ -175,7 +175,7 @@ const ScheduleManager = () => {
             </div>
 
             {/* Time Range */}
-            <div className="grid grid-cols-2 gap-4 relative z-40">
+            <div className="grid grid-cols-2 gap-4 relative z-50">
               <div className="space-y-1">
                 <DatePicker
                   selected={getTimeDate(formData.start_time)}

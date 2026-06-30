@@ -137,7 +137,7 @@ const ContactPage = () => {
                   <Home size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">Dr Samantha Medical Center</h4>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">CareSync Medical Center</h4>
                   <p className="text-sm font-medium text-slate-500 dark:text-gray-400">Hidagoda, Badulla</p>
                 </div>
               </div>

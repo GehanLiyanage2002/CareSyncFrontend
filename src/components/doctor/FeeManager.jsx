@@ -7,17 +7,20 @@ import { DollarSign, Save } from 'lucide-react';
 const FeeManager = () => {
   const { token } = useSelector((state) => state.auth);
   const [fee, setFee] = useState('');
+  const [savedFee, setSavedFee] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
     const fetchFee = async () => {
       try {
-        const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/profile', {
+        const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/profile?_t=${Date.now()}', {
           headers: { Authorization: token }
         });
         if (res.data.success) {
-          setFee(res.data.profile.consultation_fee || 1500);
+          const currentFee = res.data.profile.consultation_fee || 1500;
+          setFee(currentFee);
+          setSavedFee(currentFee);
         }
       } catch (error) {
         console.error("Failed to fetch profile", error);
@@ -43,6 +46,7 @@ const FeeManager = () => {
         { headers: { Authorization: token } }
       );
       if (res.data.success) {
+        setSavedFee(Number(fee));
         toast.success('Consultation fee updated successfully!');
       }
     } catch (error) {
@@ -96,6 +100,12 @@ const FeeManager = () => {
           <span>Save Fee</span>
         </button>
       </div>
+      
+      {savedFee && (
+        <p className="mt-3 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+          Current Active Fee: Rs. {savedFee}
+        </p>
+      )}
     </div>
   );
 };

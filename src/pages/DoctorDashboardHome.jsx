@@ -18,6 +18,7 @@ const DoctorDashboardHome = () => {
   const [isAvailable, setIsAvailable] = useState(true);
   const [isApproved, setIsApproved] = useState(false);
   const [appointments, setAppointments] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -40,6 +41,8 @@ const DoctorDashboardHome = () => {
         
         if (aptRes.data.appointments) {
           const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+          
+          setAllAppointments(aptRes.data.appointments);
           
           const todaysAppointments = aptRes.data.appointments.filter(apt => {
             const aptDateStr = new Date(apt.appointment_date).toLocaleDateString('en-CA');
@@ -70,7 +73,14 @@ const DoctorDashboardHome = () => {
     };
 
     const handleStatusChanged = (data) => {
-      if (data.doctor_id === user?.id) {
+      if (data.doctor_id === user?.id || data.doctorId === user?.id) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    };
+
+    const handleRescheduled = (data) => {
+      if (data.doctor_id === user?.id || data.doctorId === user?.id) {
+        toast.info('An appointment was rescheduled.', { icon: '📅' });
         setRefreshTrigger(prev => prev + 1);
       }
     };
@@ -90,11 +100,13 @@ const DoctorDashboardHome = () => {
 
     socket.on('slotBooked', handleSlotBooked);
     socket.on('appointmentStatusChanged', handleStatusChanged);
+    socket.on('appointmentRescheduled', handleRescheduled);
     socket.on('doctorProfileUpdated', handleProfileUpdated);
 
     return () => {
       socket.off('slotBooked', handleSlotBooked);
       socket.off('appointmentStatusChanged', handleStatusChanged);
+      socket.off('appointmentRescheduled', handleRescheduled);
       socket.off('doctorProfileUpdated', handleProfileUpdated);
     };
   }, [user]);
@@ -130,8 +142,30 @@ const DoctorDashboardHome = () => {
   };
 
   // Calculate stats
-  const pendingCount = appointments.filter(a => a.status?.toLowerCase() === 'pending' || a.status?.toLowerCase() === 'in progress').length;
-  const completedCount = appointments.filter(a => a.status === 'completed').length;
+  const todayStr = new Date().toLocaleDateString('en-CA');
+  
+  // This week calculation
+  const getStartOfWeek = (d) => {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    return new Date(date.setDate(diff)).setHours(0, 0, 0, 0);
+  };
+  const startOfWeek = getStartOfWeek(new Date());
+
+  const pendingCount = allAppointments.filter(a => {
+    const aptDateStr = new Date(a.appointment_date).toLocaleDateString('en-CA');
+    const status = a.status?.toLowerCase() || '';
+    const isPending = !['completed', 'cancelled'].includes(status);
+    return aptDateStr === todayStr && isPending;
+  }).length;
+
+  const completedCount = allAppointments.filter(a => {
+    const aptDate = new Date(a.appointment_date).getTime();
+    return a.status?.toLowerCase() === 'completed' && aptDate >= startOfWeek;
+  }).length;
+
+  const uniquePatientsCount = new Set(allAppointments.filter(a => a.patient_id).map(a => a.patient_id)).size;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white selection:bg-teal-100 flex flex-col">
@@ -214,7 +248,7 @@ const DoctorDashboardHome = () => {
               <span className="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100 shadow-sm">All Time</span>
             </div>
             <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Total Unique Patients</h3>
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">148</p>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">{loading ? '-' : uniquePatientsCount}</p>
           </div>
         </div>
 
@@ -291,7 +325,11 @@ const DoctorDashboardHome = () => {
         </div>
 
         {/* Schedule Manager */}
-        {isApproved ? (
+        {loading ? (
+          <div className="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm mb-8 flex items-center justify-center animate-pulse h-64 mt-6">
+            <span className="text-slate-400 font-medium">Loading schedule manager...</span>
+          </div>
+        ) : isApproved ? (
           <ScheduleManager />
         ) : (
           <div className="bg-amber-50 border border-amber-200 text-amber-800 p-8 rounded-[2rem] shadow-sm mb-8 flex flex-col items-center justify-center text-center mt-6">

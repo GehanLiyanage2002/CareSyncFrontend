@@ -193,8 +193,8 @@ const Login = () => {
             </div>
           )}
 
-          {/* Toggle Login Method for Doctors */}
-          {loginRole === 'Doctor' && (
+          {/* Toggle Login Method for Doctors & Patients */}
+          {(loginRole === 'Doctor' || loginRole === 'Patient') && (
             <div className="flex justify-center mb-6 bg-slate-100 dark:bg-gray-700/60 p-1.5 rounded-xl w-full max-w-sm mx-auto border border-transparent dark:border-gray-600/40">
               <button
                 type="button"
@@ -289,15 +289,17 @@ const Login = () => {
             </div>
 
             {/* Forgot Password */}
-            <div className="flex justify-end">
-              <button 
-                type="button" 
-                onClick={() => navigate('/forgot-password')}
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150"
-              >
-                Forgot password?
-              </button>
-            </div>
+            {!['Admin', 'Receptionist'].includes(loginRole) && (
+              <div className="flex justify-end">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button

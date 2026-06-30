@@ -52,11 +52,13 @@ const LiveQueue = () => {
  socket.on('slotBooked', handleUpdate);
  socket.on('appointmentStatusChanged', handleUpdate);
  socket.on('appointmentRescheduled', handleUpdate);
+ socket.on('patientUpdated', handleUpdate);
 
  return () => {
  socket.off('slotBooked', handleUpdate);
  socket.off('appointmentStatusChanged', handleUpdate);
  socket.off('appointmentRescheduled', handleUpdate);
+ socket.off('patientUpdated', handleUpdate);
  };
  }, [selectedDoctorId, token]);
 

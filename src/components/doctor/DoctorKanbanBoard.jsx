@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History, Video } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History, Activity } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import CreateMedicalReport from './CreateMedicalReport';
 import PatientPastRecordsModal from './PatientPastRecordsModal';
+import PatientMedicalProfileModal from './PatientMedicalProfileModal';
 import { io } from 'socket.io-client';
 
 const socket = io('http://127.0.0.1:5000');
@@ -36,6 +37,10 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   const [isPastRecordsModalOpen, setIsPastRecordsModalOpen] = useState(false);
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState(null);
 
+  // State for Medical Profile Modal
+  const [isMedicalProfileModalOpen, setIsMedicalProfileModalOpen] = useState(false);
+  const [selectedPatientForProfile, setSelectedPatientForProfile] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,8 +51,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         ]);
 
         if (profileRes.data.success) {
-          setConsultationFee(profileRes.data.profile?.consultation_fee || 0);
-          setSpecialization(profileRes.data.profile?.specialization || '');
+          setConsultationFee(Number(profileRes.data.profile?.consultation_fee) || 0);
         }
 
         if (appointmentsRes.data.success) {
@@ -77,6 +81,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
               status: apt.status,
               paymentMethod: apt.payment_method,
               is_rescheduled: apt.is_rescheduled,
+              consultation_fee: apt.consultation_fee,
               raw_date: apt.appointment_date,
               raw_time: apt.start_time
             };
@@ -151,15 +156,29 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
           setRefreshTrigger(prev => prev + 1);
         }
       };
+
+      const handleFeeChanged = (data) => {
+        if (data.doctor_id === user?.id) {
+          setConsultationFee(Number(data.consultation_fee) || 0);
+        }
+      };
+
+      const handlePatientUpdated = () => {
+        setRefreshTrigger(prev => prev + 1);
+      };
   
       socket.on('slotBooked', handleSlotBooked);
       socket.on('appointmentStatusChanged', handleStatusChanged);
       socket.on('appointmentRescheduled', handleRescheduled);
+      socket.on('doctorFeeChanged', handleFeeChanged);
+      socket.on('patientUpdated', handlePatientUpdated);
   
       return () => {
         socket.off('slotBooked', handleSlotBooked);
         socket.off('appointmentStatusChanged', handleStatusChanged);
         socket.off('appointmentRescheduled', handleRescheduled);
+        socket.off('doctorFeeChanged', handleFeeChanged);
+        socket.off('patientUpdated', handlePatientUpdated);
       };
     }, [user]);
 
@@ -268,7 +287,8 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-amber-100 dark:border-gray-700">
           <div>
             <p className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1">Total Earnings</p>
-            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">Rs. {totalEarnings}</h4>
+            <h4 className="text-3xl font-extrabold text-slate-800 dark:text-white">Rs. {totalEarnings.toLocaleString()}</h4>
+            {consultationFee === 0 && <p className="text-[10px] text-red-500 mt-1 font-semibold">Fee not set</p>}
           </div>
           <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
             <span className="font-bold text-xl">Rs</span>
@@ -428,8 +448,16 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
             </div>
             <div className="p-8 space-y-6">
               <div className="flex items-center gap-6 border-b border-slate-100 dark:border-gray-700 pb-6">
-                <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-3xl font-black shadow-inner">
-                  {selectedTask.patientName?.charAt(0) || '?'}
+                <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 text-3xl font-black shadow-inner overflow-hidden border border-blue-200 dark:border-blue-800">
+                  <img 
+                    src={`http://127.0.0.1:5000/api/users/profile-image/${selectedTask.patient_id}`}
+                    alt={selectedTask.patientName}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedTask.patientName || 'Patient')}&background=0D8ABC&color=fff&size=128`;
+                    }}
+                  />
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] uppercase tracking-widest font-black rounded-lg border border-indigo-100 dark:border-indigo-800">
@@ -437,7 +465,21 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                     {selectedTask.tokenNumber || 'NO-TOKEN'}
                   </div>
                   <h4 className="text-2xl font-black text-slate-800 dark:text-white">{selectedTask.patientName}</h4>
-                  <p className="text-sm font-bold text-slate-500 dark:text-gray-400 mt-1">{selectedTask.age || '-'} Yrs • {selectedTask.gender || '-'}</p>
+                  <p className="text-sm font-bold text-slate-500 dark:text-gray-400 mt-1 mb-2">{selectedTask.age || '-'} Yrs • {selectedTask.gender || '-'}</p>
+                  
+                  <button
+                    onClick={() => {
+                      setSelectedPatientForProfile({
+                        patient_id: selectedTask.patient_id,
+                        patientName: selectedTask.patientName
+                      });
+                      setIsMedicalProfileModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-800/50 transition-colors border border-emerald-200 dark:border-emerald-800"
+                  >
+                    <Activity size={14} />
+                    Medical Profile
+                  </button>
                 </div>
               </div>
               
@@ -520,6 +562,17 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         onClose={() => setIsPastRecordsModalOpen(false)}
         patient={selectedPatientForHistory}
       />
+      {/* Medical Profile Modal */}
+      {isMedicalProfileModalOpen && (
+        <PatientMedicalProfileModal
+          patient={selectedPatientForProfile}
+          onClose={() => {
+            setIsMedicalProfileModalOpen(false);
+            setSelectedPatientForProfile(null);
+          }}
+        />
+      )}
+
     </div>
   );
 };

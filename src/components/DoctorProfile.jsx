@@ -43,6 +43,27 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [imgKey, setImgKey] = useState(Date.now());
 
+  // Fetch fresh doctor data on mount to prevent stale location.state issues on refresh
+  useEffect(() => {
+    const docId = initialDoctor?.id || initialDoctor?.doctor_id;
+    if (docId) {
+      axios.get(`http://localhost:5000/api/users/doctors?_t=${Date.now()}`)
+        .then(res => {
+          if (res.data.success && res.data.doctors) {
+            const freshDoc = res.data.doctors.find(d => d.id === docId || d.doctor_id === docId);
+            if (freshDoc) {
+              setDoctor(prev => ({
+                ...prev,
+                ...freshDoc,
+                consultationFee: freshDoc.consultationFee !== undefined ? freshDoc.consultationFee : prev.consultationFee
+              }));
+            }
+          }
+        })
+        .catch(err => console.error("Failed to fetch fresh doctor data:", err));
+    }
+  }, [initialDoctor]);
+
   useEffect(() => {
     const handleFeeChanged = (data) => {
       if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {

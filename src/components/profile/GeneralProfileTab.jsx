@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { CheckCircle2, ScanFace, Lock, Camera, Mail, User, Phone, Stethoscope, Clock, FileText, MapPin, Loader } from 'lucide-react';
+import { CheckCircle2, ScanFace, Lock, Camera, Mail, User, Phone, Stethoscope, Clock, FileText, MapPin, Loader, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { updateUser } from '../../features/auth/authSlice';
@@ -17,10 +17,25 @@ const GeneralProfileTab = () => {
     contactNumber: user?.mobile_number || user?.phone || '',
   });
 
+  // Sync user data when it loads
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.full_name || user.name || '',
+        contactNumber: user.mobile_number || user.phone || '',
+      });
+    }
+  }, [user]);
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
+    confirmPassword: '',
   });
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [doctorData, setDoctorData] = useState({
     specialization: '',
@@ -116,7 +131,22 @@ const GeneralProfileTab = () => {
     fetchDoctorProfile();
   }, [user?.role, token]);
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Validation for Full Name (no numbers allowed)
+    if (name === 'fullName' && /\d/.test(value)) {
+      return;
+    }
+    
+    // Validation for Contact Number (only digits, max 10 characters)
+    if (name === 'contactNumber') {
+      if (value && !/^\d+$/.test(value)) return;
+      if (value.length > 10) return;
+    }
+
+    setFormData({ ...formData, [name]: value });
+  };
   const handlePasswordChange = (e) => setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
   const handleDoctorChange = (e) => setDoctorData({ ...doctorData, [e.target.name]: e.target.value });
 
@@ -131,6 +161,10 @@ const GeneralProfileTab = () => {
 
     if (!validation.isValid) {
       return toast.error(validation.message);
+    }
+
+    if (!/^07\d{8}$/.test(formData.contactNumber)) {
+      return toast.error('Contact number must be exactly 10 digits and start with 07 (e.g., 0715507000)');
     }
 
     setLoading(prev => ({ ...prev, general: true }));
@@ -153,8 +187,14 @@ const GeneralProfileTab = () => {
 
   const handleSavePassword = async (e) => {
     e.preventDefault();
-    if (!passwordData.currentPassword || !passwordData.newPassword) {
-      return toast.error('Please fill in both password fields');
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      return toast.error('Please fill in all password fields');
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      return toast.error('New passwords do not match');
+    }
+    if (passwordData.newPassword.length < 6) {
+      return toast.error('Password must be at least 6 characters long');
     }
     setLoading(prev => ({ ...prev, password: true }));
     try {
@@ -162,7 +202,10 @@ const GeneralProfileTab = () => {
         headers: { Authorization: token }
       });
       toast.success('Password changed successfully');
-      setPasswordData({ currentPassword: '', newPassword: '' });
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to change password');
     } finally {
@@ -279,7 +322,7 @@ const GeneralProfileTab = () => {
                   value={formData.contactNumber}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
-                  placeholder="+94 7X XXX XXXX"
+                  placeholder="07X XXX XXXX"
                   required
                 />
               </div>
@@ -417,7 +460,7 @@ const GeneralProfileTab = () => {
                     value={doctorData.location}
                     onChange={handleDoctorChange}
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
-                    placeholder="e.g. CareSync Hospital, Colombo"
+                    placeholder="e.g. CareSync Hospital, Badulla"
                   />
                 </div>
               </div>
@@ -440,8 +483,8 @@ const GeneralProfileTab = () => {
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
         <h2 className="text-xl font-semibold text-slate-800 dark:text-white mb-6">Security Settings</h2>
         
-        {/* Face ID Enrollment (Doctors Only) */}
-        {user?.role === 'Doctor' && (
+        {/* Face ID Enrollment */}
+        {(user?.role === 'Doctor' || user?.role === 'Patient') && (
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-blue-50/80 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/50">
               <div className="flex items-center gap-4 mb-4 sm:mb-0">
@@ -484,14 +527,21 @@ const GeneralProfileTab = () => {
                   <Lock size={18} className="text-slate-400" />
                 </div>
                 <input
-                  type="password"
+                  type={showCurrentPassword ? "text" : "password"}
                   name="currentPassword"
                   value={passwordData.currentPassword}
                   onChange={handlePasswordChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
+                  className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
                   placeholder="Enter current password"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
@@ -502,14 +552,46 @@ const GeneralProfileTab = () => {
                   <Lock size={18} className="text-slate-400" />
                 </div>
                 <input
-                  type="password"
+                  type={showNewPassword ? "text" : "password"}
                   name="newPassword"
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
+                  className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
                   placeholder="Create new password"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Confirm Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock size={18} className="text-slate-400" />
+                </div>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors dark:text-white"
+                  placeholder="Confirm new password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
             

@@ -50,7 +50,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  newTasks[apt.id] = {
  id: apt.id,
  tokenNumber: apt.token_number,
- patientName: apt.patient_name || apt.user_name || 'Unknown Patient',
+ patientName: apt.user_name || apt.patient_name || 'Unknown Patient',
  patient_id: apt.patient_id,
  date: new Date(apt.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
  time: apt.start_time.substring(0, 5),
@@ -62,6 +62,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  status: apt.status,
  paymentMethod: apt.payment_method,
  is_rescheduled: apt.is_rescheduled,
+ consultation_fee: apt.consultation_fee,
  raw_date: apt.appointment_date,
  raw_time: apt.start_time
  };
@@ -222,8 +223,16 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  </div>
  <div className="p-8 space-y-6">
  <div className="flex items-center gap-6 border-b border-slate-100 pb-6">
- <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 /30 flex items-center justify-center text-blue-600 text-3xl font-black shadow-inner">
- {selectedTask.patientName?.charAt(0) || '?'}
+ <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 /30 flex items-center justify-center text-blue-600 text-3xl font-black shadow-inner overflow-hidden border border-blue-200">
+ <img 
+ src={`http://127.0.0.1:5000/api/users/profile-image/${selectedTask.patient_id}`}
+ alt={selectedTask.patientName}
+ className="w-full h-full object-cover"
+ onError={(e) => {
+ e.target.onerror = null;
+ e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedTask.patientName || 'Patient')}&background=0D8ABC&color=fff&size=128`;
+ }}
+ />
  </div>
  <div>
  <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-2 bg-indigo-50 /30 text-indigo-700 text-[10px] uppercase tracking-widest font-black rounded-lg border border-indigo-100 ">
@@ -339,7 +348,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  <div className="border-t border-gray-200 pt-4 mt-2 flex justify-between items-center text-base">
  <span className="text-gray-500 font-black uppercase tracking-widest text-xs">Amount Due</span>
  <span className="text-2xl font-black text-slate-800 tracking-tight print:text-black">
- Rs. {billingTask.type === 'Telemedicine' ? '2,500' : (doctor?.consultation_fee?.toLocaleString() || doctor?.consultationFee?.toLocaleString() || '3,000')}
+ Rs. {billingTask.consultation_fee ? billingTask.consultation_fee.toLocaleString() : (doctor?.consultation_fee?.toLocaleString() || doctor?.consultationFee?.toLocaleString() || '3,000')}
  </span>
  </div>
  </div>

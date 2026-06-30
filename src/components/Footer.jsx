@@ -34,7 +34,7 @@ const Footer = () => {
               hello@company.co
             </p>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Dr Samantha Medical Center,<br />
+              CareSync Medical Center,<br />
               Hidagoda, Badulla
             </p>
           </div>

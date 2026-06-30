@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, Printer, Calendar, Loader } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { io } from 'socket.io-client';
@@ -7,7 +8,7 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const socket = io('http://127.0.0.1:5000');
+const socket = io('http://localhost:5000');
 
 const BookAppointmentPage = () => {
   const location = useLocation();
@@ -22,6 +23,7 @@ const BookAppointmentPage = () => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash'); // 'Cash' or 'Online'
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [tokenNumber, setTokenNumber] = useState(null);
   
   const [formData, setFormData] = useState({
@@ -40,6 +42,32 @@ const BookAppointmentPage = () => {
   const SLOTS_PER_PAGE = 8;
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
+
+  // Fetch fresh doctor data on mount to prevent stale location.state issues on refresh
+  useEffect(() => {
+    const docId = initialDoctor?.id || initialDoctor?.doctor_id;
+    if (docId) {
+      axios.get(`http://localhost:5000/api/users/doctors?_t=${Date.now()}`)
+        .then(res => {
+          console.log("FRESH DOCTOR FETCH RES:", res.data);
+          if (res.data.success && res.data.doctors) {
+            const freshDoc = res.data.doctors.find(d => d.id === docId || d.doctor_id === docId);
+            if (freshDoc) {
+              setDoctor(prev => {
+                const newFee = freshDoc.consultationFee !== undefined ? freshDoc.consultationFee : prev.consultationFee;
+                console.log("UPDATING DOCTOR STATE FEE FROM", prev.consultationFee, "TO", newFee);
+                return {
+                  ...prev,
+                  ...freshDoc,
+                  consultationFee: newFee
+                };
+              });
+            }
+          }
+        })
+        .catch(err => console.error("Failed to fetch fresh doctor data:", err));
+    }
+  }, [initialDoctor]);
 
   useEffect(() => {
     const handleFeeChanged = (data) => {
@@ -84,7 +112,7 @@ const BookAppointmentPage = () => {
       const fetchDates = async () => {
         setLoadingDates(true);
         try {
-          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/configured-dates/${docId}`);
+          const res = await axios.get(`http://localhost:5000/api/appointments/configured-dates/${docId}`);
           if (res.data.success && res.data.dates) {
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -121,7 +149,7 @@ const BookAppointmentPage = () => {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`http://127.0.0.1:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
+          const res = await axios.get(`http://localhost:5000/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
             // Filter out buffer slots for online booking, and extract just the time string
             let publicSlots = res.data.slots
@@ -208,92 +236,97 @@ const BookAppointmentPage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      const docId = doctor?.id || doctor?.doctor_id;
-      const amount = isTelemedicine ? 2500 : doctor.consultationFee;
-      
-      const submitBooking = async () => {
-        try {
-          const res = await axios.post('http://localhost:5000/api/appointments', {
-            doctor_id: docId,
-            appointment_date: selectedDate.valueDate,
-            start_time: selectedTime,
-            patient_name: formData.fullName,
-            age: parseInt(formData.age),
-            mobile_number: formData.mobileNumber,
-            gender: formData.gender,
-            email: formData.email,
-            payment_method: paymentMethod,
-            is_telemedicine: isTelemedicine
-          }, {
-            headers: { Authorization: token }
-          });
-          
-          if (res.data.success) {
-            setTokenNumber(res.data.appointment.token_number);
-            setShowSuccessModal(true);
-          }
-        } catch (error) {
-          console.error("Booking failed", error);
-          alert(error.response?.data?.message || 'Booking failed');
+      setShowConfirmModal(true);
+    }
+  };
+
+  const proceedBooking = async () => {
+    setShowConfirmModal(false);
+    const docId = doctor?.id || doctor?.doctor_id;
+    const amount = doctor.consultationFee;
+    
+    const submitBooking = async () => {
+      try {
+        const res = await axios.post('http://localhost:5000/api/appointments', {
+          doctor_id: docId,
+          appointment_date: selectedDate.valueDate,
+          start_time: selectedTime,
+          patient_name: formData.fullName,
+          age: parseInt(formData.age),
+          mobile_number: formData.mobileNumber,
+          gender: formData.gender,
+          email: formData.email,
+          payment_method: paymentMethod,
+          is_telemedicine: isTelemedicine
+        }, {
+          headers: { Authorization: token }
+        });
+        
+        if (res.data.success) {
+          setTokenNumber(res.data.appointment.token_number);
+          setShowSuccessModal(true);
         }
-      };
-
-      if (paymentMethod === 'Online') {
-        const order_id = `APT-${Date.now()}`;
-        try {
-          const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
-            order_id: order_id,
-            amount: amount,
-            currency: 'LKR'
-          });
-
-          if (hashRes.data) {
-            const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
-
-            const payment = {
-              sandbox: true,
-              merchant_id: merchant_id,
-              return_url: window.location.href,
-              cancel_url: window.location.href,
-              notify_url: "http://localhost:5000/api/payment/notify",
-              order_id: order_id,
-              items: `Appointment with ${doctor?.name || 'Doctor'}`,
-              amount: formattedAmount,
-              currency: 'LKR',
-              hash: hash,
-              first_name: formData.fullName,
-              last_name: '',
-              email: formData.email || 'test@example.com',
-              phone: formData.mobileNumber,
-              address: 'Sri Lanka',
-              city: 'Colombo',
-              country: 'Sri Lanka'
-            };
-
-            window.payhere.onCompleted = function onCompleted(orderId) {
-              console.log("Payment completed. OrderID:" + orderId);
-              submitBooking();
-            };
-
-            window.payhere.onDismissed = function onDismissed() {
-              console.log("Payment dismissed");
-              alert("Payment was dismissed. Booking not completed.");
-            };
-
-            window.payhere.onError = function onError(error) {
-              console.log("Error:"  + error);
-              alert("Payment error occurred.");
-            };
-
-            window.payhere.startPayment(payment);
-          }
-        } catch (error) {
-          console.error("Hash generation failed", error);
-          alert("Failed to initialize payment gateway");
-        }
-      } else {
-        submitBooking();
+      } catch (error) {
+        console.error("Booking failed", error);
+        toast.error(error.response?.data?.message || 'Booking failed');
       }
+    };
+
+    if (paymentMethod === 'Online') {
+      const order_id = `APT-${Date.now()}`;
+      try {
+        const hashRes = await axios.post('http://localhost:5000/api/payment/generate-hash', {
+          order_id: order_id,
+          amount: amount,
+          currency: 'LKR'
+        });
+
+        if (hashRes.data) {
+          const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
+
+          const payment = {
+            sandbox: true,
+            merchant_id: merchant_id,
+            return_url: window.location.href,
+            cancel_url: window.location.href,
+            notify_url: "http://localhost:5000/api/payment/notify",
+            order_id: order_id,
+            items: `Appointment with ${doctor?.name || 'Doctor'}`,
+            amount: formattedAmount,
+            currency: 'LKR',
+            hash: hash,
+            first_name: formData.fullName,
+            last_name: '',
+            email: formData.email || 'test@example.com',
+            phone: formData.mobileNumber,
+            address: 'Sri Lanka',
+            city: 'Colombo',
+            country: 'Sri Lanka'
+          };
+
+          window.payhere.onCompleted = function onCompleted(orderId) {
+            console.log("Payment completed. OrderID:" + orderId);
+            submitBooking();
+          };
+
+          window.payhere.onDismissed = function onDismissed() {
+            console.log("Payment dismissed");
+            toast.error("Payment was dismissed. Booking not completed.");
+          };
+
+          window.payhere.onError = function onError(error) {
+            console.log("Error:"  + error);
+            toast.error("Payment error occurred.");
+          };
+
+          window.payhere.startPayment(payment);
+        }
+      } catch (error) {
+        console.error("Hash generation failed", error);
+        toast.error("Failed to initialize payment gateway");
+      }
+    } else {
+      submitBooking();
     }
   };
 
@@ -586,7 +619,7 @@ const BookAppointmentPage = () => {
 
               <div className="border-t border-blue-100 dark:border-gray-700 pt-3 flex justify-between items-center">
                 <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Consultation Fee</span>
-                <span className="text-md font-bold text-blue-900 dark:text-blue-400">Rs. {isTelemedicine ? 2500 : doctor.consultationFee}</span>
+                <span className="text-md font-bold text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
               </div>
 
               {/* Payment Methods */}
@@ -636,6 +669,32 @@ const BookAppointmentPage = () => {
         </div>
       )}
       </div>
+
+{/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 dark:border-gray-700/80 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Confirm Booking</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
+              Are you sure you want to proceed with booking this appointment?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-xl font-bold transition"
+              >
+                No, Cancel
+              </button>
+              <button
+                onClick={proceedBooking}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition"
+              >
+                Yes, Proceed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 {/* Success Booking Receipt Overlay Modal */}
       {showSuccessModal && (
@@ -692,7 +751,7 @@ const BookAppointmentPage = () => {
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between text-sm font-bold">
                   <span className="text-gray-500">Paid Amount</span>
-                  <span className="text-blue-900 dark:text-blue-400">Rs. {isTelemedicine ? 2500 : doctor.consultationFee}</span>
+                  <span className="text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
                 </div>
               </div>
 

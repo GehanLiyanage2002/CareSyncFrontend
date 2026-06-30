@@ -12,6 +12,7 @@ const GlobalQueueMonitor = () => {
  const [loading, setLoading] = useState(true);
  const [isFullscreen, setIsFullscreen] = useState(false);
  const containerRef = useRef(null);
+ const [refreshTrigger, setRefreshTrigger] = useState(0);
 
  const fetchGlobalQueues = async () => {
  try {
@@ -28,17 +29,19 @@ const GlobalQueueMonitor = () => {
  };
 
  useEffect(() => {
- fetchGlobalQueues();
+    if (token) fetchGlobalQueues();
+  }, [token, refreshTrigger]);
 
- const handleUpdate = () => {
- fetchGlobalQueues();
- };
+  useEffect(() => {
+    const handleUpdate = () => {
+      setRefreshTrigger(prev => prev + 1);
+    };
 
- socket.on('slotBooked', handleUpdate);
- socket.on('appointmentStatusChanged', handleUpdate);
- socket.on('appointmentRescheduled', handleUpdate);
+    socket.on('slotBooked', handleUpdate);
+    socket.on('appointmentStatusChanged', handleUpdate);
+    socket.on('appointmentRescheduled', handleUpdate);
 
- const interval = setInterval(fetchGlobalQueues, 60000);
+    const interval = setInterval(handleUpdate, 60000);
 
  const onFullscreenChange = () => {
  setIsFullscreen(!!document.fullscreenElement);

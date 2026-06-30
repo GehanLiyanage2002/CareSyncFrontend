@@ -32,8 +32,11 @@ const PatientDashboardHome = () => {
   const navigate = useNavigate();
   const [upcomingTelemedicine, setUpcomingTelemedicine] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [reportsCount, setReportsCount] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
@@ -106,8 +109,49 @@ const PatientDashboardHome = () => {
         console.error('Error fetching appointments:', error);
       }
     };
-    if (token) fetchAppointments();
+    
+    const fetchReports = async () => {
+      try {
+        const response = await axios.get(
+          'http://127.0.0.1:5000/api/reports/my-history',
+          { headers: { Authorization: token } }
+        );
+        if (response.data.success) {
+          console.log('REPORTS RESPONSE:', response.data);
+          const reportsArray = response.data.reports || [];
+          setReportsCount(Array.isArray(reportsArray) ? reportsArray.length : 0);
+        } else {
+          setReportsCount(0);
+        }
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+        setReportsCount(0);
+      }
+    };
+
+    if (token) {
+      fetchAppointments();
+      fetchReports();
+      
+      // Real-time polling every 10 seconds
+      const interval = setInterval(() => {
+        fetchAppointments();
+        fetchReports();
+      }, 10000);
+      
+      return () => clearInterval(interval);
+    }
   }, [token, refreshTrigger]);
+
+  const getMedicalProfileCompletion = () => {
+    if (!user) return 0;
+    const fields = ['blood_group', 'allergies', 'chronic_conditions', 'emergency_contact_name', 'emergency_contact_number'];
+    let filled = 0;
+    fields.forEach(field => {
+      if (user[field] && user[field].toString().trim() !== '') filled++;
+    });
+    return Math.round((filled / fields.length) * 100);
+  };
 
   useEffect(() => {
     const handleStatusChanged = (data) => {
@@ -123,18 +167,26 @@ const PatientDashboardHome = () => {
     };
   }, [user]);
 
-  const handleCancel = async (id) => {
-    if (!window.confirm('Are you sure you want to cancel this appointment? Cancellations are only allowed up to 1 hour before.')) return;
+  const confirmCancel = (id) => {
+    setAppointmentToCancel(id);
+    setIsCancelModalOpen(true);
+  };
+
+  const executeCancel = async () => {
+    if (!appointmentToCancel) return;
     try {
-      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${id}/cancel`, {}, {
+      const res = await axios.put(`http://127.0.0.1:5000/api/appointments/${appointmentToCancel}/cancel`, {}, {
         headers: { Authorization: token }
       });
       if (res.data.success) {
-        setAppointments(appointments.map(a => a.id === id ? { ...a, status: 'cancelled' } : a));
+        setAppointments(appointments.map(a => a.id === appointmentToCancel ? { ...a, status: 'cancelled' } : a));
+        setIsCancelModalOpen(false);
+        setAppointmentToCancel(null);
+        toast.success('Appointment cancelled successfully');
       }
     } catch (err) {
       console.error('Error cancelling appointment:', err);
-      alert(err.response?.data?.message || 'Failed to cancel appointment');
+      toast.error(err.response?.data?.message || 'Failed to cancel appointment');
     }
   };
 
@@ -175,18 +227,18 @@ const PatientDashboardHome = () => {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
         
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-blue-200 text-white mb-8 relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-blue-200 dark:shadow-none text-white mb-8 relative overflow-hidden group">
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight">
-              Welcome back, {user?.name || user?.firstName || 'Patient'}! 👋
+              Welcome back, {user?.gender === 'Male' ? 'Mr. ' : user?.gender === 'Female' ? 'Ms. ' : ''}{user?.name || user?.firstName || user?.full_name || 'Patient'}! 👋
             </h2>
             <p className="text-blue-50 text-lg md:text-xl max-w-2xl font-medium leading-relaxed">
               Here is your daily health summary. Stay on track with your upcoming appointments and wellness goals.
             </p>
           </div>
           {/* Decorative background shapes */}
-          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
-          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="absolute -top-32 -right-32 w-80 h-80 bg-white/20 dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-white/20 dark:bg-gray-800/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
         </div>
 
         {upcomingTelemedicine && (
@@ -224,7 +276,9 @@ const PatientDashboardHome = () => {
               <span className="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 shadow-sm">Next 7 Days</span>
             </div>
             <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Upcoming Appointments</h3>
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">2 Scheduled</p>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">
+              {appointments.filter(a => a.status?.toLowerCase() === 'pending').length} Scheduled
+            </p>
           </div>
 
           {/* Card 2: Recent Diagnoses */}
@@ -237,7 +291,9 @@ const PatientDashboardHome = () => {
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm">New Updates</span>
             </div>
             <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Recent Diagnoses</h3>
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">1 Added</p>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">
+              {reportsCount === null ? 'Loading...' : `${reportsCount} Added`}
+            </p>
           </div>
 
           {/* Card 3: Medical Profile Status */}
@@ -250,7 +306,7 @@ const PatientDashboardHome = () => {
               <span className="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-100 shadow-sm">Looking Good</span>
             </div>
             <h3 className="text-slate-500 dark:text-gray-400 text-sm font-semibold mb-1 uppercase tracking-wider">Medical Profile Status</h3>
-            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">95% Complete</p>
+            <p className="text-3xl font-extrabold text-slate-800 dark:text-white">{getMedicalProfileCompletion()}% Complete</p>
           </div>
         </div>
 
@@ -282,7 +338,7 @@ const PatientDashboardHome = () => {
                       <button onClick={() => openRescheduleModal(app)} className="flex-1 md:flex-none px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded-xl transition-colors">Reschedule</button>
                     )}
                     {(app.status?.toLowerCase() === 'pending' || app.status?.toLowerCase() === 'in progress') && (
-                      <button onClick={() => handleCancel(app.id)} className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-xl transition-colors">Cancel</button>
+                      <button onClick={() => confirmCancel(app.id)} className="flex-1 md:flex-none px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 font-semibold rounded-xl transition-colors">Cancel</button>
                     )}
                   </div>
                 </div>
@@ -410,6 +466,37 @@ const PatientDashboardHome = () => {
               </div>
               <button onClick={handleReschedule} className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">
                 Confirm Reschedule
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {isCancelModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative text-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Cancel Appointment?</h3>
+            <p className="text-slate-500 dark:text-gray-400 mb-6 text-sm">
+              Are you sure you want to cancel this appointment? Cancellations are only allowed up to 1 hour before the scheduled time.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsCancelModalOpen(false)} 
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-semibold rounded-xl transition-colors"
+              >
+                No, Keep it
+              </button>
+              <button 
+                onClick={executeCancel} 
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl shadow-lg shadow-red-200 dark:shadow-none transition-colors"
+              >
+                Yes, Cancel
               </button>
             </div>
           </div>

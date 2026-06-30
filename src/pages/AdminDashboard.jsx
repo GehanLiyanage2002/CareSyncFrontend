@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import socket from '../socket';
 import axios from 'axios';
-import { io } from 'socket.io-client';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { 
  LayoutDashboard, Users, UserRound, Calendar, DollarSign, 
@@ -232,51 +232,63 @@ const AdminDashboard = () => {
  }, [activeTab, dateFilter, customDates]);
 
  useEffect(() => {
- const socket = io(`${import.meta.env.VITE_API_URL}`, { reconnection: true, reconnectionDelay: 1000 });
- socket.on('connect', () => {
- setSocketConnected(true);
- // Refresh data on reconnect (e.g. after server restart)
- if (activeTab === 'Overview') { fetchStats(); fetchEarnings(); }
- if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
- });
- socket.on('disconnect', () => setSocketConnected(false));
- 
- const refreshData = () => {
- if (activeTab === 'Overview') {
- fetchStats();
- fetchEarnings();
- }
- if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
- };
+  const handleConnect = () => {
+    setSocketConnected(true);
+    // Refresh data on reconnect (e.g. after server restart)
+    if (activeTab === 'Overview') { fetchStats(); fetchEarnings(); }
+    if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
+  };
+  const handleDisconnect = () => setSocketConnected(false);
 
- socket.on('appointmentStatusChanged', refreshData);
- socket.on('slotBooked', refreshData);
- 
- // Listen for doctor updates to refresh the doctors list
- const refreshDoctors = () => {
- if (activeTab === 'Doctors') {
- fetchDoctors();
- }
- refreshData();
- };
+  socket.on('connect', handleConnect);
+  socket.on('disconnect', handleDisconnect);
+  
+  const refreshData = () => {
+  if (activeTab === 'Overview') {
+  fetchStats();
+  fetchEarnings();
+  }
+  if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
+  };
 
- socket.on('doctorProfileUpdated', refreshDoctors);
- socket.on('doctorFeeChanged', refreshDoctors);
- socket.on('doctorAvailabilityChanged', refreshDoctors);
- 
- // Listen for patient updates to refresh the patients list
- const refreshPatients = () => {
- if (activeTab === 'Patients') {
- fetchPatients();
- }
- refreshData();
- };
+  socket.on('appointmentStatusChanged', refreshData);
+  socket.on('slotBooked', refreshData);
+  
+  // Listen for doctor updates to refresh the doctors list
+  const refreshDoctors = () => {
+  if (activeTab === 'Doctors') {
+  fetchDoctors();
+  }
+  refreshData();
+  };
 
- socket.on('patientRegistered', refreshPatients);
- socket.on('patientUpdated', refreshPatients);
- 
- return () => socket.disconnect();
- }, [activeTab, dateFilter, customDates]);
+  socket.on('doctorProfileUpdated', refreshDoctors);
+  socket.on('doctorFeeChanged', refreshDoctors);
+  socket.on('doctorAvailabilityChanged', refreshDoctors);
+  
+  // Listen for patient updates to refresh the patients list
+  const refreshPatients = () => {
+  if (activeTab === 'Patients') {
+  fetchPatients();
+  }
+  refreshData();
+  };
+
+  socket.on('patientRegistered', refreshPatients);
+  socket.on('patientUpdated', refreshPatients);
+  
+  return () => {
+    socket.off('connect', handleConnect);
+    socket.off('disconnect', handleDisconnect);
+    socket.off('appointmentStatusChanged', refreshData);
+    socket.off('slotBooked', refreshData);
+    socket.off('doctorProfileUpdated', refreshDoctors);
+    socket.off('doctorFeeChanged', refreshDoctors);
+    socket.off('doctorAvailabilityChanged', refreshDoctors);
+    socket.off('patientRegistered', refreshPatients);
+    socket.off('patientUpdated', refreshPatients);
+  };
+  }, [activeTab, dateFilter, customDates]);
 
 
  const handleLogout = () => {

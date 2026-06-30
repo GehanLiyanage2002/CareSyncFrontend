@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchServices } from '../features/services/servicesSlice';
 import { 
@@ -10,7 +10,7 @@ import {
   Baby, Sparkles, Search, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const Services = ({ isPage }) => {
   const navigate = useNavigate();

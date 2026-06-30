@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, User, CreditCard, X, Hash, Check, Receipt, CheckCircle, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  const { user } = useSelector((state) => state.auth);

@@ -7,9 +7,9 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import ScheduleManager from '../components/doctor/ScheduleManager';
 import FeeManager from '../components/doctor/FeeManager';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);

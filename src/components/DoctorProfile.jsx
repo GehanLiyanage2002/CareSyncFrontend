@@ -3,10 +3,10 @@ import { ArrowLeft, Star, Heart, Award, Users, Check, Printer, Clock, MapPin, Ch
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 import PatientReviewsList from './PatientReviewsList';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   const [doctor, setDoctor] = useState(initialDoctor);

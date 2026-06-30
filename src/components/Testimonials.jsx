@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Quote, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 import { Marquee } from './magicui/Marquee';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const Testimonials = () => {
   const [reviews, setReviews] = useState([]);

@@ -3,12 +3,12 @@ import { ArrowLeft, CheckCircle, Printer, Calendar, Loader } from 'lucide-react'
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const BookAppointmentPage = () => {
   const location = useLocation();

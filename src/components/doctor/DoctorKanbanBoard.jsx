@@ -7,9 +7,9 @@ import toast from 'react-hot-toast';
 import CreateMedicalReport from './CreateMedicalReport';
 import PatientPastRecordsModal from './PatientPastRecordsModal';
 import PatientMedicalProfileModal from './PatientMedicalProfileModal';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   const { token, user } = useSelector((state) => state.auth);

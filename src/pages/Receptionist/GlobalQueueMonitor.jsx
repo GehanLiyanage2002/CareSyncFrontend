@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Users, User, Activity, Maximize, Minimize } from 'lucide-react';
-import { io } from 'socket.io-client';
+import socket from '../../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const GlobalQueueMonitor = () => {
  const { token } = useSelector((state) => state.auth);

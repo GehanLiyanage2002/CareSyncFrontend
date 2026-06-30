@@ -6,9 +6,9 @@ import { Calendar, Clock, Star, ChevronRight, Stethoscope, Hash, CreditCard, Che
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const statusConfig = {
   pending: {

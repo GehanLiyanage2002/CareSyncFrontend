@@ -7,9 +7,9 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Header from '../components/Header';
 import { Video, Calendar, Clock, X, ChevronUp, ChevronDown } from 'lucide-react';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const CalendarIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>

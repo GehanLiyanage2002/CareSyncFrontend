@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 import { Mail, CheckCircle, Trash2, MailOpen, Clock, Reply, Send } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useSelector } from 'react-redux';
@@ -38,18 +38,16 @@ const Messages = () => {
 
   useEffect(() => {
     fetchMessages();
-    
-    // Set up Socket.IO connection for real-time updates
-    const socket = io(`${import.meta.env.VITE_API_URL}`, { reconnection: true });
-    
-    socket.on('new_contact_message', (newMessage) => {
+    const handleNewMessage = (newMessage) => {
       console.log('Received new message via socket:', newMessage);
       setMessages(prev => [newMessage, ...prev]);
       toast.success('New contact message received');
-    });
+    };
+
+    socket.on('new_contact_message', handleNewMessage);
 
     return () => {
-      socket.disconnect();
+      socket.off('new_contact_message', handleNewMessage);
     };
   }, []);
 

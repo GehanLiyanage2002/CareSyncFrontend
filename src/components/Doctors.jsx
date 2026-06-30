@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDoctors, updateDoctorAvailability, updateDoctorFee } from '../features/doctors/doctorsSlice';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import socket from '../socket';
 
-const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 
 const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   const navigate = useNavigate();

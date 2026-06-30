@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = {
   dyslexiaFriendly: 0,
   bigCursor: false,
   tooltips: false,
-  lineHeight: false,
+  lineHeight: 0,
   saturationLevel: 0,
   readingGuide: false,
 };
@@ -195,10 +195,9 @@ export const AccessibilityProvider = ({ children }) => {
     }
 
     // Line Height
-    if (settings.lineHeight) {
-      html.classList.add('a11y-line-height');
-    } else {
-      html.classList.remove('a11y-line-height');
+    html.classList.remove('a11y-line-height-1', 'a11y-line-height-2', 'a11y-line-height-3', 'a11y-line-height-4');
+    if (Number(settings.lineHeight) > 0) {
+      html.classList.add(`a11y-line-height-${settings.lineHeight}`);
     }
 
 

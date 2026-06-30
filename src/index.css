@@ -207,10 +207,10 @@
 }
 
 /* Line Height */
-.a11y-line-height,
-.a11y-line-height * {
-  line-height: 1.9 !important;
-}
+.a11y-line-height-1, .a11y-line-height-1 * { line-height: 1.5 !important; }
+.a11y-line-height-2, .a11y-line-height-2 * { line-height: 1.75 !important; }
+.a11y-line-height-3, .a11y-line-height-3 * { line-height: 2.0 !important; }
+.a11y-line-height-4, .a11y-line-height-4 * { line-height: 2.25 !important; }
 
 /* Tooltips */
 .a11y-tooltips [title]:not(.fixed):not(.absolute),

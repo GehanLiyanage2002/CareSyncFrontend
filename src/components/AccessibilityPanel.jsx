@@ -57,12 +57,12 @@ const AccessibilityPanel = () => {
     { key: 'dyslexiaFriendly', icon: BookOpen, label: 'Dyslexia Friendly', maxLevels: 2, levelLabels: ['Dyslexia Friendly', 'Legible Fonts'] },
     { key: 'bigCursor', icon: MousePointer2, label: 'Cursor' },
     { key: 'tooltips', icon: MessageSquare, label: 'Tooltips' },
-    { key: 'lineHeight', icon: ChevronUp, label: 'Line Height' },
+    { key: 'lineHeight', icon: ChevronUp, label: 'Line Height', maxLevels: 4, levelLabels: ['1.5x Spacing', '1.75x Spacing', '2.0x Spacing', '2.25x Spacing'] },
     { key: 'readingGuide', icon: Focus, label: 'Reading Guide' },
   ];
 
   const activeCount = Object.entries(settings).filter(([k, v]) => {
-    if (k === 'biggerText' || k === 'contrast' || k === 'dyslexiaFriendly' || k === 'saturationLevel' || k === 'textSpacing') return v > 0;
+    if (k === 'biggerText' || k === 'contrast' || k === 'dyslexiaFriendly' || k === 'saturationLevel' || k === 'textSpacing' || k === 'lineHeight') return v > 0;
     return v === true;
   }).length;
 

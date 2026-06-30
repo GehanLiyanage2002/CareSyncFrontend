@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { UserPlus, User, Phone, Mail, Droplets, Activity, CalendarPlus, Stethoscope } from 'lucide-react';
+import { UserPlus, User, Phone, Mail, Droplets, Activity, CalendarPlus, Stethoscope, Calendar, Users } from 'lucide-react';
 import QuickBookModal from './QuickBookModal';
 import QuickBookServiceModal from './QuickBookServiceModal';
 
@@ -14,6 +14,8 @@ const WalkInRegistration = () => {
  name: '',
  phone: '',
  email: '',
+ date_of_birth: '',
+ gender: '',
  blood_group: '',
  emergency_contact_name: '',
  emergency_contact_number: ''
@@ -44,7 +46,7 @@ const WalkInRegistration = () => {
  const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/receptionist/all-patients`, {
  headers: { Authorization: token }
  });
- setAllPatients(response.data);
+ setAllPatients(response.data.data || []);
  } catch (error) {
  console.error('Error preloading patients:', error);
  }
@@ -59,7 +61,7 @@ const WalkInRegistration = () => {
  const filtered = allPatients.filter(p => 
  (p.full_name && p.full_name.toLowerCase().includes(q)) || 
  (p.email && p.email.toLowerCase().includes(q)) ||
- (p.mobile_number && p.mobile_number.includes(q))
+ (p.mobile_number && p.mobile_number.toString().includes(q))
  ).slice(0, 10);
  
  setSearchResults(filtered);
@@ -84,6 +86,8 @@ const WalkInRegistration = () => {
  name: patient.full_name || '',
  phone: patient.mobile_number || '',
  email: patient.email || '',
+ date_of_birth: patient.date_of_birth || '',
+ gender: patient.gender || '',
  blood_group: patient.blood_group || '',
  emergency_contact_name: patient.emergency_contact_name || '',
  emergency_contact_number: patient.emergency_contact_number || ''
@@ -95,18 +99,78 @@ const WalkInRegistration = () => {
  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
  const handleChange = (e) => {
+ const { name, value } = e.target;
+ 
+ // Restrict phone fields to numbers only
+ if (name === 'phone' || name === 'emergency_contact_number') {
+ const numbersOnly = value.replace(/[^0-9]/g, '');
+ setFormData({ ...formData, [name]: numbersOnly });
+ return;
+ }
+
+ // Restrict name fields to letters and spaces only
+ if (name === 'name' || name === 'emergency_contact_name') {
+ const lettersOnly = value.replace(/[^a-zA-Z\s.-]/g, '');
+ setFormData({ ...formData, [name]: lettersOnly });
+ return;
+ }
+
  setFormData({
  ...formData,
- [e.target.name]: e.target.value
+ [name]: value
  });
  };
 
  const handleSubmit = async (e) => {
  e.preventDefault();
  
- if (!formData.name || !formData.phone) {
- toast.error('Name and Phone Number are required.');
+ if (!formData.name.trim() || formData.name.trim().length < 2) {
+ toast.error('Please enter a valid Full Name.');
  return;
+ }
+
+ const nameRegex = /^[a-zA-Z\s.-]+$/;
+ if (!nameRegex.test(formData.name.trim())) {
+ toast.error('Full Name should only contain letters and spaces.');
+ return;
+ }
+
+ const phoneRegex = /^[0-9]{10}$/;
+ if (!phoneRegex.test(formData.phone)) {
+ toast.error('Please enter a valid 10-digit phone number.');
+ return;
+ }
+
+ if (formData.email) {
+ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+ if (!emailRegex.test(formData.email)) {
+ toast.error('Please enter a valid Email Address.');
+ return;
+ }
+ }
+
+ if (formData.emergency_contact_name) {
+ if (!nameRegex.test(formData.emergency_contact_name.trim())) {
+ toast.error('Emergency Contact Name should only contain letters and spaces.');
+ return;
+ }
+ }
+
+ if (formData.emergency_contact_number) {
+ if (!phoneRegex.test(formData.emergency_contact_number)) {
+ toast.error('Please enter a valid 10-digit Emergency Contact Phone number.');
+ return;
+ }
+ }
+  
+ if (formData.date_of_birth) {
+   const selectedDate = new Date(formData.date_of_birth);
+   const today = new Date();
+   today.setHours(0, 0, 0, 0); // Ignore time part for today
+   if (selectedDate > today) {
+     toast.error('Date of Birth cannot be in the future.');
+     return;
+   }
  }
 
  setLoading(true);
@@ -138,6 +202,8 @@ const WalkInRegistration = () => {
  name: '',
  phone: '',
  email: '',
+ date_of_birth: '',
+ gender: '',
  blood_group: '',
  emergency_contact_name: '',
  emergency_contact_number: ''
@@ -294,9 +360,52 @@ const WalkInRegistration = () => {
  onChange={handleChange}
  autoComplete="off"
  required
+ maxLength="10"
  placeholder="e.g. 0771234567"
  className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />
+ </div>
+ </div>
+
+ {/* Date of Birth */}
+ <div>
+ <label className="block text-sm font-bold text-slate-700 mb-2">Date of Birth <span className="text-slate-400 font-normal">(Optional)</span></label>
+ <div className="relative">
+ <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+ <Calendar size={18} />
+ </div>
+ <input
+ type="date"
+ name="date_of_birth"
+ value={formData.date_of_birth}
+ onChange={handleChange}
+ max={new Date().toISOString().split('T')[0]}
+ className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+ />
+ </div>
+ </div>
+
+ {/* Gender */}
+ <div>
+ <label className="block text-sm font-bold text-slate-700 mb-2">Gender <span className="text-slate-400 font-normal">(Optional)</span></label>
+ <div className="relative">
+ <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+ <Users size={18} />
+ </div>
+ <select
+ name="gender"
+ value={formData.gender}
+ onChange={handleChange}
+ className="block w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium appearance-none cursor-pointer"
+ >
+ <option value="" disabled>Select Gender</option>
+ <option value="Male">Male</option>
+ <option value="Female">Female</option>
+ <option value="Other">Other</option>
+ </select>
+ <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+ <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+ </div>
  </div>
  </div>
 
@@ -373,6 +482,7 @@ const WalkInRegistration = () => {
  name="emergency_contact_number"
  value={formData.emergency_contact_number}
  onChange={handleChange}
+ maxLength="10"
  placeholder="e.g. 0777654321"
  className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />

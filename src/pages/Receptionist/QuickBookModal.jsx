@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { X, Calendar, Loader, CheckCircle, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-let cachedAllDoctors = null;
 
 const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  const { token } = useSelector((state) => state.auth);
@@ -15,7 +14,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
 
  // 2. Doctors State
  const [doctors, setDoctors] = useState([]);
- const [loadingDoctors, setLoadingDoctors] = useState(!cachedAllDoctors);
+ const [loadingDoctors, setLoadingDoctors] = useState(true);
  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
  // Filters State
@@ -39,18 +38,15 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  const slotsPerPage = 8;
  const totalSlotPages = Math.ceil(slots.length / slotsPerPage);
 
- const [allDoctors, setAllDoctors] = useState(cachedAllDoctors || []);
+ const [allDoctors, setAllDoctors] = useState([]);
 
- // Fetch Doctors ONCE per session
+ // Fetch Doctors
  useEffect(() => {
- if (cachedAllDoctors) return;
-
  const fetchDoctors = async () => {
  setLoadingDoctors(true);
  try {
  const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/doctors`);
  if (res.data.success) {
- cachedAllDoctors = res.data.doctors;
  setAllDoctors(res.data.doctors);
  }
  } catch (error) {
@@ -178,15 +174,16 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  };
 
  // Derived state for filtering doctors
- const specializations = ['All', ...new Set(doctors.map(d => d.specialization))];
+ const specializations = ['All', ...new Set(doctors.map(d => d.specialization || 'General'))];
  const filteredDoctors = doctors.filter(doc => {
  const formattedName = doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`;
  const searchLower = searchQuery.toLowerCase();
+ const docSpec = doc.specialization || 'General';
  
  const matchesSearch = doc.name.toLowerCase().includes(searchLower) || 
  formattedName.toLowerCase().includes(searchLower) ||
- doc.specialization.toLowerCase().includes(searchLower);
- const matchesSpec = selectedSpecialization === 'All' || doc.specialization === selectedSpecialization;
+ docSpec.toLowerCase().includes(searchLower);
+ const matchesSpec = selectedSpecialization === 'All' || docSpec === selectedSpecialization;
  return matchesSearch && matchesSpec;
  });
 

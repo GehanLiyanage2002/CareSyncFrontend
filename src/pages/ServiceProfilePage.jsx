@@ -86,7 +86,7 @@ const ServiceProfilePage = () => {
             <div className="w-full md:w-1/3 flex flex-col items-center">
               <div className="relative mb-6 w-full max-w-sm">
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-500 to-teal-400 opacity-20 blur-md scale-105"></div>
-                {service.image ? (
+                {service.has_image ? (
                   <img
                     src={`${import.meta.env.VITE_API_URL}/api/services/${service.id}/image?t=${imgKey}`}
                     alt={service.name}
@@ -99,7 +99,7 @@ const ServiceProfilePage = () => {
                   />
                 ) : null}
                 <div 
-                  className={`w-full aspect-square rounded-2xl bg-blue-50 dark:bg-gray-700 items-center justify-center border-4 border-white dark:border-gray-800 shadow-xl relative z-10 ${service.image ? 'hidden' : 'flex'}`}
+                  className={`w-full aspect-square rounded-2xl bg-blue-50 dark:bg-gray-700 items-center justify-center border-4 border-white dark:border-gray-800 shadow-xl relative z-10 ${service.has_image ? 'hidden' : 'flex'}`}
                 >
                   <Activity className="w-20 h-20 text-blue-300 dark:text-gray-500" />
                 </div>

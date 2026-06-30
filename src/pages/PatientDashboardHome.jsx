@@ -60,7 +60,24 @@ const PatientDashboardHome = () => {
         try {
           const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/appointments/configured-dates/${selectedAppointment.doctor_id}`);
           if (res.data.success) {
-            setConfiguredDates(res.data.dates.map(d => new Date(d).toDateString()));
+            const rawDates = res.data.dates || [];
+            const datesArr = rawDates.map(d => new Date(d).toDateString());
+            setConfiguredDates(datesArr);
+            
+            // Auto-select date logic
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const todayStrLocal = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            
+            const futureDates = rawDates.filter(d => new Date(d) > today).sort((a,b) => new Date(a) - new Date(b));
+            
+            if (futureDates.length > 0) {
+               const nextDate = new Date(futureDates[0]);
+               const nextDateStr = new Date(nextDate.getTime() - nextDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+               setNewDate(nextDateStr);
+            } else if (datesArr.includes(today.toDateString())) {
+               setNewDate(todayStrLocal);
+            }
           }
         } catch (error) {
           console.error('Error fetching configured dates:', error);
@@ -79,7 +96,22 @@ const PatientDashboardHome = () => {
         try {
           const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/appointments/slots/${selectedAppointment.doctor_id}?date=${newDate}`);
           if (res.data.success) {
-            setAvailableSlots(res.data.slots || []);
+            let publicSlots = (res.data.slots || [])
+              .filter(s => !s.isBuffer)
+              .map(s => s.time || s);
+              
+            // Filter out past time slots if the selected date is today
+            const todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            if (newDate === todayStr) {
+              const now = new Date();
+              const currentMinutes = now.getHours() * 60 + now.getMinutes();
+              publicSlots = publicSlots.filter(timeStr => {
+                const [h, m] = timeStr.split(':').map(Number);
+                return (h * 60 + m) > currentMinutes;
+              });
+            }
+            
+            setAvailableSlots(publicSlots);
           }
         } catch (error) {
           console.error('Error fetching slots:', error);
@@ -192,15 +224,13 @@ const PatientDashboardHome = () => {
 
   const openRescheduleModal = (app) => {
     setSelectedAppointment(app);
-    const d = new Date(app.appointment_date);
-    const localDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    setNewDate(localDateStr);
-    setNewTime(app.start_time);
+    setNewDate('');
+    setNewTime('');
     setIsRescheduleModalOpen(true);
   };
 
   const handleReschedule = async () => {
-    if (!newDate || !newTime) return alert('Please select a new date and time');
+    if (!newDate || !newTime) return toast.error('Please select a new date and time');
     try {
       const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/appointments/${selectedAppointment.id}/reschedule`, {
         new_date: newDate,
@@ -216,7 +246,7 @@ const PatientDashboardHome = () => {
       }
     } catch (err) {
       console.error('Error rescheduling appointment:', err);
-      alert(err.response?.data?.message || 'Failed to reschedule appointment');
+      toast.error(err.response?.data?.message || 'Failed to reschedule appointment');
     }
   };
 
@@ -386,7 +416,12 @@ const PatientDashboardHome = () => {
                         setNewDate('');
                       }
                     }}
-                    minDate={new Date(Date.now() + 86400000)}
+                    minDate={(() => {
+                      const today = new Date();
+                      today.setHours(0,0,0,0);
+                      const hasFuture = configuredDates.some(d => new Date(d) > today);
+                      return hasFuture ? new Date(today.getTime() + 86400000) : new Date();
+                    })()}
                     filterDate={(date) => configuredDates.includes(date.toDateString())}
                     dayClassName={(date) => configuredDates.includes(date.toDateString()) ? "font-bold text-blue-700 bg-blue-100 rounded-full" : "text-slate-500 dark:text-gray-400"}
                     wrapperClassName="w-full"

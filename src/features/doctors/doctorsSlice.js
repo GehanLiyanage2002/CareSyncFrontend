@@ -7,7 +7,11 @@ export const fetchDoctors = createAsyncThunk(
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/doctors?_t=${Date.now()}`);
       if (response.data.success) {
-        return response.data.doctors;
+        const timestamp = Date.now();
+        return response.data.doctors.map(doc => ({
+          ...doc,
+          image: doc.image ? `${doc.image}?t=${timestamp}` : doc.image
+        }));
       } else {
         return rejectWithValue('Failed to fetch doctors');
       }

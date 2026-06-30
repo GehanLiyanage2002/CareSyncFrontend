@@ -402,13 +402,30 @@ const AdminDashboard = () => {
  const totalDoctorPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
 
  // Appointments Pagination Logic
+ const { startDate: apptStartDate, endDate: apptEndDate } = getFilterDates();
+ 
+ const filterApptByDate = (itemDateStr) => {
+ if (!apptStartDate || !apptEndDate) return true;
+ try {
+ const itemDateString = format(new Date(itemDateStr), 'yyyy-MM-dd');
+ return itemDateString >= apptStartDate && itemDateString <= apptEndDate;
+ } catch (e) {
+ return true;
+ }
+ };
+
  let combinedAppointments = [];
  if (appointmentFilter === 'All' || appointmentFilter === 'Doctor') {
- combinedAppointments = [...combinedAppointments, ...(appointments || []).map(a => ({...a, _type: 'Doctor'}))];
+ const validAppts = (appointments || []).filter(a => filterApptByDate(a.date));
+ combinedAppointments = [...combinedAppointments, ...validAppts.map(a => ({...a, _type: 'Doctor'}))];
  }
  if (appointmentFilter === 'All' || appointmentFilter === 'Services') {
- combinedAppointments = [...combinedAppointments, ...(serviceBookings || []).map(s => ({...s, _type: 'Service'}))];
+ const validBookings = (serviceBookings || []).filter(s => filterApptByDate(s.date));
+ combinedAppointments = [...combinedAppointments, ...validBookings.map(s => ({...s, _type: 'Service'}))];
  }
+ 
+ combinedAppointments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
 
  const indexOfLastAppointment = appointmentCurrentPage * appointmentsPerPage;
  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
@@ -1022,6 +1039,32 @@ const AdminDashboard = () => {
  ))}
  </div>
  </div>
+
+ <div className="mb-6 flex flex-col md:flex-row justify-end gap-4">
+    <div className="flex flex-col items-end gap-3">
+      <div className="flex bg-white border border-slate-200 rounded-full p-1 shadow-sm overflow-x-auto max-w-full">
+        {['All Time', 'Today', 'This Week', 'This Month', 'Custom'].map(f => (
+          <button
+            key={f}
+            onClick={() => setDateFilter(f)}
+            className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all whitespace-nowrap ${
+              dateFilter === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 '
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+      
+      {dateFilter === 'Custom' && (
+        <div className="flex gap-2 items-center bg-white border border-slate-200 p-1.5 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2">
+          <input type="date" value={customDates.start} onChange={e => setCustomDates({...customDates, start: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+          <span className="text-slate-400 text-xs font-bold">TO</span>
+          <input type="date" value={customDates.end} onChange={e => setCustomDates({...customDates, end: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+        </div>
+      )}
+    </div>
+  </div>
  
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
  {currentAppointments.map(item => {

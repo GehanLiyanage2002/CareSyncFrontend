@@ -160,17 +160,23 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
           setConsultationFee(Number(data.consultation_fee) || 0);
         }
       };
+
+      const handlePatientUpdated = () => {
+        setRefreshTrigger(prev => prev + 1);
+      };
   
       socket.on('slotBooked', handleSlotBooked);
       socket.on('appointmentStatusChanged', handleStatusChanged);
       socket.on('appointmentRescheduled', handleRescheduled);
       socket.on('doctorFeeChanged', handleFeeChanged);
+      socket.on('patientUpdated', handlePatientUpdated);
   
       return () => {
         socket.off('slotBooked', handleSlotBooked);
         socket.off('appointmentStatusChanged', handleStatusChanged);
         socket.off('appointmentRescheduled', handleRescheduled);
         socket.off('doctorFeeChanged', handleFeeChanged);
+        socket.off('patientUpdated', handlePatientUpdated);
       };
     }, [user]);
 

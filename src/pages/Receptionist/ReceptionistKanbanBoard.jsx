@@ -50,7 +50,7 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  newTasks[apt.id] = {
  id: apt.id,
  tokenNumber: apt.token_number,
- patientName: apt.patient_name || apt.user_name || 'Unknown Patient',
+ patientName: apt.user_name || apt.patient_name || 'Unknown Patient',
  patient_id: apt.patient_id,
  date: new Date(apt.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
  time: apt.start_time.substring(0, 5),

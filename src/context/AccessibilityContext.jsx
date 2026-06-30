@@ -6,7 +6,7 @@ const DEFAULT_SETTINGS = {
   contrast: 0,
   highlightLinks: false,
   biggerText: 0,
-  textSpacing: false,
+  textSpacing: 0,
   pauseAnimations: false,
   hideImages: false,
   dyslexiaFriendly: 0,
@@ -153,10 +153,9 @@ export const AccessibilityProvider = ({ children }) => {
     }
 
     // Text Spacing
-    if (settings.textSpacing) {
-      html.classList.add('a11y-text-spacing');
-    } else {
-      html.classList.remove('a11y-text-spacing');
+    html.classList.remove('a11y-text-spacing', 'a11y-text-spacing-1', 'a11y-text-spacing-2', 'a11y-text-spacing-3');
+    if (Number(settings.textSpacing) > 0) {
+      html.classList.add(`a11y-text-spacing-${settings.textSpacing}`);
     }
 
     // Pause Animations

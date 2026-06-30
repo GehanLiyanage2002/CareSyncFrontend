@@ -51,7 +51,7 @@ const AccessibilityPanel = () => {
     { key: 'contrast', icon: SunMedium, label: 'Contrast +', maxLevels: 3, levelLabels: ['Invert Colors', 'Dark Contrast', 'Light Contrast'] },
     { key: 'highlightLinks', icon: Link, label: 'Highlight Links' },
     { key: 'biggerText', icon: Type, label: 'Bigger Text', maxLevels: 4 },
-    { key: 'textSpacing', icon: AlignJustify, label: 'Text Spacing' },
+    { key: 'textSpacing', icon: AlignJustify, label: 'Text Spacing', maxLevels: 3, levelLabels: ['Light Spacing', 'Moderate Spacing', 'Max Spacing'] },
     { key: 'pauseAnimations', icon: PauseCircle, label: 'Pause Animations' },
     { key: 'hideImages', icon: ImageOff, label: 'Hide Images' },
     { key: 'dyslexiaFriendly', icon: BookOpen, label: 'Dyslexia Friendly', maxLevels: 2, levelLabels: ['Dyslexia Friendly', 'Legible Fonts'] },
@@ -62,7 +62,7 @@ const AccessibilityPanel = () => {
   ];
 
   const activeCount = Object.entries(settings).filter(([k, v]) => {
-    if (k === 'biggerText' || k === 'contrast' || k === 'dyslexiaFriendly' || k === 'saturationLevel') return v > 0;
+    if (k === 'biggerText' || k === 'contrast' || k === 'dyslexiaFriendly' || k === 'saturationLevel' || k === 'textSpacing') return v > 0;
     return v === true;
   }).length;
 
@@ -87,6 +87,7 @@ const AccessibilityPanel = () => {
 
       {/* Panel */}
       <div
+        id="a11y-panel"
         className={`a11y-no-align fixed bottom-[80px] left-[24px] z-[9999] w-[260px] bg-white rounded-[16px] shadow-2xl shadow-blue-100/60 border border-gray-100 transition-all duration-300 ease-out overflow-hidden
           ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         style={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', transform: open ? 'translateY(0)' : 'translateY(16px)' }}

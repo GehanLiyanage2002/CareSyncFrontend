@@ -9,7 +9,7 @@ const DEFAULT_SETTINGS = {
   textSpacing: false,
   pauseAnimations: false,
   hideImages: false,
-  dyslexiaFriendly: false,
+  dyslexiaFriendly: 0,
   bigCursor: false,
   tooltips: false,
   lineHeight: false,
@@ -150,11 +150,12 @@ export const AccessibilityProvider = ({ children }) => {
       html.classList.remove('a11y-hide-images');
     }
 
-    // Dyslexia Friendly Font
-    if (settings.dyslexiaFriendly) {
+    // Dyslexia Friendly / Legible Fonts
+    html.classList.remove('a11y-dyslexia', 'a11y-legible');
+    if (Number(settings.dyslexiaFriendly) === 1) {
       html.classList.add('a11y-dyslexia');
-    } else {
-      html.classList.remove('a11y-dyslexia');
+    } else if (Number(settings.dyslexiaFriendly) === 2) {
+      html.classList.add('a11y-legible');
     }
 
     // Big Cursor

@@ -77,7 +77,7 @@ const AccessibilityPanel = () => {
     { key: 'textSpacing', icon: AlignJustify, label: 'Text Spacing' },
     { key: 'pauseAnimations', icon: PauseCircle, label: 'Pause Animations' },
     { key: 'hideImages', icon: ImageOff, label: 'Hide Images' },
-    { key: 'dyslexiaFriendly', icon: BookOpen, label: 'Dyslexia Friendly' },
+    { key: 'dyslexiaFriendly', icon: BookOpen, label: 'Dyslexia Friendly', maxLevels: 2, levelLabels: ['Dyslexia Friendly', 'Legible Fonts'] },
     { key: 'bigCursor', icon: MousePointer2, label: 'Cursor' },
     { key: 'tooltips', icon: MessageSquare, label: 'Tooltips' },
     { key: 'lineHeight', icon: ChevronUp, label: 'Line Height' },
@@ -86,7 +86,7 @@ const AccessibilityPanel = () => {
   const activeCount = Object.entries(settings).filter(([k, v]) => {
     if (k === 'saturation') return v !== 100;
     if (k === 'textAlign') return v !== 'default';
-    if (k === 'biggerText' || k === 'contrast') return v > 0;
+    if (k === 'biggerText' || k === 'contrast' || k === 'dyslexiaFriendly') return v > 0;
     return v === true;
   }).length;
 
@@ -111,7 +111,7 @@ const AccessibilityPanel = () => {
 
       {/* Panel */}
       <div
-        className={`fixed bottom-[80px] left-[24px] z-[9999] w-[260px] bg-white rounded-[16px] shadow-2xl shadow-blue-100/60 border border-gray-100 transition-all duration-300 ease-out overflow-hidden
+        className={`a11y-no-align fixed bottom-[80px] left-[24px] z-[9999] w-[260px] bg-white rounded-[16px] shadow-2xl shadow-blue-100/60 border border-gray-100 transition-all duration-300 ease-out overflow-hidden
           ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         style={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', transform: open ? 'translateY(0)' : 'translateY(16px)' }}
       >

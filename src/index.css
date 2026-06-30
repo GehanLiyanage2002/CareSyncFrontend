@@ -171,6 +171,12 @@
   word-spacing: 0.1em !important;
 }
 
+/* Legible Fonts */
+.a11y-legible,
+.a11y-legible * {
+  font-family: Arial, Helvetica, Verdana, sans-serif !important;
+}
+
 /* Big Cursor */
 .a11y-big-cursor,
 .a11y-big-cursor * {
@@ -184,9 +190,9 @@
 }
 
 /* Text Align */
-.a11y-align-left * { text-align: left !important; }
-.a11y-align-center * { text-align: center !important; }
-.a11y-align-right * { text-align: right !important; }
+.a11y-align-left *:not(button):not(button *):not(input):not(select):not(textarea):not(.a11y-no-align):not(.a11y-no-align *) { text-align: left !important; }
+.a11y-align-center *:not(button):not(button *):not(input):not(select):not(textarea):not(.a11y-no-align):not(.a11y-no-align *) { text-align: center !important; }
+.a11y-align-right *:not(button):not(button *):not(input):not(select):not(textarea):not(.a11y-no-align):not(.a11y-no-align *) { text-align: right !important; }
 
 /* Tooltips */
 .a11y-tooltips [title]:not(.fixed):not(.absolute),

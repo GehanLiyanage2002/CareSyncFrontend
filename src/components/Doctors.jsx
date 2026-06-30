@@ -17,10 +17,8 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    if (!doctors || doctors.length === 0) {
-      dispatch(fetchDoctors());
-    }
-  }, [dispatch, doctors?.length]);
+    dispatch(fetchDoctors());
+  }, [dispatch]);
 
   useEffect(() => {
     const handleAvailability = (data) => dispatch(updateDoctorAvailability(data));

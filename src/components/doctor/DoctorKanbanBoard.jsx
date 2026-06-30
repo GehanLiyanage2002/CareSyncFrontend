@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History, Activity } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import CreateMedicalReport from './CreateMedicalReport';
 import PatientPastRecordsModal from './PatientPastRecordsModal';
+import PatientMedicalProfileModal from './PatientMedicalProfileModal';
 import { io } from 'socket.io-client';
 
 const socket = io('http://127.0.0.1:5000');
@@ -34,6 +35,10 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   // State for Past Records Modal
   const [isPastRecordsModalOpen, setIsPastRecordsModalOpen] = useState(false);
   const [selectedPatientForHistory, setSelectedPatientForHistory] = useState(null);
+
+  // State for Medical Profile Modal
+  const [isMedicalProfileModalOpen, setIsMedicalProfileModalOpen] = useState(false);
+  const [selectedPatientForProfile, setSelectedPatientForProfile] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -433,7 +438,21 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
                     {selectedTask.tokenNumber || 'NO-TOKEN'}
                   </div>
                   <h4 className="text-2xl font-black text-slate-800 dark:text-white">{selectedTask.patientName}</h4>
-                  <p className="text-sm font-bold text-slate-500 dark:text-gray-400 mt-1">{selectedTask.age || '-'} Yrs • {selectedTask.gender || '-'}</p>
+                  <p className="text-sm font-bold text-slate-500 dark:text-gray-400 mt-1 mb-2">{selectedTask.age || '-'} Yrs • {selectedTask.gender || '-'}</p>
+                  
+                  <button
+                    onClick={() => {
+                      setSelectedPatientForProfile({
+                        patient_id: selectedTask.patient_id,
+                        patientName: selectedTask.patientName
+                      });
+                      setIsMedicalProfileModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-800/50 transition-colors border border-emerald-200 dark:border-emerald-800"
+                  >
+                    <Activity size={14} />
+                    Medical Profile
+                  </button>
                 </div>
               </div>
               
@@ -504,6 +523,17 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
         onClose={() => setIsPastRecordsModalOpen(false)}
         patient={selectedPatientForHistory}
       />
+      {/* Medical Profile Modal */}
+      {isMedicalProfileModalOpen && (
+        <PatientMedicalProfileModal
+          patient={selectedPatientForProfile}
+          onClose={() => {
+            setIsMedicalProfileModalOpen(false);
+            setSelectedPatientForProfile(null);
+          }}
+        />
+      )}
+
     </div>
   );
 };

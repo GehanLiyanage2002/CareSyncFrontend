@@ -222,8 +222,16 @@ const ReceptionistKanbanBoard = ({ allAppointments = [], doctor }) => {
  </div>
  <div className="p-8 space-y-6">
  <div className="flex items-center gap-6 border-b border-slate-100 pb-6">
- <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 /30 flex items-center justify-center text-blue-600 text-3xl font-black shadow-inner">
- {selectedTask.patientName?.charAt(0) || '?'}
+ <div className="h-20 w-20 rounded-[1.5rem] bg-blue-100 /30 flex items-center justify-center text-blue-600 text-3xl font-black shadow-inner overflow-hidden border border-blue-200">
+ <img 
+ src={`http://127.0.0.1:5000/api/users/profile-image/${selectedTask.patient_id}`}
+ alt={selectedTask.patientName}
+ className="w-full h-full object-cover"
+ onError={(e) => {
+ e.target.onerror = null;
+ e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedTask.patientName || 'Patient')}&background=0D8ABC&color=fff&size=128`;
+ }}
+ />
  </div>
  <div>
  <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-2 bg-indigo-50 /30 text-indigo-700 text-[10px] uppercase tracking-widest font-black rounded-lg border border-indigo-100 ">

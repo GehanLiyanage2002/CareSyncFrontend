@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History, Activity } from 'lucide-react';
+import { Calendar, Clock, User, CreditCard, X, Hash, Check, FileText, History, Activity, Video } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -52,6 +52,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
 
         if (profileRes.data.success) {
           setConsultationFee(Number(profileRes.data.profile?.consultation_fee) || 0);
+          setSpecialization(profileRes.data.profile?.specialization || '');
         }
 
         if (appointmentsRes.data.success) {

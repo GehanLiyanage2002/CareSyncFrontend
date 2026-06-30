@@ -269,7 +269,11 @@ const WalkInRegistration = () => {
  <p className="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{patient.full_name}</p>
  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
  <span className="text-xs text-slate-500 flex items-center gap-1"><Phone size={12}/> {patient.mobile_number}</span>
- {patient.email && <span className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>}
+ {patient.email && !patient.email.includes('@caresync.local') ? (
+ <span className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>
+ ) : (
+ <span className="text-xs text-slate-400/70 flex items-center gap-1 italic"><Mail size={12}/> None</span>
+ )}
  </div>
  </div>
  <div className="flex gap-2 ml-3 shrink-0">

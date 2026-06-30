@@ -4,7 +4,7 @@ import {
   SunMedium, Link, Type, AlignJustify, PauseCircle, ImageOff,
   BookOpen, MousePointer2, MessageSquare, AlignLeft, AlignCenter,
   AlignRight, Droplets, RotateCcw, Settings2, X, ChevronUp,
-  Accessibility
+  Accessibility, Focus
 } from 'lucide-react';
 
 const ToolButton = ({ active, onClick, icon: Icon, label, level, maxLevels }) => (
@@ -38,39 +38,16 @@ const ToolButton = ({ active, onClick, icon: Icon, label, level, maxLevels }) =>
   </button>
 );
 
-const SliderRow = ({ label, value, min, max, step, onChange, icon: Icon }) => (
-  <div className="px-[4px]">
-    <div className="flex items-center justify-between mb-[6px]">
-      <div className="flex items-center gap-[6px] text-[12px] font-semibold text-gray-600">
-        <Icon size={14} />
-        {label}
-      </div>
-      <span className="text-[12px] text-blue-600 font-bold">{value}{label === 'Saturation' ? '%' : ''}</span>
-    </div>
-    <input
-      type="range"
-      min={min}
-      max={max}
-      step={step}
-      value={value}
-      onChange={e => onChange(Number(e.target.value))}
-      className="w-full accent-blue-600 h-1.5 rounded-full"
-    />
-  </div>
-);
+
 
 const AccessibilityPanel = () => {
   const [open, setOpen] = useState(false);
   const { settings, toggle, set, reset } = useAccessibility();
 
-  const textAlignOptions = [
-    { value: 'default', icon: AlignJustify, label: 'Default' },
-    { value: 'left', icon: AlignLeft, label: 'Left' },
-    { value: 'center', icon: AlignCenter, label: 'Center' },
-    { value: 'right', icon: AlignRight, label: 'Right' },
-  ];
+
 
   const tools = [
+    { key: 'saturationLevel', icon: Droplets, label: 'Saturation', maxLevels: 3, levelLabels: ['High Saturation', 'Low Saturation', 'Monochrome'] },
     { key: 'contrast', icon: SunMedium, label: 'Contrast +', maxLevels: 3, levelLabels: ['Invert Colors', 'Dark Contrast', 'Light Contrast'] },
     { key: 'highlightLinks', icon: Link, label: 'Highlight Links' },
     { key: 'biggerText', icon: Type, label: 'Bigger Text', maxLevels: 4 },
@@ -81,12 +58,11 @@ const AccessibilityPanel = () => {
     { key: 'bigCursor', icon: MousePointer2, label: 'Cursor' },
     { key: 'tooltips', icon: MessageSquare, label: 'Tooltips' },
     { key: 'lineHeight', icon: ChevronUp, label: 'Line Height' },
+    { key: 'readingGuide', icon: Focus, label: 'Reading Guide' },
   ];
 
   const activeCount = Object.entries(settings).filter(([k, v]) => {
-    if (k === 'saturation') return v !== 100;
-    if (k === 'textAlign') return v !== 'default';
-    if (k === 'biggerText' || k === 'contrast' || k === 'dyslexiaFriendly') return v > 0;
+    if (k === 'biggerText' || k === 'contrast' || k === 'dyslexiaFriendly' || k === 'saturationLevel') return v > 0;
     return v === true;
   }).length;
 
@@ -160,46 +136,9 @@ const AccessibilityPanel = () => {
           })}
         </div>
 
-        {/* Divider */}
-        <div className="mx-[12px] border-t border-gray-100 my-[4px]" />
 
-        {/* Text Align */}
-        <div className="px-[12px] py-[8px]">
-          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-[8px]">Text Align</p>
-          <div className="grid grid-cols-4 gap-[4px]">
-            {textAlignOptions.map(({ value, icon: Icon, label }) => (
-              <button
-                key={value}
-                onClick={() => set('textAlign', value)}
-                title={label}
-                className={`flex flex-col items-center justify-center py-[8px] rounded-[8px] border-2 transition-all text-[10px] font-semibold gap-[4px]
-                  ${settings.textAlign === value
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-gray-100 text-gray-500 hover:border-blue-300 hover:text-blue-600'
-                  }`}
-              >
-                <Icon size={14} />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Divider */}
-        <div className="mx-[12px] border-t border-gray-100 my-[4px]" />
 
-        {/* Saturation Slider */}
-        <div className="px-[12px] py-[8px] space-y-[12px]">
-          <SliderRow
-            label="Saturation"
-            value={settings.saturation}
-            min={0}
-            max={200}
-            step={10}
-            onChange={v => set('saturation', v)}
-            icon={Droplets}
-          />
-        </div>
 
         {/* Reset Button */}
         <div className="px-[12px] pb-[12px] pt-[8px]">

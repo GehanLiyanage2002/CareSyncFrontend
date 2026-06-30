@@ -13,8 +13,8 @@ const DEFAULT_SETTINGS = {
   bigCursor: false,
   tooltips: false,
   lineHeight: false,
-  textAlign: 'default', // 'default' | 'left' | 'center' | 'right'
-  saturation: 100,      // 0 = grayscale, 100 = normal, 200 = high
+  saturationLevel: 0,
+  readingGuide: false,
 };
 
 const AccessibilityContext = createContext(null);
@@ -31,6 +31,21 @@ export const AccessibilityProvider = ({ children }) => {
 
   const { userInfo } = useSelector((state) => state.auth || {});
   const isInitialMount = useRef(true);
+  const [readingGuideY, setReadingGuideY] = useState(0);
+
+  useEffect(() => {
+    if (!settings.readingGuide) return;
+    
+    const handleMouseMove = (e) => {
+      setReadingGuideY(e.clientY);
+    };
+
+    // Initialize to center of screen if no mouse movement yet
+    setReadingGuideY(window.innerHeight / 2);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [settings.readingGuide]);
 
   // Fetch settings from DB on login/mount
   useEffect(() => {
@@ -90,6 +105,7 @@ export const AccessibilityProvider = ({ children }) => {
     let brightness = '1';
     let invert = '0%';
     let hueRotate = '0deg';
+    let saturate = '100%';
 
     switch (Number(settings.contrast)) {
       case 1: // Invert Colors
@@ -108,7 +124,14 @@ export const AccessibilityProvider = ({ children }) => {
         break;
     }
 
-    html.style.setProperty('--a11y-saturate', `${settings.saturation}%`);
+    switch (Number(settings.saturationLevel)) {
+      case 1: saturate = '200%'; break; // High
+      case 2: saturate = '50%'; break;  // Low
+      case 3: saturate = '0%'; break;   // Monochrome
+      default: break;
+    }
+
+    html.style.setProperty('--a11y-saturate', saturate);
     html.style.setProperty('--a11y-contrast', contrast);
     html.style.setProperty('--a11y-brightness', brightness);
     html.style.setProperty('--a11y-invert', invert);
@@ -179,11 +202,7 @@ export const AccessibilityProvider = ({ children }) => {
       html.classList.remove('a11y-line-height');
     }
 
-    // Text Align
-    html.classList.remove('a11y-align-left', 'a11y-align-center', 'a11y-align-right');
-    if (settings.textAlign !== 'default') {
-      html.classList.add(`a11y-align-${settings.textAlign}`);
-    }
+
   }, [settings]);
 
   const toggle = useCallback((key) => {
@@ -209,6 +228,23 @@ export const AccessibilityProvider = ({ children }) => {
           WebkitBackdropFilter: `saturate(var(--a11y-saturate, 100%)) invert(var(--a11y-invert, 0%)) hue-rotate(var(--a11y-hue-rotate, 0deg)) contrast(var(--a11y-contrast, 100%)) brightness(var(--a11y-brightness, 100%))`
         }}
       />
+      
+      {/* Reading Guide */}
+      {settings.readingGuide && (
+        <div 
+          className="fixed left-0 right-0 z-[9998] pointer-events-none transition-transform duration-75 ease-out"
+          style={{
+            top: 0,
+            height: '120px',
+            transform: `translateY(${readingGuideY - 60}px)`,
+            borderTop: '3px solid #3b82f6',
+            borderBottom: '3px solid #3b82f6',
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 -200vh 0 200vh rgba(0,0,0,0.4), 0 200vh 0 200vh rgba(0,0,0,0.4)'
+          }}
+        />
+      )}
+      
       {children}
     </AccessibilityContext.Provider>
   );

@@ -189,11 +189,6 @@
   line-height: 1.9 !important;
 }
 
-/* Text Align */
-.a11y-align-left *:not(button):not(button *):not(input):not(select):not(textarea):not(.a11y-no-align):not(.a11y-no-align *) { text-align: left !important; }
-.a11y-align-center *:not(button):not(button *):not(input):not(select):not(textarea):not(.a11y-no-align):not(.a11y-no-align *) { text-align: center !important; }
-.a11y-align-right *:not(button):not(button *):not(input):not(select):not(textarea):not(.a11y-no-align):not(.a11y-no-align *) { text-align: right !important; }
-
 /* Tooltips */
 .a11y-tooltips [title]:not(.fixed):not(.absolute),
 .a11y-tooltips [aria-label]:not(.fixed):not(.absolute) {

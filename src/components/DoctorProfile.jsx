@@ -283,6 +283,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
           <button
             onClick={() => navigate('/book-appointment', { state: { doctor, isTelemedicine: actualIsTelemedicine } })}
             className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-extrabold text-lg py-4 px-10 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2"
+            aria-label={`Book an appointment with Dr. ${doctor.name}`}
           >
             <Calendar className="w-6 h-6" />
             Book Your Appointment

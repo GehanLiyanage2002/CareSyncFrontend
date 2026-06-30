@@ -136,7 +136,7 @@ const Header = () => {
 
               {/* Google-Style Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-4 w-[360px] max-w-[90vw] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden flex flex-col transform origin-top-right transition-all duration-200 ease-out">
+                <div className="absolute right-0 mt-4 w-[360px] max-w-[90vw] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-[100] flex flex-col transform origin-top-right transition-all duration-200 ease-out">
                   
                   {/* Top Bar with Close Button */}
                   <div className="flex justify-between items-center px-6 pt-4 pb-2">
@@ -175,17 +175,19 @@ const Header = () => {
                         navigate('/edit-profile');
                       }}
                       className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
+                      aria-label="Edit and manage your CareSync profile"
                     >
                       Manage your CareSync Profile
                     </button>
                   </div>
 
                   {/* Dashboard Sections List */}
-                  <div className="bg-white dark:bg-slate-900 mx-2 mb-2 rounded-2xl flex flex-col overflow-hidden shadow-inner border border-slate-100 dark:border-slate-800">
+                  <div className="bg-white dark:bg-slate-900 mx-2 mb-2 rounded-2xl flex flex-col shadow-inner border border-slate-100 dark:border-slate-800">
                     
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/dashboard' : '/patient/dashboard'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800 first:rounded-t-2xl"
+                      aria-label="Go to your Dashboard"
                     >
                       <Home className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Dashboard</span>
@@ -194,6 +196,7 @@ const Header = () => {
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/kanban' : '/patient/appointments'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      aria-label={user?.role === 'Doctor' ? 'Manage your appointments' : 'View your appointments'}
                     >
                       <Calendar className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointments Board' : 'My Appointments'}</span>
@@ -202,6 +205,7 @@ const Header = () => {
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/history' : '/patient/medical-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      aria-label={user?.role === 'Doctor' ? 'View past appointments' : 'View your medical profile'}
                     >
                       {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
@@ -212,6 +216,7 @@ const Header = () => {
                       <button 
                         onClick={() => { setIsDropdownOpen(false); navigate('/patient/medical-history'); }}
                         className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        aria-label="View your past medical history"
                       >
                         <History className="text-slate-500 dark:text-slate-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">Medical History</span>
@@ -226,6 +231,7 @@ const Header = () => {
                           navigate('/doctor/reviews');
                         }}
                         className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        aria-label="View patient reviews and ratings"
                       >
                         <Star className="text-amber-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">My Reviews</span>
@@ -235,6 +241,7 @@ const Header = () => {
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      aria-label="Change account settings"
                     >
                       <Settings className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>
@@ -247,6 +254,7 @@ const Header = () => {
                           navigate('/');
                         }}
                         className="flex items-center gap-4 px-4 py-3 w-full hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl transition-colors text-left font-medium"
+                        aria-label="Sign out of your account"
                       >
                         <LogOut size={20} />
                         <span>Sign out</span>

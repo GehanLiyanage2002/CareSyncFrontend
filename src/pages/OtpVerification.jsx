@@ -94,7 +94,7 @@ const OtpVerification = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/auth/verify-otp', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/verify-otp`, {
         email,
         otp: otpCode
       });

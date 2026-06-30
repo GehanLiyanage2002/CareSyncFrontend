@@ -40,7 +40,7 @@ export const AccessibilityProvider = ({ children }) => {
           const config = {
             headers: { Authorization: `Bearer ${userInfo.token}` },
           };
-          const { data } = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/accessibility', config);
+          const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/accessibility`, config);
           if (data && Object.keys(data).length > 0) {
             setSettings(prev => ({ ...prev, ...data }));
           }
@@ -67,7 +67,7 @@ export const AccessibilityProvider = ({ children }) => {
           const config = {
             headers: { Authorization: `Bearer ${userInfo.token}` },
           };
-          await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/accessibility', settings, config);
+          await axios.put(`${import.meta.env.VITE_API_URL}/api/accessibility`, settings, config);
         } catch (error) {
           console.error('Failed to sync accessibility settings:', error);
         }

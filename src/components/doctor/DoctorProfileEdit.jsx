@@ -26,7 +26,7 @@ const DoctorProfileEdit = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/profile', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/doctor/profile`, {
           headers: { Authorization: token }
         });
         
@@ -83,7 +83,7 @@ const DoctorProfileEdit = () => {
     }
     
     try {
-      const response = await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/profile', {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/doctor/profile`, {
         full_name: `${profile.firstName} ${profile.lastName}`.trim(),
         mobile_number: profile.phone,
         specialization: profile.specialization,

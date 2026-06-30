@@ -8,7 +8,7 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const BookAppointmentPage = () => {
   const location = useLocation();
@@ -47,7 +47,7 @@ const BookAppointmentPage = () => {
   useEffect(() => {
     const docId = initialDoctor?.id || initialDoctor?.doctor_id;
     if (docId) {
-      axios.get(`http://localhost:5000/api/users/doctors?_t=${Date.now()}`)
+      axios.get(`${import.meta.env.VITE_API_URL}/api/users/doctors?_t=${Date.now()}`)
         .then(res => {
           console.log("FRESH DOCTOR FETCH RES:", res.data);
           if (res.data.success && res.data.doctors) {
@@ -112,7 +112,7 @@ const BookAppointmentPage = () => {
       const fetchDates = async () => {
         setLoadingDates(true);
         try {
-          const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/appointments/configured-dates/${docId}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/appointments/configured-dates/${docId}`);
           if (res.data.success && res.data.dates) {
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -149,7 +149,7 @@ const BookAppointmentPage = () => {
       const fetchSlots = async () => {
         setLoadingSlots(true);
         try {
-          const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/appointments/slots/${docId}?date=${selectedDate.valueDate}`);
           if (res.data.success) {
             // Filter out buffer slots for online booking, and extract just the time string
             let publicSlots = res.data.slots
@@ -247,7 +247,7 @@ const BookAppointmentPage = () => {
     
     const submitBooking = async () => {
       try {
-        const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/appointments', {
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/appointments`, {
           doctor_id: docId,
           appointment_date: selectedDate.valueDate,
           start_time: selectedTime,
@@ -275,7 +275,7 @@ const BookAppointmentPage = () => {
     if (paymentMethod === 'Online') {
       const order_id = `APT-${Date.now()}`;
       try {
-        const hashRes = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/payment/generate-hash', {
+        const hashRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/payment/generate-hash`, {
           order_id: order_id,
           amount: amount,
           currency: 'LKR'
@@ -289,7 +289,7 @@ const BookAppointmentPage = () => {
             merchant_id: merchant_id,
             return_url: window.location.href,
             cancel_url: window.location.href,
-            notify_url: "https://caresync-backend-api-gl.azurewebsites.net/api/payment/notify",
+            notify_url: `${import.meta.env.VITE_API_URL}/api/payment/notify`,
             order_id: order_id,
             items: `Appointment with ${doctor?.name || 'Doctor'}`,
             amount: formattedAmount,

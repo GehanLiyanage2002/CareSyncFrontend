@@ -15,7 +15,7 @@ const ViewSingleMedicalReportModal = ({ isOpen, onClose, appointment, onEditClic
       const fetchReport = async () => {
         setIsLoading(true);
         try {
-          const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/reports/appointment/${appointment.id}`, {
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/reports/appointment/${appointment.id}`, {
             headers: { Authorization: token }
           });
           if (res.data.success && res.data.report) {

@@ -35,7 +35,7 @@ const ScheduleManager = () => {
   const confirmDelete = async () => {
     if (!scheduleToDelete) return;
     try {
-      await axios.delete(`https://caresync-backend-api-gl.azurewebsites.net/api/doctor/schedule/${scheduleToDelete}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/doctor/schedule/${scheduleToDelete}`, {
         headers: { Authorization: token }
       });
       toast.success("Schedule deleted successfully");
@@ -49,7 +49,7 @@ const ScheduleManager = () => {
   };
   const fetchSchedules = async () => {
     try {
-      const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/schedule', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/doctor/schedule`, {
         headers: { Authorization: token }
       });
       if (res.data.success) {
@@ -88,7 +88,7 @@ const ScheduleManager = () => {
       const dayStr = String(selectedDate.getDate()).padStart(2, '0');
       const schedule_date = `${year}-${monthStr}-${dayStr}`;
 
-      await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/schedule', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/doctor/schedule`, {
         schedule_date: schedule_date,
         start_time: formData.start_time,
         end_time: formData.end_time,

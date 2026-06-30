@@ -41,7 +41,7 @@ const AdminServices = () => {
 
  const fetchServices = async () => {
  try {
- const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/services', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/services`, {
  headers: { Authorization: token }
  });
  if (res.data.success) {
@@ -55,7 +55,7 @@ const AdminServices = () => {
 
  const fetchSchedules = async (serviceId) => {
  try {
- const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${serviceId}/schedules`, {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/${serviceId}/schedules`, {
  headers: { Authorization: token }
  });
  if (res.data.success) {
@@ -69,7 +69,7 @@ const AdminServices = () => {
  useEffect(() => {
  fetchServices();
  
- const socket = io('https://caresync-backend-api-gl.azurewebsites.net', { reconnection: true });
+ const socket = io(`${import.meta.env.VITE_API_URL}`, { reconnection: true });
  
  socket.on('serviceAdded', fetchServices);
  socket.on('serviceUpdated', fetchServices);
@@ -94,7 +94,7 @@ const AdminServices = () => {
  fd.append('image', avatarFile);
  setUploadingImage(true);
  try {
- await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${serviceId}/image`, fd, {
+ await axios.put(`${import.meta.env.VITE_API_URL}/api/services/${serviceId}/image`, fd, {
  headers: { Authorization: token, 'Content-Type': 'multipart/form-data' }
  });
  } catch (err) {
@@ -113,7 +113,7 @@ const AdminServices = () => {
 
  try {
  if (isEditing) {
- const res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${currentService.id}`, {
+ const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/services/${currentService.id}`, {
  name: currentService.name,
  description: currentService.description,
  location: currentService.location,
@@ -129,7 +129,7 @@ const AdminServices = () => {
  fetchServices();
  }
  } else {
- const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/services', {
+ const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/services`, {
  name: currentService.name,
  description: currentService.description,
  location: currentService.location,
@@ -162,7 +162,7 @@ const AdminServices = () => {
  if (!isEditing) return;
  
  try {
- const res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${currentService.id}`, {
+ const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/services/${currentService.id}`, {
  name: currentService.name,
  description: currentService.description,
  location: currentService.location,
@@ -206,12 +206,12 @@ const AdminServices = () => {
  end_time: newSchedule.end_time,
  schedule_date: newSchedule.schedule_date
  };
- await axios.post(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${currentService.id}/schedules`, payload, {
+ await axios.post(`${import.meta.env.VITE_API_URL}/api/services/${currentService.id}/schedules`, payload, {
  headers: { Authorization: token }
  });
  } else {
  const promises = newSchedule.day_of_week.map(day => {
- return axios.post(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${currentService.id}/schedules`, {
+ return axios.post(`${import.meta.env.VITE_API_URL}/api/services/${currentService.id}/schedules`, {
  start_time: newSchedule.start_time,
  end_time: newSchedule.end_time,
  day_of_week: day
@@ -230,7 +230,7 @@ const AdminServices = () => {
 
  const handleDeleteSchedule = async (scheduleId) => {
  try {
- const res = await axios.delete(`https://caresync-backend-api-gl.azurewebsites.net/api/services/schedules/${scheduleId}`, {
+ const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/services/schedules/${scheduleId}`, {
  headers: { Authorization: token }
  });
  if (res.data.success) {
@@ -251,7 +251,7 @@ const AdminServices = () => {
  price: service.price || ''
  });
  if (service.has_image) {
- setAvatarPreview(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${service.id}/image?t=${Date.now()}`);
+ setAvatarPreview(`${import.meta.env.VITE_API_URL}/api/services/${service.id}/image?t=${Date.now()}`);
  } else {
  setAvatarPreview(null);
  }
@@ -280,7 +280,7 @@ const AdminServices = () => {
  }
 
  const service = services.find(s => s.id === id);
- const res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${id}`, {
+ const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/services/${id}`, {
  name: service.name,
  description: service.description,
  location: service.location,
@@ -315,7 +315,7 @@ const AdminServices = () => {
  const confirmDeleteService = async () => {
  if (!serviceToDelete) return;
  try {
- const res = await axios.delete(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${serviceToDelete.id}`, {
+ const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/services/${serviceToDelete.id}`, {
  headers: { Authorization: token }
  });
  if (res.data.success) {
@@ -690,7 +690,7 @@ const AdminServices = () => {
  <div className="flex gap-4">
  <div className="w-[70px] h-[70px] rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-indigo-100 flex-shrink-0 shadow-inner">
  <img 
- src={`https://caresync-backend-api-gl.azurewebsites.net/api/services/${service.id}/image?t=${Date.now()}`} 
+ src={`${import.meta.env.VITE_API_URL}/api/services/${service.id}/image?t=${Date.now()}`} 
  alt={service.name} 
  className="w-full h-full object-cover" 
  onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; if(e.target.parentNode) e.target.parentNode.innerText = service.name.charAt(0).toUpperCase(); }} 
@@ -768,7 +768,7 @@ const AdminServices = () => {
  <div className="px-8 pb-8">
  <div className="flex justify-between items-start mb-6">
  <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
- <img src={`https://caresync-backend-api-gl.azurewebsites.net/api/services/${selectedService.id}/image?t=${Date.now()}`} alt={selectedService.name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; if(e.target.parentNode) e.target.parentNode.innerText = selectedService.name.charAt(0).toUpperCase(); }} />
+ <img src={`${import.meta.env.VITE_API_URL}/api/services/${selectedService.id}/image?t=${Date.now()}`} alt={selectedService.name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; if(e.target.parentNode) e.target.parentNode.innerText = selectedService.name.charAt(0).toUpperCase(); }} />
  </div>
  
  {/* Toggle Switch */}

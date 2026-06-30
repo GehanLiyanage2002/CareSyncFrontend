@@ -17,7 +17,7 @@ const PatientMedicalHistoryPage = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/reports/my-history`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/reports/my-history`, {
           headers: { Authorization: token }
         });
         if (res.data.success) {

@@ -9,7 +9,7 @@ import ScheduleManager from '../components/doctor/ScheduleManager';
 import FeeManager from '../components/doctor/FeeManager';
 import { io } from 'socket.io-client';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const DoctorDashboardHome = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -26,7 +26,7 @@ const DoctorDashboardHome = () => {
     const fetchData = async () => {
       try {
         // Fetch doctor profile to get availability status
-        const profileRes = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/users/doctor-profile', {
+        const profileRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/doctor-profile`, {
           headers: { Authorization: token }
         });
         if (profileRes.data.profile) {
@@ -35,7 +35,7 @@ const DoctorDashboardHome = () => {
         }
 
         // Fetch today's appointments
-        const aptRes = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/appointments/doctor/my-appointments', {
+        const aptRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/appointments/doctor/my-appointments`, {
           headers: { Authorization: token }
         });
         
@@ -117,7 +117,7 @@ const DoctorDashboardHome = () => {
     setIsAvailable(newStatus);
     
     try {
-      await axios.put('https://caresync-backend-api-gl.azurewebsites.net/api/appointments/doctor/availability', {}, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/appointments/doctor/availability`, {}, {
         headers: { Authorization: token }
       });
       

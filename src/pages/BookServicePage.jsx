@@ -30,7 +30,7 @@ const BookServicePage = () => {
   const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
-    axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/reviews/public/recent')
+    axios.get(`${import.meta.env.VITE_API_URL}/api/reviews/public/recent`)
       .then(res => {
         if (res.data.success && res.data.reviews) {
           setReviews(res.data.reviews);
@@ -53,7 +53,7 @@ const BookServicePage = () => {
       if (!service.id) return;
       setLoadingDates(true);
       try {
-        const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/services/${service.id}/schedules`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/${service.id}/schedules`, {
           headers: { Authorization: token }
         });
         if (res.data.success && res.data.schedules) {
@@ -148,7 +148,7 @@ const BookServicePage = () => {
       
       const submitBooking = async () => {
         try {
-          const res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/services/book', {
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/services/book`, {
             service_id: service.id,
             date: selectedDateObj.schedule_date,
             time: selectedTime,
@@ -170,7 +170,7 @@ const BookServicePage = () => {
       if (paymentMethod === 'Online') {
         const order_id = `SRV-${Date.now()}`;
         try {
-          const hashRes = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/payment/generate-hash', {
+          const hashRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/payment/generate-hash`, {
             order_id: order_id,
             amount: amount,
             currency: 'LKR'
@@ -184,7 +184,7 @@ const BookServicePage = () => {
               merchant_id: merchant_id,
               return_url: window.location.href,
               cancel_url: window.location.href,
-              notify_url: "https://caresync-backend-api-gl.azurewebsites.net/api/payment/notify",
+              notify_url: `${import.meta.env.VITE_API_URL}/api/payment/notify`,
               order_id: order_id,
               items: `Service Booking: ${service.name}`,
               amount: formattedAmount,

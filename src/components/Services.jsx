@@ -10,7 +10,7 @@ import {
   Baby, Sparkles, Search, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const Services = ({ isPage }) => {
   const navigate = useNavigate();
@@ -125,7 +125,7 @@ const Services = ({ isPage }) => {
                       {service.has_image ? (
                         <div className="w-20 h-20 rounded-full border-2 border-white dark:border-gray-800 shadow-sm overflow-hidden group-hover:scale-105 transition-transform duration-300">
                           <img 
-                            src={`https://caresync-backend-api-gl.azurewebsites.net/api/services/${service.id}/image`} 
+                            src={`${import.meta.env.VITE_API_URL}/api/services/${service.id}/image`} 
                             alt={service.name} 
                             className="w-full h-full object-cover"
                           />

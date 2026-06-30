@@ -23,7 +23,7 @@ const AppointmentHistory = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/doctor/appointments', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/doctor/appointments`, {
           headers: { Authorization: token }
         });
 

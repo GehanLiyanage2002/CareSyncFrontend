@@ -5,7 +5,7 @@ export const fetchServices = createAsyncThunk(
   'services/fetchServices',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/services');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services`);
       if (response.data.success) {
         return response.data.services;
       } else {

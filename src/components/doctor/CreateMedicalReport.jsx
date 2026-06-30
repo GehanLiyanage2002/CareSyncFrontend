@@ -27,7 +27,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
       const fetchReport = async () => {
         setIsLoading(true);
         try {
-          const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/reports/appointment/${appointment.id}`, {
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/reports/appointment/${appointment.id}`, {
             headers: { Authorization: token }
           });
           if (res.data.success && res.data.report) {
@@ -116,14 +116,14 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
 
       let res;
       if (isEditMode && existingReport) {
-        res = await axios.put(`https://caresync-backend-api-gl.azurewebsites.net/api/reports/${existingReport.id}`, data, {
+        res = await axios.put(`${import.meta.env.VITE_API_URL}/api/reports/${existingReport.id}`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: token,
           },
         });
       } else {
-        res = await axios.post('https://caresync-backend-api-gl.azurewebsites.net/api/reports', data, {
+        res = await axios.post(`${import.meta.env.VITE_API_URL}/api/reports`, data, {
           headers: {
             'Content-Type': 'multipart/form-data',
             Authorization: token,

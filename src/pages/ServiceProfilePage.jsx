@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const ServiceProfilePage = () => {
   const location = useLocation();
@@ -87,7 +87,7 @@ const ServiceProfilePage = () => {
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-500 to-teal-400 opacity-20 blur-md scale-105"></div>
                 {service.image ? (
                   <img
-                    src={`https://caresync-backend-api-gl.azurewebsites.net/api/services/${service.id}/image?t=${imgKey}`}
+                    src={`${import.meta.env.VITE_API_URL}/api/services/${service.id}/image?t=${imgKey}`}
                     alt={service.name}
                     className="w-full aspect-square object-cover rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl relative z-10"
                     onError={(e) => {

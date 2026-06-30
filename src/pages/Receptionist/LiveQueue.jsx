@@ -6,7 +6,7 @@ import { Users, ChevronDown, User, Activity, Calendar, Clock, LayoutDashboard, L
 import ReceptionistKanbanBoard from './ReceptionistKanbanBoard';
 import { io } from 'socket.io-client';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const LiveQueue = () => {
  const { token } = useSelector((state) => state.auth);
@@ -39,7 +39,7 @@ const LiveQueue = () => {
  const handleUpdate = (data) => {
  if (String(data.doctor_id) === String(selectedDoctorId) || String(data.doctorId) === String(selectedDoctorId)) {
  // Refetch queue silently to keep real-time UI smooth
- axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/receptionist/queue-dashboard/${selectedDoctorId}`, {
+ axios.get(`${import.meta.env.VITE_API_URL}/api/receptionist/queue-dashboard/${selectedDoctorId}`, {
  headers: { Authorization: token }
  }).then(res => {
  setUpcoming(res.data.upcoming || []);
@@ -66,7 +66,7 @@ const LiveQueue = () => {
  try {
  setIsFetchingDoctors(true);
  // Fetch all available doctors using the public/user endpoint
- const res = await axios.get('https://caresync-backend-api-gl.azurewebsites.net/api/users/doctors', {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/doctors`, {
  headers: { Authorization: token }
  });
  setDoctors(res.data.doctors || []);
@@ -82,7 +82,7 @@ const LiveQueue = () => {
  try {
  setLoading(true);
  // Fetch using the all-queues API and filter, or use the dedicated endpoint
- const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/receptionist/queue-dashboard/${doctorId}`, {
+ const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/receptionist/queue-dashboard/${doctorId}`, {
  headers: { Authorization: token }
  });
  setUpcoming(res.data.upcoming || []);

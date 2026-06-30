@@ -18,7 +18,7 @@ const PatientPastRecordsModal = ({ isOpen, onClose, patient }) => {
       const fetchReports = async () => {
         setIsLoading(true);
         try {
-          const res = await axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/reports/patient/${patient.patient_id}`, {
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/reports/patient/${patient.patient_id}`, {
             headers: { Authorization: token }
           });
           if (res.data.success) {

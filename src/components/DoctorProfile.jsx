@@ -6,7 +6,7 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import PatientReviewsList from './PatientReviewsList';
 
-const socket = io('https://caresync-backend-api-gl.azurewebsites.net');
+const socket = io(`${import.meta.env.VITE_API_URL}`);
 
 const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   const [doctor, setDoctor] = useState(initialDoctor);
@@ -47,7 +47,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   useEffect(() => {
     const docId = initialDoctor?.id || initialDoctor?.doctor_id;
     if (docId) {
-      axios.get(`http://localhost:5000/api/users/doctors?_t=${Date.now()}`)
+      axios.get(`${import.meta.env.VITE_API_URL}/api/users/doctors?_t=${Date.now()}`)
         .then(res => {
           if (res.data.success && res.data.doctors) {
             const freshDoc = res.data.doctors.find(d => d.id === docId || d.doctor_id === docId);
@@ -106,7 +106,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
   useEffect(() => {
     const doctorId = doctor.id || doctor.doctor_id;
     if (!doctorId) return;
-    axios.get(`https://caresync-backend-api-gl.azurewebsites.net/api/reviews/${doctorId}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/api/reviews/${doctorId}`)
       .then(res => {
         if (res.data.success) {
           setReviews(res.data.reviews);

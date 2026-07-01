@@ -431,7 +431,7 @@ const BookAppointmentPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {/* Full Name */}
-                <div>
+                <div aria-label="Enter patient's full name">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Full Name</label>
                   <input
                     type="text"
@@ -445,7 +445,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Age */}
-                <div>
+                <div aria-label="Enter patient's age in years">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Age</label>
                   <input
                     type="text"
@@ -459,7 +459,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Mobile Number */}
-                <div>
+                <div aria-label="Enter a 10-digit mobile number">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Mobile Number (10 digits)</label>
                   <input
                     type="tel"
@@ -473,7 +473,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Gender */}
-                <div>
+                <div aria-label="Select patient's gender">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Gender</label>
                   <select
                     name="gender"
@@ -489,7 +489,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Email */}
-                <div className="md:col-span-2">
+                <div className="md:col-span-2" aria-label="Enter email address to receive the booking receipt">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Email (Optional - for receipt)</label>
                   <input
                     type="email"
@@ -627,6 +627,7 @@ const BookAppointmentPage = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('Cash')}
+                  aria-label="Pay cash at the hospital counter"
                   className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
                     paymentMethod === 'Cash'
                       ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
@@ -638,6 +639,7 @@ const BookAppointmentPage = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('Online')}
+                  aria-label="Pay securely online now"
                   className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
                     paymentMethod === 'Online'
                       ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
@@ -654,12 +656,14 @@ const BookAppointmentPage = () => {
                   Only Patients can book appointments.
                 </div>
               ) : (
-                <button
-                  type="submit"
-                  className="w-full mt-4 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md transition duration-300 hover:shadow-lg active:scale-98"
-                >
-                  Confirm Booking
-                </button>
+                <div aria-label="Click to confirm your appointment booking" className="w-full mt-4">
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md transition duration-300 hover:shadow-lg active:scale-98"
+                  >
+                    Confirm Booking
+                  </button>
+                </div>
               )}
             </div>
 

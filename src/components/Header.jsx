@@ -53,13 +53,13 @@ const Header = () => {
     <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
         <div className="flex items-center">
-          <span className="text-2xl font-bold text-blue-700 dark:text-blue-400 cursor-pointer" onClick={() => navigate('/')}>CareSync</span>
+          <span className="text-2xl font-bold text-blue-700 dark:text-blue-400 cursor-pointer" onClick={() => navigate('/')} aria-label="CareSync Home">CareSync</span>
         </div>
         <nav className="hidden md:flex space-x-8">
-          <button onClick={() => navigate('/#hero')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</button>
-          <button onClick={() => navigate('/doctors')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Doctors</button>
-          <button onClick={() => navigate('/services')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Services</button>
-          <button onClick={() => navigate('/contact')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Contact Us</button>
+          <button onClick={() => navigate('/#hero')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors" aria-label="Go to Home section">Home</button>
+          <button onClick={() => navigate('/doctors')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors" aria-label="View our doctors">Doctors</button>
+          <button onClick={() => navigate('/services')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors" aria-label="Explore our services">Services</button>
+          <button onClick={() => navigate('/contact')} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors" aria-label="Contact CareSync support">Contact Us</button>
           {/* <a href="#login" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login portal</a> */}
         </nav>
         <div className="flex items-center space-x-4">
@@ -83,6 +83,7 @@ const Header = () => {
             <button
               onClick={() => navigate('/login')}
               className="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2"
+              aria-label="Sign in to your account"
             >
               Sign In
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
@@ -103,6 +104,7 @@ const Header = () => {
                   }
                 }}
                 className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 items-center gap-2"
+                aria-label={user?.role === 'Doctor' ? 'Set new appointment' : 'Book an appointment'}
               >
                 {user?.role === 'Doctor' ? 'Set Appointment' : 'Book Appointment'}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
@@ -134,7 +136,7 @@ const Header = () => {
 
               {/* Google-Style Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-4 w-[360px] max-w-[90vw] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden flex flex-col transform origin-top-right transition-all duration-200 ease-out">
+                <div className="absolute right-0 mt-4 w-[360px] max-w-[90vw] bg-[#f8fafc] dark:bg-slate-800 rounded-[28px] shadow-2xl border border-slate-200 dark:border-slate-700 z-[100] flex flex-col transform origin-top-right transition-all duration-200 ease-out">
                   
                   {/* Top Bar with Close Button */}
                   <div className="flex justify-between items-center px-6 pt-4 pb-2">
@@ -144,6 +146,7 @@ const Header = () => {
                     <button 
                       onClick={() => setIsDropdownOpen(false)}
                       className="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5 transition-colors absolute right-4 top-4"
+                      aria-label="Close account menu"
                     >
                       <X size={18} />
                     </button>
@@ -172,17 +175,19 @@ const Header = () => {
                         navigate('/edit-profile');
                       }}
                       className="px-5 py-2 mt-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2"
+                      aria-label="Edit and manage your CareSync profile"
                     >
                       Manage your CareSync Profile
                     </button>
                   </div>
 
                   {/* Dashboard Sections List */}
-                  <div className="bg-white dark:bg-slate-900 mx-2 mb-2 rounded-2xl flex flex-col overflow-hidden shadow-inner border border-slate-100 dark:border-slate-800">
+                  <div className="bg-white dark:bg-slate-900 mx-2 mb-2 rounded-2xl flex flex-col shadow-inner border border-slate-100 dark:border-slate-800">
                     
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/dashboard' : '/patient/dashboard'); }}
-                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800 first:rounded-t-2xl"
+                      aria-label="Go to your Dashboard"
                     >
                       <Home className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Dashboard</span>
@@ -191,6 +196,7 @@ const Header = () => {
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/kanban' : '/patient/appointments'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      aria-label={user?.role === 'Doctor' ? 'Manage your appointments' : 'View your appointments'}
                     >
                       <Calendar className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointments Board' : 'My Appointments'}</span>
@@ -199,6 +205,7 @@ const Header = () => {
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate(user?.role === 'Doctor' ? '/doctor/history' : '/patient/medical-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      aria-label={user?.role === 'Doctor' ? 'View past appointments' : 'View your medical profile'}
                     >
                       {user?.role === 'Doctor' ? <History className="text-slate-500 dark:text-slate-400" size={20} /> : <HeartPulse className="text-slate-500 dark:text-slate-400" size={20} />}
                       <span className="font-medium text-slate-700 dark:text-slate-200">{user?.role === 'Doctor' ? 'Appointment History' : 'Medical Profile'}</span>
@@ -209,6 +216,7 @@ const Header = () => {
                       <button 
                         onClick={() => { setIsDropdownOpen(false); navigate('/patient/medical-history'); }}
                         className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        aria-label="View your past medical history"
                       >
                         <History className="text-slate-500 dark:text-slate-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">Medical History</span>
@@ -223,6 +231,7 @@ const Header = () => {
                           navigate('/doctor/reviews');
                         }}
                         className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        aria-label="View patient reviews and ratings"
                       >
                         <Star className="text-amber-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">My Reviews</span>
@@ -232,6 +241,7 @@ const Header = () => {
                     <button 
                       onClick={() => { setIsDropdownOpen(false); navigate('/edit-profile'); }}
                       className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                      aria-label="Change account settings"
                     >
                       <Settings className="text-slate-500 dark:text-slate-400" size={20} />
                       <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span>
@@ -244,6 +254,7 @@ const Header = () => {
                           navigate('/');
                         }}
                         className="flex items-center gap-4 px-4 py-3 w-full hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl transition-colors text-left font-medium"
+                        aria-label="Sign out of your account"
                       >
                         <LogOut size={20} />
                         <span>Sign out</span>

@@ -34,13 +34,15 @@ const Hero = () => {
           </p>
           
           <div className="flex gap-4">
-            <button 
-              onClick={() => navigate('/#doctors')}
-              className="relative overflow-hidden group flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-8 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 hover:-translate-y-1"
-            >
-              <span className="absolute inset-0 bg-white dark:bg-gray-800/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></span>
-              <span className="relative flex items-center gap-2 transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-white">Book Appointment <ArrowRight size={16} /></span>
-            </button>
+            <div aria-label="Book an appointment with a doctor" className="inline-block">
+              <button 
+                onClick={() => navigate('/#doctors')}
+                className="relative overflow-hidden group flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-8 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 hover:-translate-y-1"
+              >
+                <span className="absolute inset-0 bg-white dark:bg-gray-800/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></span>
+                <span className="relative flex items-center gap-2 transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-white">Book Appointment <ArrowRight size={16} /></span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -50,6 +52,7 @@ const Hero = () => {
             <img 
               src="https://themewagon.github.io/live-doc/v1.0.0/assets/img/gallery/hero.png" 
               alt="Doctor with patients" 
+              aria-label="Healthcare professionals at CareSync"
               className="w-full lg:w-[130%] max-w-none transform md:translate-x-10 lg:translate-x-24 drop-shadow-2xl hover:scale-[1.02] transition-transform duration-500"
               style={{ objectFit: 'contain' }}
               onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1638202993928-7267aad84c31?q=80&w=1000&auto=format&fit=crop' }}

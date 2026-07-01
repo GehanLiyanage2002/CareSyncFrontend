@@ -293,7 +293,7 @@ const GeneralProfileTab = () => {
             {/* Full Name */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
-              <div className="relative">
+              <div className="relative" aria-label="Update your full name">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User size={18} className="text-slate-400" />
                 </div>
@@ -312,7 +312,7 @@ const GeneralProfileTab = () => {
             {/* Contact Number */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Contact Number</label>
-              <div className="relative">
+              <div className="relative" aria-label="Update your contact number">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Phone size={18} className="text-slate-400" />
                 </div>
@@ -331,7 +331,7 @@ const GeneralProfileTab = () => {
             {/* Email Address (Read-only) */}
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
-              <div className="relative">
+              <div className="relative" aria-label="Your registered email address (cannot be changed)">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail size={18} className="text-slate-400" />
                 </div>
@@ -352,7 +352,7 @@ const GeneralProfileTab = () => {
             </div>
           </div>
           
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end pt-4" aria-label="Save all changes to your basic information">
             <button
               type="submit"
               disabled={loading.general}
@@ -374,7 +374,7 @@ const GeneralProfileTab = () => {
               {/* Specialization */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Specialization</label>
-                <div className="relative">
+                <div className="relative" aria-label="Enter your medical specialization">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Stethoscope size={18} className="text-slate-400" />
                   </div>
@@ -393,7 +393,7 @@ const GeneralProfileTab = () => {
               {/* Experience */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Years of Experience</label>
-                <div className="relative">
+                <div className="relative" aria-label="Enter your years of professional experience">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Clock size={18} className="text-slate-400" />
                   </div>
@@ -413,7 +413,7 @@ const GeneralProfileTab = () => {
               {/* Qualifications */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Qualifications</label>
-                <div className="relative">
+                <div className="relative" aria-label="Enter your medical qualifications">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <CheckCircle2 size={18} className="text-slate-400" />
                   </div>
@@ -431,7 +431,7 @@ const GeneralProfileTab = () => {
               {/* Bio */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Professional Bio</label>
-                <div className="relative">
+                <div className="relative" aria-label="Write a brief professional bio">
                   <div className="absolute top-3 left-3 pointer-events-none">
                     <FileText size={18} className="text-slate-400" />
                   </div>
@@ -450,7 +450,7 @@ const GeneralProfileTab = () => {
               {/* Location */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Clinic Location</label>
-                <div className="relative">
+                <div className="relative" aria-label="Enter your clinic location">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <MapPin size={18} className="text-slate-400" />
                   </div>
@@ -466,7 +466,7 @@ const GeneralProfileTab = () => {
               </div>
             </div>
             
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-end pt-4" aria-label="Save changes to your professional details">
               <button
                 type="submit"
                 disabled={loading.doctor}
@@ -486,7 +486,7 @@ const GeneralProfileTab = () => {
         {/* Face ID Enrollment */}
         {(user?.role === 'Doctor' || user?.role === 'Patient') && (
           <div className="mb-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-blue-50/80 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/50">
+            <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-blue-50/80 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/50" aria-label="Register your face for faster logins">
               <div className="flex items-center gap-4 mb-4 sm:mb-0">
                 <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <ScanFace size={24} />
@@ -498,6 +498,7 @@ const GeneralProfileTab = () => {
               </div>
               <button 
                 onClick={() => setShowFaceScanner(!showFaceScanner)}
+                aria-label={showFaceScanner ? 'Cancel face enrollment' : 'Enroll Face ID'}
                 className="w-full sm:w-auto px-5 py-2.5 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-slate-600 rounded-xl font-medium hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center justify-center gap-2"
               >
                 <ScanFace size={18} />
@@ -522,7 +523,7 @@ const GeneralProfileTab = () => {
           <form onSubmit={handleSavePassword} className="space-y-5 max-w-lg">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Current Password</label>
-              <div className="relative">
+              <div className="relative" aria-label="Type your current password">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock size={18} className="text-slate-400" />
                 </div>
@@ -538,7 +539,8 @@ const GeneralProfileTab = () => {
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:text-gray-300 dark:hover:text-slate-300"
+                  aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -547,7 +549,7 @@ const GeneralProfileTab = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">New Password</label>
-              <div className="relative">
+              <div className="relative" aria-label="Enter your new password">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock size={18} className="text-slate-400" />
                 </div>
@@ -563,7 +565,8 @@ const GeneralProfileTab = () => {
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:text-gray-300 dark:hover:text-slate-300"
+                  aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -572,7 +575,7 @@ const GeneralProfileTab = () => {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Confirm Password</label>
-              <div className="relative">
+              <div className="relative" aria-label="Re-type your new password to confirm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock size={18} className="text-slate-400" />
                 </div>
@@ -588,20 +591,23 @@ const GeneralProfileTab = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:text-gray-300 dark:hover:text-slate-300"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                 >
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
             
-            <button
-              type="submit"
-              disabled={loading.password}
-              className="px-6 py-2.5 mt-2 bg-slate-800 dark:bg-slate-700 text-white rounded-xl font-medium hover:bg-slate-900 dark:hover:bg-slate-600 focus:ring-4 focus:ring-slate-500/20 transition-all shadow-sm active:scale-95 disabled:opacity-70"
-            >
-              {loading.password ? 'Updating...' : 'Update Password'}
-            </button>
+            <div aria-label="Save your new password" className="inline-block">
+              <button
+                type="submit"
+                disabled={loading.password}
+                className="px-6 py-2.5 mt-2 bg-slate-800 dark:bg-slate-700 text-white rounded-xl font-medium hover:bg-slate-900 dark:hover:bg-slate-600 focus:ring-4 focus:ring-slate-500/20 transition-all shadow-sm active:scale-95 disabled:opacity-70"
+              >
+                {loading.password ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
           </form>
         </div>
       </div>

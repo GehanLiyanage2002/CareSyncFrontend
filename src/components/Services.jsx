@@ -148,17 +148,20 @@ const Services = ({ isPage }) => {
                       <button 
                         onClick={() => navigate('/service-profile', { state: { service } })}
                         className="w-full py-2.5 rounded-full font-bold text-sm border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-transparent hover:border-[#0ea5e9] hover:text-[#0ea5e9] transition-all duration-300"
+                        aria-label={`View details about ${service.name}`}
                       >
                         View Details
                       </button>
                       
                       {/* Magic Shine Button */}
-                      <button 
-                        onClick={() => navigate('/book-service', { state: { service } })}
-                        className="magic-shine w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-400 text-white shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 hover:-translate-y-1 border-none"
-                      >
-                        Book Now
-                      </button>
+                      <div aria-label={`Book ${service.name} service`} className="w-full">
+                        <button 
+                          onClick={() => navigate('/book-service', { state: { service } })}
+                          className="magic-shine w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-400 text-white shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 hover:-translate-y-1 border-none"
+                        >
+                          Book Now
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

@@ -20,6 +20,7 @@ const Telemedicine = () => {
               <img 
                 src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
                 alt="Telemedicine Consultation" 
+                aria-label="Online telemedicine video consultation"
                 className="w-full h-auto object-cover aspect-[4/3] hover:scale-105 transition-transform duration-700"
               />
               {/* Overlay Gradient */}
@@ -87,6 +88,7 @@ const Telemedicine = () => {
               <button 
                 onClick={() => navigate('/login')}
                 className="bg-[#3b82f6] hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold shadow-xl shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group w-full sm:w-auto"
+                aria-label="Start your secure online consultation"
               >
                 Start Consultation
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />

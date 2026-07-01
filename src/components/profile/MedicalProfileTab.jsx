@@ -114,7 +114,7 @@ const MedicalProfileTab = () => {
       </div>
 
       {/* Update form card */}
-      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm">
         <div className="px-8 pt-8 pb-6 border-b border-slate-100 dark:border-slate-700">
           <h3 className="font-bold text-slate-800 dark:text-white text-lg flex items-center gap-2">
             <HeartPulse className="text-blue-500" size={24} />
@@ -126,7 +126,7 @@ const MedicalProfileTab = () => {
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
 
           {/* Blood Group Dropdown */}
-          <div className="max-w-md">
+          <div className="max-w-md" aria-label="Select your blood group">
             <label htmlFor="blood-group" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
               Blood Group
             </label>
@@ -155,7 +155,7 @@ const MedicalProfileTab = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Allergies Textarea */}
-            <div>
+            <div aria-label="Enter any known allergies">
               <label htmlFor="allergies" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                 <AlertCircle size={16} className="text-amber-500" />
                 Allergies & Reactions
@@ -174,7 +174,7 @@ const MedicalProfileTab = () => {
             </div>
 
             {/* Chronic Conditions Textarea */}
-            <div>
+            <div aria-label="Enter any ongoing chronic medical conditions">
               <label htmlFor="chronicConditions" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                 <HeartPulse size={16} className="text-blue-500" />
                 Chronic Conditions
@@ -199,7 +199,7 @@ const MedicalProfileTab = () => {
               {/* Emergency Contact Name */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Contact Name</label>
-                <div className="relative">
+                <div className="relative" aria-label="Enter the name of your emergency contact">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <UserIcon size={18} className="text-slate-400" />
                   </div>
@@ -219,7 +219,7 @@ const MedicalProfileTab = () => {
               {/* Emergency Contact Number */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Contact Number</label>
-                <div className="relative">
+                <div className="relative" aria-label="Enter the phone number of your emergency contact">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Phone size={18} className="text-slate-400" />
                   </div>
@@ -240,7 +240,7 @@ const MedicalProfileTab = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="pt-4 flex justify-end">
+          <div className="pt-4 flex justify-end" aria-label="Save changes to your medical profile">
             <button
               type="submit"
               disabled={loading}

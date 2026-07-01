@@ -178,16 +178,19 @@ const Doctors = ({ onBookNow, hideHeader, defaultSearchTerm = '' }) => {
                     <button 
                       onClick={() => onBookNow && onBookNow(doctor)}
                       className="w-full py-2.5 rounded-full font-bold text-sm border-2 border-[#0ea5e9] text-[#0ea5e9] bg-transparent hover:bg-[#0ea5e9] hover:text-white transition-all duration-300"
+                      aria-label={`View full profile of ${doctor.name}`}
                     >
                       View Profile
                     </button>
                     {/* Book Now Button */}
-                    <button 
-                      onClick={() => navigate('/book-appointment', { state: { doctor } })}
-                      className="magic-shine w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-none"
-                    >
-                      Book Now
-                    </button>
+                    <div aria-label={`Book an appointment with ${doctor.name}`} className="w-full">
+                      <button 
+                        onClick={() => navigate('/book-appointment', { state: { doctor } })}
+                        className="magic-shine w-full py-2.5 rounded-full font-bold text-sm bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-none"
+                      >
+                        Book Now
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

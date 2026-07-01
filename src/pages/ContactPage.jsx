@@ -68,7 +68,7 @@ const ContactPage = () => {
           </div>
 
           {/* Google Map Section */}
-          <div className="w-full h-[400px] mb-16 rounded-lg overflow-hidden shadow-sm border border-gray-100">
+          <div className="w-full h-[400px] mb-16 rounded-lg overflow-hidden shadow-sm border border-gray-100 relative z-0">
             <iframe 
               src="https://maps.google.com/maps?q=Hidagoda,%20Badulla&t=&z=14&ie=UTF8&iwloc=&output=embed" 
               width="100%" 
@@ -89,7 +89,7 @@ const ContactPage = () => {
               <h3 className="text-2xl font-bold text-[#0a192f] dark:text-white mb-6">Get in Touch</h3>
               <form onSubmit={handleSubmit} className="space-y-6">                
                 <div className="flex flex-col sm:flex-row gap-6">
-                  <div className="w-full sm:w-1/2">
+                  <div className="w-full sm:w-1/2" aria-label="Enter your full name">
                     <input 
                       type="text" 
                       name="name"
@@ -99,7 +99,7 @@ const ContactPage = () => {
                       className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                     />
                   </div>
-                  <div className="w-full sm:w-1/2">
+                  <div className="w-full sm:w-1/2" aria-label="Enter your email address">
                     <input 
                       type="email" 
                       name="email"
@@ -111,7 +111,7 @@ const ContactPage = () => {
                   </div>
                 </div>
                 
-                <div>
+                <div aria-label="Enter the subject of your message">
                   <input 
                     type="text" 
                     name="subject"
@@ -122,7 +122,7 @@ const ContactPage = () => {
                   />
                 </div>
 
-                <div>
+                <div aria-label="Type your message here">
                   <textarea 
                     rows="6" 
                     name="message"
@@ -133,13 +133,15 @@ const ContactPage = () => {
                   ></textarea>
                 </div>
                 
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="mt-4 w-full sm:w-auto px-10 py-3.5 border border-transparent rounded-xl shadow-lg shadow-blue-600/20 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 uppercase tracking-wide disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Sending...' : 'Send Message'}
-                </button>
+                <div aria-label="Send your message to our support team" className="mt-4 w-full sm:w-auto inline-block">
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full px-10 py-3.5 border border-transparent rounded-xl shadow-lg shadow-blue-600/20 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 uppercase tracking-wide disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Sending...' : 'Send Message'}
+                  </button>
+                </div>
               </form>
             </div>
             

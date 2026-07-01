@@ -265,7 +265,7 @@ const DoctorKanbanBoard = ({ dateFilter = 'all' }) => {
   };
 
   if (isLoading) {
-    return <div className="h-full flex items-center justify-center text-gray-500 animate-pulse text-lg font-semibold">Loading your Kanban Board...</div>;
+    return <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400 animate-pulse text-lg font-semibold">Loading your Kanban Board...</div>;
   }
 
   return (

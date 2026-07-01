@@ -261,7 +261,7 @@ const CreateMedicalReport = ({ isOpen, onClose, appointment }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
+              className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
             >
               Cancel
             </button>

@@ -12,7 +12,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 // ── Reusable field component exactly matching the profile page input style ──
 const Field = ({ label, icon: Icon, children, className = '' }) => (
  <div className={`space-y-2 ${className}`}>
- <label className="text-sm font-medium text-slate-700 ">{label}</label>
+ <label className="text-sm font-medium text-slate-700 dark:text-gray-200 ">{label}</label>
  <div className="relative">
  {Icon && (
  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -25,12 +25,12 @@ const Field = ({ label, icon: Icon, children, className = '' }) => (
 );
 
 const inputCls = (hasIcon = true) =>
- `w-full ${hasIcon ? 'pl-10' : 'pl-4'} pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-slate-800 text-sm placeholder-slate-400`;
+ `w-full ${hasIcon ? 'pl-10' : 'pl-4'} pr-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-slate-800 dark:text-white text-sm placeholder-slate-400`;
 
 // ── Section wrapper exactly like the profile page card ──
 const Section = ({ title, children }) => (
- <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 ">
- <h2 className="text-xl font-semibold text-slate-800 mb-6">{title}</h2>
+ <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-gray-700 ">
+ <h2 className="text-xl font-semibold text-slate-800 dark:text-white mb-6">{title}</h2>
  {children}
  </div>
 );
@@ -181,17 +181,17 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  };
 
  return (
- <div className="bg-white/80 /80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/50 /50 p-6">
+ <div className="bg-white dark:bg-gray-800/80 /80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200 dark:border-gray-600/50 /50 p-6">
  <div className="w-full">
 
  {/* Modal header — matches EditProfilePage heading style */}
  <div className="flex items-start justify-between mb-8">
  <div>
- <h1 className="text-3xl font-bold text-slate-900">Add New Doctor</h1>
- <p className="text-slate-500 mt-2">Fill in the doctor's profile, schedule, and consultation fee details.</p>
+ <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Add New Doctor</h1>
+ <p className="text-slate-500 dark:text-gray-400 mt-2">Fill in the doctor's profile, schedule, and consultation fee details.</p>
  </div>
  <button onClick={onClose}
- className="mt-1 flex items-center gap-2 px-5 py-2.5 bg-white text-slate-600 hover:text-rose-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:border-rose-200 transition-all duration-300">
+ className="mt-1 flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:text-rose-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 dark:border-gray-600 hover:border-rose-200 transition-all duration-300">
  <X size={16} />
  Cancel
  </button>
@@ -204,7 +204,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  <form onSubmit={handleCreateDoctor} className="space-y-6">
 
  {/* Avatar upload — same UI as profile page */}
- <div className="flex items-center gap-6 pb-6 border-b border-slate-100 ">
+ <div className="flex items-center gap-6 pb-6 border-b border-slate-100 dark:border-gray-700 ">
  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
  <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold shadow-inner overflow-hidden border-2 border-white">
  {avatarPreview ? (
@@ -214,7 +214,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  )}
  </div>
  <button type="button"
- className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md border border-slate-200 text-slate-600 hover:text-blue-600 transition-colors"
+ className="absolute bottom-0 right-0 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md border border-slate-200 dark:border-gray-600 text-slate-600 dark:text-gray-300 hover:text-blue-600 transition-colors"
  title="Upload Photo">
  {loading.image ? <Loader size={18} className="animate-spin" /> : <Camera size={18} />}
  </button>
@@ -222,8 +222,8 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  accept="image/png, image/jpeg" className="hidden" />
  </div>
  <div>
- <h3 className="font-medium text-slate-800 text-lg">{basic.full_name || 'New Doctor'}</h3>
- <p className="text-slate-500 text-sm">Doctor Account</p>
+ <h3 className="font-medium text-slate-800 dark:text-white text-lg">{basic.full_name || 'New Doctor'}</h3>
+ <p className="text-slate-500 dark:text-gray-400 text-sm">Doctor Account</p>
  <p className="text-slate-400 text-xs mt-1">Click the camera icon to upload a photo</p>
  </div>
  </div>
@@ -253,7 +253,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  onChange={e => setBasic({...basic, password: e.target.value})}
  className={`${inputCls()} pr-12`} placeholder="Minimum 6 characters" required disabled={!!createdId} />
  <button type="button" onClick={() => setShowPassword(!showPassword)}
- className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 ">
+ className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:text-gray-300 ">
  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
  </button>
  </Field>
@@ -305,7 +305,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  <textarea value={professional.bio}
  onChange={e => setProfessional({...professional, bio: e.target.value})}
  rows={4} disabled={!!createdId}
- className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-slate-800 text-sm placeholder-slate-400 resize-none disabled:opacity-60"
+ className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-slate-800 dark:text-white text-sm placeholder-slate-400 resize-none disabled:opacity-60"
  placeholder="Brief professional biography..." />
  </div>
  </Field>
@@ -333,9 +333,9 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  )}
 
  {scheduleEntries.map((entry, idx) => (
- <div key={idx} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+ <div key={idx} className="p-5 bg-slate-50 dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-700 space-y-4">
  <div className="flex items-center justify-between">
- <p className="text-sm font-semibold text-slate-600 flex items-center gap-2">
+ <p className="text-sm font-semibold text-slate-600 dark:text-gray-300 flex items-center gap-2">
  <CalendarDays size={16} className="text-blue-500" />
  Working Day {idx + 1}
  </p>
@@ -349,34 +349,34 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
 
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div className="space-y-2 md:col-span-2">
- <label className="text-sm font-medium text-slate-700 ">Date</label>
+ <label className="text-sm font-medium text-slate-700 dark:text-gray-200 ">Date</label>
  <DatePicker selected={entry.date}
  onChange={date => updateEntry(idx, 'date', date)}
  minDate={new Date()}
- className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 cursor-pointer"
+ className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 dark:text-white cursor-pointer"
  dateFormat="MMMM d, yyyy"
  wrapperClassName="w-full" />
  </div>
 
  <div className="space-y-2">
- <label className="text-sm font-medium text-slate-700 ">Start Time</label>
+ <label className="text-sm font-medium text-slate-700 dark:text-gray-200 ">Start Time</label>
  <input type="time" value={entry.start_time}
  onChange={e => updateEntry(idx, 'start_time', e.target.value)}
- className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 " />
+ className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 dark:text-white " />
  </div>
 
  <div className="space-y-2">
- <label className="text-sm font-medium text-slate-700 ">End Time</label>
+ <label className="text-sm font-medium text-slate-700 dark:text-gray-200 ">End Time</label>
  <input type="time" value={entry.end_time}
  onChange={e => updateEntry(idx, 'end_time', e.target.value)}
- className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 " />
+ className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 dark:text-white " />
  </div>
 
  <div className="space-y-2 md:col-span-2">
- <label className="text-sm font-medium text-slate-700 ">Appointment Slot Duration</label>
+ <label className="text-sm font-medium text-slate-700 dark:text-gray-200 ">Appointment Slot Duration</label>
  <select value={entry.slot_duration_minutes}
  onChange={e => updateEntry(idx, 'slot_duration_minutes', e.target.value)}
- className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 ">
+ className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors text-sm text-slate-800 dark:text-white ">
  {[10,15,20,30,45,60].map(m => <option key={m} value={m}>{m} minutes per slot</option>)}
  </select>
  </div>
@@ -385,7 +385,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  ))}
 
  <button type="button" onClick={addScheduleEntry}
- className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50/40 font-medium text-sm transition-all">
+ className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-slate-200 dark:border-gray-600 text-slate-500 dark:text-gray-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50/40 font-medium text-sm transition-all">
  <Plus size={16} /> Add Another Day
  </button>
 
@@ -408,21 +408,21 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  )}
 
  <div className="space-y-2 max-w-sm">
- <label className="text-sm font-medium text-slate-700 ">Consultation Fee (Rs.)</label>
+ <label className="text-sm font-medium text-slate-700 dark:text-gray-200 ">Consultation Fee (Rs.)</label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
  <span className="text-slate-400 font-bold text-sm">Rs.</span>
  </div>
  <input type="number" min="0" value={fee}
  onChange={e => setFee(e.target.value)}
- className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors font-bold text-lg text-slate-800 "
+ className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 focus:bg-white dark:bg-gray-800 dark:focus:bg-gray-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors font-bold text-lg text-slate-800 dark:text-white "
  placeholder="1500" />
  </div>
  </div>
 
  <div className="flex items-center justify-between pt-2">
  <button type="button" onClick={onClose}
- className="px-5 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all">
+ className="px-5 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-gray-200 hover:bg-slate-100 dark:bg-gray-800 rounded-xl transition-all">
  Cancel
  </button>
  <button type="submit" disabled={loading.fee || !createdId}
@@ -439,7 +439,7 @@ const AddDoctorModal = ({ token, onClose, onSuccess }) => {
  <div className="mt-12 flex justify-center pb-8">
  <button
  onClick={onClose}
- className="flex items-center gap-2 px-6 py-3 bg-white text-slate-600 hover:text-blue-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 hover:border-blue-200 transition-all duration-300 group"
+ className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:text-blue-600 font-medium rounded-full shadow-sm hover:shadow-md border border-slate-200 dark:border-gray-600 hover:border-blue-200 transition-all duration-300 group"
  >
  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 group-hover:-translate-x-1 transition-transform">
  <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

@@ -162,7 +162,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
       <div className="flex justify-between items-center mb-8 border-b border-gray-100 dark:border-gray-800 pb-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-semibold transition shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 font-semibold transition shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
@@ -344,7 +344,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
                   </span>
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between text-sm font-bold">
-                  <span className="text-gray-500">Paid Amount</span>
+                  <span className="text-gray-500 dark:text-gray-400">Paid Amount</span>
                   <span className="text-blue-900 dark:text-blue-400">Rs. {actualIsTelemedicine ? 2500 : doctor.consultationFee}</span>
                 </div>
               </div>
@@ -364,7 +364,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
                 <button
                   type="button"
                   onClick={printTicket}
-                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
+                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
                 >
                   <Printer className="h-4 w-4" />
                   <span>Print</span>

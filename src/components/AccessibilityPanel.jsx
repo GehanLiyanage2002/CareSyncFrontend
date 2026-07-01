@@ -15,7 +15,7 @@ const ToolButton = ({ active, onClick, icon: Icon, label, level, maxLevels }) =>
     className={`flex flex-col items-center justify-center gap-[6px] p-[12px] pb-[16px] rounded-[12px] border-2 transition-all duration-200 text-center w-full relative
       ${active
         ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200'
-        : 'bg-white border-gray-100 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm'
+        : 'bg-white dark:bg-gray-800 border-gray-100 text-gray-700 dark:text-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm'
       }`}
   >
     <Icon size={20} strokeWidth={1.8} />

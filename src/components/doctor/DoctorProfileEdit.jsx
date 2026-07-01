@@ -109,7 +109,7 @@ const DoctorProfileEdit = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64 text-gray-500">Loading profile...</div>;
+    return <div className="flex justify-center items-center h-64 text-gray-500 dark:text-gray-400">Loading profile...</div>;
   }
 
   return (
@@ -163,7 +163,7 @@ const DoctorProfileEdit = () => {
               <div className="flex-1">
                 <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Email</label>
                 {isEditing ? (
-                  <input type="email" name="email" value={profile.email} disabled className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-gray-500 cursor-not-allowed text-sm" />
+                  <input type="email" name="email" value={profile.email} disabled className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-gray-500 dark:text-gray-400 cursor-not-allowed text-sm" />
                 ) : (
                   <p className="text-gray-800 dark:text-gray-200">{profile.email || '-'}</p>
                 )}

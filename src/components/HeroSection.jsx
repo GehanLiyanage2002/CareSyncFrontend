@@ -35,7 +35,7 @@ const HeroSection = () => {
             
             <Link 
               to="/services" 
-              className="inline-flex justify-center items-center px-8 py-3.5 border-2 border-white/80 text-base font-bold rounded-xl text-white hover:bg-white dark:bg-gray-800 hover:text-slate-900 shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+              className="inline-flex justify-center items-center px-8 py-3.5 border-2 border-white/80 text-base font-bold rounded-xl text-white hover:bg-white dark:bg-gray-800 hover:text-slate-900 dark:text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
             >
               Our Services
             </Link>

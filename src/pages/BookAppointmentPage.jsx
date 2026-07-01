@@ -395,7 +395,7 @@ const BookAppointmentPage = () => {
                   <Loader className="animate-spin h-6 w-6" />
                 </div>
               ) : dates.length === 0 ? (
-                <div className="text-sm text-gray-500 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
+                <div className="text-sm text-gray-500 dark:text-gray-400 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
                   No availability currently configured.
                 </div>
               ) : (
@@ -431,7 +431,7 @@ const BookAppointmentPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {/* Full Name */}
-                <div>
+                <div aria-label="Enter patient's full name">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Full Name</label>
                   <input
                     type="text"
@@ -445,7 +445,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Age */}
-                <div>
+                <div aria-label="Enter patient's age in years">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Age</label>
                   <input
                     type="text"
@@ -459,7 +459,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Mobile Number */}
-                <div>
+                <div aria-label="Enter a 10-digit mobile number">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Mobile Number (10 digits)</label>
                   <input
                     type="tel"
@@ -473,7 +473,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Gender */}
-                <div>
+                <div aria-label="Select patient's gender">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Gender</label>
                   <select
                     name="gender"
@@ -489,7 +489,7 @@ const BookAppointmentPage = () => {
                 </div>
 
                 {/* Email */}
-                <div className="md:col-span-2">
+                <div className="md:col-span-2" aria-label="Enter email address to receive the booking receipt">
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Email (Optional - for receipt)</label>
                   <input
                     type="email"
@@ -627,10 +627,11 @@ const BookAppointmentPage = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('Cash')}
+                  aria-label="Pay cash at the hospital counter"
                   className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
                     paymentMethod === 'Cash'
                       ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
                   }`}
                 >
                   Cash
@@ -638,10 +639,11 @@ const BookAppointmentPage = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('Online')}
+                  aria-label="Pay securely online now"
                   className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
                     paymentMethod === 'Online'
                       ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
                   }`}
                 >
                   Online
@@ -654,12 +656,14 @@ const BookAppointmentPage = () => {
                   Only Patients can book appointments.
                 </div>
               ) : (
-                <button
-                  type="submit"
-                  className="w-full mt-4 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md transition duration-300 hover:shadow-lg active:scale-98"
-                >
-                  Confirm Booking
-                </button>
+                <div aria-label="Click to confirm your appointment booking" className="w-full mt-4">
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-1.5 shadow-md transition duration-300 hover:shadow-lg active:scale-98"
+                  >
+                    Confirm Booking
+                  </button>
+                </div>
               )}
             </div>
 
@@ -752,7 +756,7 @@ const BookAppointmentPage = () => {
                   </span>
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between text-sm font-bold">
-                  <span className="text-gray-500">Paid Amount</span>
+                  <span className="text-gray-500 dark:text-gray-400">Paid Amount</span>
                   <span className="text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
                 </div>
               </div>
@@ -772,7 +776,7 @@ const BookAppointmentPage = () => {
                 <button
                   type="button"
                   onClick={printTicket}
-                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
+                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
                 >
                   <Printer className="h-4 w-4" />
                   <span>Print</span>

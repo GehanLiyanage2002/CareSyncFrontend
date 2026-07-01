@@ -248,7 +248,7 @@ export default function TelemedicineVideoRoom() {
            </div>
            <h2 className="text-2xl font-black mb-2 text-white">Connection Error</h2>
            <p className="text-neutral-400 mb-8 leading-relaxed">{error}</p>
-           <button onClick={() => navigate(-1)} className="w-full py-4 bg-white text-black font-black rounded-xl hover:bg-neutral-200 transition-all active:scale-95 shadow-lg">
+           <button onClick={() => navigate(-1)} className="w-full py-4 bg-white dark:bg-gray-800 text-black dark:text-white font-black rounded-xl hover:bg-neutral-200 transition-all active:scale-95 shadow-lg">
              Return to Dashboard
            </button>
         </div>
@@ -382,7 +382,7 @@ export default function TelemedicineVideoRoom() {
               <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-2 rounded-[2rem] flex items-center gap-2 shadow-2xl shadow-black/50">
                 <button 
                   onClick={toggleMic} 
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 ${isMuted ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white/10 hover:bg-white/20 text-white'}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 ${isMuted ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white dark:bg-gray-800/10 hover:bg-white dark:bg-gray-800/20 text-white'}`}
                   title={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted ? <MicOff size={22} /> : <Mic size={22} />}
@@ -390,13 +390,13 @@ export default function TelemedicineVideoRoom() {
                 
                 <button 
                   onClick={toggleVideo} 
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 ${!isVideoOn ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white/10 hover:bg-white/20 text-white'}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 ${!isVideoOn ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-white dark:bg-gray-800/10 hover:bg-white dark:bg-gray-800/20 text-white'}`}
                   title={!isVideoOn ? "Start Video" : "Stop Video"}
                 >
                   {isVideoOn ? <VideoIcon size={22} /> : <VideoOff size={22} />}
                 </button>
                 
-                <div className="w-px h-8 bg-white/10 mx-2"></div>
+                <div className="w-px h-8 bg-white dark:bg-gray-800/10 mx-2"></div>
                 
                 <button 
                   onClick={() => setShowEndModal(true)} 

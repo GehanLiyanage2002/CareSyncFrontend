@@ -87,7 +87,7 @@ const GlobalQueueMonitor = () => {
  <span className={`text-xl font-black tracking-tight ${isNext ? 'text-blue-600' : 'text-emerald-600'}`}>
  {tokenStr}
  </span>
- <span className="text-[12px] font-bold text-slate-500 bg-slate-50 px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
+ <span className="text-[12px] font-bold text-slate-500 dark:text-gray-400 bg-slate-50 dark:bg-gray-900 px-3 py-1 rounded-full border border-slate-200 dark:border-gray-600 shadow-sm flex items-center gap-1.5">
  <User size={12} className={isNext ? "text-blue-500" : "text-emerald-500"} /> 
  <span className="truncate max-w-[120px]">{name}</span>
  </span>
@@ -99,18 +99,18 @@ const GlobalQueueMonitor = () => {
  return (
  <div className="flex flex-col items-center justify-center h-64">
  <Activity className="animate-spin text-blue-500 mb-4" size={32} />
- <p className="text-slate-500 font-bold">Loading Queue Monitor...</p>
+ <p className="text-slate-500 dark:text-gray-400 font-bold">Loading Queue Monitor...</p>
  </div>
  );
  }
 
  if (queues.length === 0) {
  return (
- <div className="bg-white /50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 p-12 text-center shadow-sm">
- <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+ <div className="bg-white dark:bg-gray-800 /50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 dark:border-gray-600 p-12 text-center shadow-sm">
+ <div className="w-20 h-20 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
  <Users size={32} />
  </div>
- <h3 className="text-xl font-bold text-slate-600 mb-2">No Active Queues</h3>
+ <h3 className="text-xl font-bold text-slate-600 dark:text-gray-300 mb-2">No Active Queues</h3>
  <p className="text-slate-400 font-medium">There are no doctors with active or upcoming appointments today.</p>
  </div>
  );
@@ -119,13 +119,13 @@ const GlobalQueueMonitor = () => {
  return (
  <div 
  ref={containerRef}
- className={`space-y-4 animate-fadeIn ${isFullscreen ? 'bg-slate-50 p-8 min-h-screen overflow-y-auto' : 'pb-10'}`}
+ className={`space-y-4 animate-fadeIn ${isFullscreen ? 'bg-slate-50 dark:bg-gray-900 p-8 min-h-screen overflow-y-auto' : 'pb-10'}`}
  >
  {/* Top action bar */}
  <div className="flex justify-end mb-2">
  <button 
  onClick={toggleFullscreen}
- className="bg-white border border-slate-200 p-2.5 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+ className="bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 p-2.5 rounded-xl text-slate-500 dark:text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
  title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
  >
  {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
@@ -148,34 +148,34 @@ const GlobalQueueMonitor = () => {
  const waitingCount = inQueuePatients.length + pendingPatients.length;
 
  return (
- <div key={docData.doctorId} className="bg-white rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100 overflow-hidden flex flex-col group">
+ <div key={docData.doctorId} className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100 dark:border-gray-700 overflow-hidden flex flex-col group">
  
  {/* Doctor Header */}
  <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 p-5 border-b border-blue-50/50 flex items-center gap-4 transition-colors group-hover:from-blue-100/50 group-hover:to-indigo-100/50">
- <div className="w-12 h-12 rounded-2xl bg-white border border-blue-100 flex items-center justify-center font-black text-blue-600 shadow-sm text-lg">
+ <div className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 border border-blue-100 flex items-center justify-center font-black text-blue-600 shadow-sm text-lg">
  {docData.doctorName ? docData.doctorName.charAt(0).toUpperCase() : <User />}
  </div>
  <div>
- <h3 className="text-lg font-bold text-slate-800 leading-tight">Dr. {docData.doctorName}</h3>
+ <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">Dr. {docData.doctorName}</h3>
  </div>
  </div>
 
  {/* Status Display inside Card */}
  <div className="flex-1 flex flex-col">
- <div className="flex justify-around items-center p-6 bg-white ">
+ <div className="flex justify-around items-center p-6 bg-white dark:bg-gray-800 ">
  <div className="text-center flex-1">
  <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-3">Current Patient</p>
  {formatDisplay(currentPatient, false)}
  </div>
- <div className="w-px h-16 bg-slate-100"></div>
+ <div className="w-px h-16 bg-slate-100 dark:bg-gray-800"></div>
  <div className="text-center flex-1">
  <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-3">Next Patient</p>
  {formatDisplay(nextPatient, true)}
  </div>
  </div>
- <div className="bg-slate-50 flex items-center justify-between px-8 py-5 border-t border-slate-100 ">
- <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Waiting in Queue</p>
- <div className="bg-white text-slate-800 font-black text-2xl w-12 h-12 flex items-center justify-center rounded-xl shadow-sm border border-slate-200 ">
+ <div className="bg-slate-50 dark:bg-gray-900 flex items-center justify-between px-8 py-5 border-t border-slate-100 dark:border-gray-700 ">
+ <p className="text-slate-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest">Waiting in Queue</p>
+ <div className="bg-white dark:bg-gray-800 text-slate-800 dark:text-white font-black text-2xl w-12 h-12 flex items-center justify-center rounded-xl shadow-sm border border-slate-200 dark:border-gray-600 ">
  {waitingCount}
  </div>
  </div>

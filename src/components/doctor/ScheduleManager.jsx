@@ -167,7 +167,7 @@ const ScheduleManager = () => {
                   }}
                   minDate={new Date()}
                   dateFormat="EEEE, MMMM d"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm text-slate-700 dark:text-gray-200 font-medium cursor-pointer"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-800 dark:focus:bg-gray-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm text-slate-700 dark:text-gray-200 font-medium cursor-pointer"
                   wrapperClassName="w-full"
                   popperPlacement="bottom-start"
                   popperClassName="!z-[100]"
@@ -374,7 +374,7 @@ const ScheduleManager = () => {
               <div className="flex gap-3">
                 <button 
                   onClick={() => setScheduleToDelete(null)}
-                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:text-gray-200 font-bold rounded-xl transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 text-slate-700 dark:text-gray-200 font-bold rounded-xl transition-colors"
                 >
                   Cancel
                 </button>

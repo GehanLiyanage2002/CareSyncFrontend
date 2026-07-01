@@ -215,7 +215,7 @@ const Register = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                   placeholder="John Doe"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
@@ -240,7 +240,7 @@ const Register = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
@@ -265,7 +265,7 @@ const Register = () => {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   placeholder="071 234 5678"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
@@ -290,7 +290,7 @@ const Register = () => {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="123 Main St, City"
-                  className="block w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium resize-none"
+                  className="block w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium resize-none"
                 />
               </div>
             </div>
@@ -314,7 +314,7 @@ const Register = () => {
                   max={new Date().toISOString().split('T')[0]}
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
               </div>
             </div>
@@ -336,7 +336,7 @@ const Register = () => {
                   required
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium appearance-none"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium appearance-none"
                 >
                   <option value="" disabled>Select Gender</option>
                   <option value="Male">Male</option>
@@ -369,7 +369,7 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 6 characters"
-                  className="block w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                  className="block w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                 />
                 <button
                   type="button"
@@ -402,7 +402,7 @@ const Register = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
-                  className={`block w-full pl-12 pr-12 py-3.5 bg-slate-50 border text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium
+                  className={`block w-full pl-12 pr-12 py-3.5 bg-slate-50 border text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium
                     ${confirmPassword && confirmPassword !== password
                       ? 'border-red-300 focus:ring-red-400'
                       : confirmPassword && confirmPassword === password
@@ -443,7 +443,7 @@ const Register = () => {
             <div className="mt-6 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-semibold text-slate-700 dark:text-gray-200">
-                  Biometric Verification <span className="text-xs font-normal text-slate-500">(Optional)</span>
+                  Biometric Verification <span className="text-xs font-normal text-slate-500 dark:text-gray-400">(Optional)</span>
                 </p>
               </div>
               {showBiometric ? (

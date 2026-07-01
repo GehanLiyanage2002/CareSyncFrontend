@@ -19,7 +19,7 @@ const About = () => {
               </span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight mb-6">
               Welcome To Our <br className="hidden md:block" />
               Medical Clinic
             </h2>
@@ -34,6 +34,7 @@ const About = () => {
               <button 
                 onClick={() => navigate('/doctors')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-lg font-bold shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between gap-3 group w-full"
+                aria-label="Search for doctors in our clinic"
               >
                 Find Doctors
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -42,6 +43,7 @@ const About = () => {
               <button 
                 onClick={() => navigate('/services')}
                 className="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3.5 rounded-lg font-bold shadow-lg shadow-slate-500/30 hover:shadow-slate-500/50 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between gap-3 group w-full"
+                aria-label="Browse our medical services"
               >
                 Find Services
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -56,6 +58,7 @@ const About = () => {
               <img 
                 src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
                 alt="Doctor working" 
+                aria-label="Experienced doctor reviewing records"
                 className="w-full h-auto object-cover aspect-[4/5]"
               />
               <div className="absolute inset-0 bg-blue-900/10 mix-blend-multiply"></div>
@@ -66,6 +69,7 @@ const About = () => {
               <img 
                 src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                 alt="Female doctor" 
+                aria-label="Friendly medical staff"
                 className="w-full h-auto object-cover aspect-[3/4]"
               />
             </div>

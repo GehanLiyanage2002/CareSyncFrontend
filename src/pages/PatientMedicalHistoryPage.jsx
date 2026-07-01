@@ -93,7 +93,7 @@ const PatientMedicalHistoryPage = () => {
         
         {/* Date Filter Dropdown */}
         {sortedDates.length > 0 && (
-          <div className="flex flex-col items-start gap-1 shrink-0">
+          <div className="flex flex-col items-start gap-1 shrink-0" aria-label="Select a date to filter your medical history">
             <label className="text-xs font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest ml-1">Select Date</label>
             <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-gray-700 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
               <Calendar size={18} className="text-blue-500" />

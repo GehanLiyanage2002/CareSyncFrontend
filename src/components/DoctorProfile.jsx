@@ -91,16 +91,24 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
       }
     };
 
+    const handlePatientsUpdated = (data) => {
+      if (data.doctor_id === doctor.id || data.doctor_id === doctor.doctor_id) {
+        setDoctor(prev => ({ ...prev, patients: data.patients }));
+      }
+    };
+
     socket.on('doctorFeeChanged', handleFeeChanged);
     socket.on('doctorAvailabilityChanged', handleAvailabilityChanged);
     socket.on('doctorProfileUpdated', handleProfileUpdated);
+    socket.on('doctorPatientsUpdated', handlePatientsUpdated);
 
     return () => {
       socket.off('doctorFeeChanged', handleFeeChanged);
       socket.off('doctorAvailabilityChanged', handleAvailabilityChanged);
       socket.off('doctorProfileUpdated', handleProfileUpdated);
+      socket.off('doctorPatientsUpdated', handlePatientsUpdated);
     };
-  }, [doctor.id, doctor.doctor_id]);
+  }, [doctor?.id, doctor?.doctor_id, socket]);
 
   const [loadingDates, setLoadingDates] = useState(false);
   const [dates, setDates] = useState([]);
@@ -154,7 +162,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
       <div className="flex justify-between items-center mb-8 border-b border-gray-100 dark:border-gray-800 pb-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 font-semibold transition shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 font-semibold transition shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
@@ -184,12 +192,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
             </div>
 
             {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-3 w-full mt-4">
-              <div className="bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 rounded-2xl p-3 text-center transition-colors duration-300">
-                <Heart className="h-5 w-5 text-rose-500 mx-auto mb-1" />
-                <span className="block text-xs text-gray-500 dark:text-gray-400">Success</span>
-                <span className="text-sm font-bold text-rose-600 dark:text-rose-400">{doctor.successRate}</span>
-              </div>
+            <div className="grid grid-cols-2 gap-3 w-full mt-4">
               <div className="bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 rounded-2xl p-3 text-center transition-colors duration-300">
                 <Award className="h-5 w-5 text-blue-500 mx-auto mb-1" />
                 <span className="block text-xs text-gray-500 dark:text-gray-400">Exp.</span>
@@ -283,6 +286,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
           <button
             onClick={() => navigate('/book-appointment', { state: { doctor, isTelemedicine: actualIsTelemedicine } })}
             className="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-extrabold text-lg py-4 px-10 rounded-full shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2"
+            aria-label={`Book an appointment with Dr. ${doctor.name}`}
           >
             <Calendar className="w-6 h-6" />
             Book Your Appointment
@@ -340,7 +344,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
                   </span>
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between text-sm font-bold">
-                  <span className="text-gray-500">Paid Amount</span>
+                  <span className="text-gray-500 dark:text-gray-400">Paid Amount</span>
                   <span className="text-blue-900 dark:text-blue-400">Rs. {actualIsTelemedicine ? 2500 : doctor.consultationFee}</span>
                 </div>
               </div>
@@ -360,7 +364,7 @@ const DoctorProfile = ({ doctor: initialDoctor, onBack, isTelemedicine }) => {
                 <button
                   type="button"
                   onClick={printTicket}
-                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
+                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
                 >
                   <Printer className="h-4 w-4" />
                   <span>Print</span>

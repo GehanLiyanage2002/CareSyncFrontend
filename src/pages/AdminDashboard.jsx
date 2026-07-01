@@ -35,7 +35,7 @@ const AuthorizedImage = ({ url, token, alt, onClick, className = "w-full h-full 
       .catch(err => console.error(err));
   }, [url, token]);
 
-  if (!imgSrc) return <div className="flex justify-center items-center h-full w-full bg-slate-100 animate-pulse text-xs text-slate-400">Loading...</div>;
+  if (!imgSrc) return <div className="flex justify-center items-center h-full w-full bg-slate-100 dark:bg-gray-800 animate-pulse text-xs text-slate-400">Loading...</div>;
   return <img src={imgSrc} alt={alt} className={className} onClick={onClick} style={onClick ? { cursor: 'pointer' } : {}} />;
 };
 
@@ -433,9 +433,9 @@ const AdminDashboard = () => {
  const totalAppointmentPages = Math.ceil(combinedAppointments.length / appointmentsPerPage);
 
  return (
- <div className="flex flex-col min-h-screen bg-slate-50 overflow-hidden font-sans">
+ <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-gray-900 overflow-hidden font-sans">
  {/* Header Navbar */}
- <header className="bg-white /95 backdrop-blur-md shadow-sm sticky top-0 z-50 flex items-center justify-between px-6 py-4">
+ <header className="bg-white dark:bg-gray-800 /95 backdrop-blur-md shadow-sm sticky top-0 z-50 flex items-center justify-between px-6 py-4">
  {/* Logo */}
  <div className="flex items-center gap-3">
  <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-md shadow-blue-200">
@@ -455,8 +455,8 @@ const AdminDashboard = () => {
  onClick={() => setActiveTab(item.name)}
  className={`flex items-center flex-col px-5 py-1.5 rounded-full transition-all duration-300 min-w-[90px] ${
  activeTab === item.name
- ? 'bg-white text-blue-600 shadow-sm'
- : 'text-slate-500 hover:text-blue-600 hover:bg-blue-100/50'
+ ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
+ : 'text-slate-500 dark:text-gray-400 hover:text-blue-600 hover:bg-blue-100/50'
  }`}
  >
  {React.cloneElement(item.icon, { size: 18, className: 'mb-0.5' })}
@@ -489,18 +489,18 @@ const AdminDashboard = () => {
  <>
  <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
  <div>
- <h2 className="text-4xl font-extrabold text-slate-800 tracking-tight">DASHBOARD</h2>
- <p className="text-slate-500 font-medium mt-1">Overview of doctors & appointments</p>
+ <h2 className="text-4xl font-extrabold text-slate-800 dark:text-white tracking-tight">DASHBOARD</h2>
+ <p className="text-slate-500 dark:text-gray-400 font-medium mt-1">Overview of doctors & appointments</p>
  </div>
 
  <div className="flex flex-col items-end gap-3">
- <div className="flex bg-white border border-slate-200 rounded-full p-1 shadow-sm overflow-x-auto max-w-full">
+ <div className="flex bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-full p-1 shadow-sm overflow-x-auto max-w-full">
  {['All Time', 'Today', 'This Week', 'This Month', 'Custom'].map(f => (
  <button
  key={f}
  onClick={() => setDateFilter(f)}
  className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all whitespace-nowrap ${
- dateFilter === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 '
+ dateFilter === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:bg-gray-800 hover:text-slate-800 dark:text-white '
  }`}
  >
  {f}
@@ -509,10 +509,10 @@ const AdminDashboard = () => {
  </div>
  
  {dateFilter === 'Custom' && (
- <div className="flex gap-2 items-center bg-white border border-slate-200 p-1.5 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2">
- <input type="date" value={customDates.start} onChange={e => setCustomDates({...customDates, start: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+ <div className="flex gap-2 items-center bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 p-1.5 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2">
+ <input type="date" value={customDates.start} onChange={e => setCustomDates({...customDates, start: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 rounded-full focus:outline-none focus:border-blue-400" />
  <span className="text-slate-400 text-xs font-bold">TO</span>
- <input type="date" value={customDates.end} onChange={e => setCustomDates({...customDates, end: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+ <input type="date" value={customDates.end} onChange={e => setCustomDates({...customDates, end: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 rounded-full focus:outline-none focus:border-blue-400" />
  </div>
  )}
  </div>
@@ -569,7 +569,7 @@ const AdminDashboard = () => {
  tag: 'Revenue' 
  },
  ].map((stat, i) => (
- <div key={i} className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+ <div key={i} className="bg-white dark:bg-gray-800 border border-slate-100 dark:border-gray-700 shadow-sm rounded-[2rem] p-6 flex flex-col justify-between hover:shadow-md transition-shadow">
  <div className="flex justify-between items-start mb-8">
  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center ${stat.iconColor}`}>
  {stat.icon}
@@ -579,8 +579,8 @@ const AdminDashboard = () => {
  </div>
  </div>
  <div>
- <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{stat.title}</p>
- <p className="text-3xl font-black text-slate-800 ">{stat.value}</p>
+ <p className="text-[11px] font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">{stat.title}</p>
+ <p className="text-3xl font-black text-slate-800 dark:text-white ">{stat.value}</p>
  </div>
  </div>
  ))}
@@ -588,7 +588,7 @@ const AdminDashboard = () => {
  
  {/* Search Bar */}
  <div className="mb-6">
- <h3 className="text-[15px] font-bold text-slate-700 mb-2">Search doctors</h3>
+ <h3 className="text-[15px] font-bold text-slate-700 dark:text-gray-200 mb-2">Search doctors</h3>
  <div className="flex items-center gap-3">
  <div className="relative w-full max-w-md">
  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
@@ -597,7 +597,7 @@ const AdminDashboard = () => {
  placeholder="Search name / specialization / fee"
  value={searchQuery}
  onChange={(e) => setSearchQuery(e.target.value)}
- className="w-full pl-11 pr-4 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white "
+ className="w-full pl-11 pr-4 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 dark:text-gray-200 placeholder-slate-400 bg-white dark:bg-gray-800 "
  />
  </div>
  <button 
@@ -610,9 +610,9 @@ const AdminDashboard = () => {
  </div>
 
  {/* Doctors Table */}
- <div className="bg-white rounded-3xl shadow-md shadow-blue-100/50 border border-blue-50 overflow-hidden">
- <div className="p-5 border-b border-blue-50 flex justify-between items-center bg-white ">
- <h3 className="text-xl font-extrabold text-slate-800 ">Doctors</h3>
+ <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-md shadow-blue-100/50 border border-blue-50 overflow-hidden">
+ <div className="p-5 border-b border-blue-50 flex justify-between items-center bg-white dark:bg-gray-800 ">
+ <h3 className="text-xl font-extrabold text-slate-800 dark:text-white ">Doctors</h3>
  <span className="text-xs font-semibold text-slate-400">Showing {filteredEarnings.length} of {earnings.length}</span>
  </div>
  <div className="bg-[#f8eaff]/30 p-6">
@@ -620,7 +620,7 @@ const AdminDashboard = () => {
  {filteredEarnings.map(earn => (
  <div 
  key={earn.doctor_id} 
- className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-default"
+ className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-default"
  >
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
@@ -633,7 +633,7 @@ const AdminDashboard = () => {
  </div>
  <div className="flex flex-col">
  <h4 className="font-extrabold text-indigo-900 text-[15px] mb-0.5">Dr. {earn.doctor_name}</h4>
- <p className="text-slate-500 text-[12px] font-medium flex items-center gap-1.5">
+ <p className="text-slate-500 dark:text-gray-400 text-[12px] font-medium flex items-center gap-1.5">
  <span>{earn.specialization}</span>
  <span className="w-1 h-1 rounded-full bg-slate-300"></span>
  <span className="text-indigo-600 font-bold">LKR {parseFloat(earn.consultation_fee).toLocaleString()}</span>
@@ -641,10 +641,10 @@ const AdminDashboard = () => {
  </div>
  </div>
 
- <div className="flex flex-wrap items-center gap-4 sm:gap-6 bg-slate-50 /50 px-5 py-2.5 rounded-xl border border-slate-100 ">
+ <div className="flex flex-wrap items-center gap-4 sm:gap-6 bg-slate-50 dark:bg-gray-900 /50 px-5 py-2.5 rounded-xl border border-slate-100 dark:border-gray-700 ">
  <div className="flex flex-col text-left sm:text-right min-w-[60px]">
  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Appts</span>
- <span className="text-slate-700 font-extrabold text-[14px]">
+ <span className="text-slate-700 dark:text-gray-200 font-extrabold text-[14px]">
  {earn.total_appointments || 0}
  </span>
  </div>
@@ -680,7 +680,7 @@ const AdminDashboard = () => {
  ))}
  
  {filteredEarnings.length === 0 && (
- <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+ <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white dark:bg-gray-800 rounded-2xl border border-indigo-100 border-dashed">
  No doctors match your search.
  </div>
  )}
@@ -704,7 +704,7 @@ const AdminDashboard = () => {
  {/* Search and Filter for Doctors Tab */}
  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
  <div>
- <h3 className="text-[15px] font-bold text-slate-700 mb-2">
+ <h3 className="text-[15px] font-bold text-slate-700 dark:text-gray-200 mb-2">
  Search doctors
  {doctorSearchQuery && (
  <span className="ml-2 text-xs font-normal text-blue-500">
@@ -720,12 +720,12 @@ const AdminDashboard = () => {
  placeholder="Search name / specialization / email"
  value={doctorSearchQuery}
  onChange={(e) => setDoctorSearchQuery(e.target.value)}
- className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white "
+ className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 dark:text-gray-200 placeholder-slate-400 bg-white dark:bg-gray-800 "
  />
  {doctorSearchQuery && (
  <button
  onClick={() => setDoctorSearchQuery('')}
- className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+ className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-gray-300 transition-colors"
  >
  <X size={16} />
  </button>
@@ -734,11 +734,11 @@ const AdminDashboard = () => {
  </div>
  </div>
 
- <div className="flex items-center gap-3 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+ <div className="flex items-center gap-3 bg-white dark:bg-gray-800 p-1.5 rounded-full border border-slate-200 dark:border-gray-600 shadow-sm">
  <button 
  onClick={() => setDoctorStatusFilter('All')}
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
- doctorStatusFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'
+ doctorStatusFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:bg-gray-800'
  }`}
  >
  All
@@ -748,7 +748,7 @@ const AdminDashboard = () => {
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
  doctorStatusFilter === 'Available' 
  ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm' 
- : 'border-transparent text-slate-500 hover:bg-slate-50 '
+ : 'border-transparent text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900 '
  }`}
  >
  Available
@@ -758,7 +758,7 @@ const AdminDashboard = () => {
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
  doctorStatusFilter === 'Unavailable' 
  ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-sm' 
- : 'border-transparent text-slate-500 hover:bg-slate-50 '
+ : 'border-transparent text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900 '
  }`}
  >
  Unavailable
@@ -766,9 +766,9 @@ const AdminDashboard = () => {
  </div>
  </div>
 
- <div className="bg-white /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+ <div className="bg-white dark:bg-gray-800 /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
  <div className="p-5 border-b border-blue-50 flex items-center justify-between">
- <h3 className="text-xl font-extrabold text-slate-800 ">Doctor Management</h3>
+ <h3 className="text-xl font-extrabold text-slate-800 dark:text-white ">Doctor Management</h3>
  <button
  onClick={() => setShowAddDoctor(true)}
  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
@@ -783,7 +783,7 @@ const AdminDashboard = () => {
  <div 
  key={doctor.id} 
  onClick={() => setSelectedDoctor(doctor)}
- className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
+ className="bg-white dark:bg-gray-800 rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
  >
  <div className="flex justify-between items-start">
  <div className="flex gap-4">
@@ -801,7 +801,7 @@ const AdminDashboard = () => {
  {doctor.is_approved ? 'APPROVED' : 'SUSPENDED'}
  </span>
  </div>
- <p className="text-slate-500 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
+ <p className="text-slate-500 dark:text-gray-400 text-[12px] font-medium">{doctor.specialization} • {parseInt(doctor.experience) || 0} years</p>
  </div>
  </div>
  
@@ -812,8 +812,8 @@ const AdminDashboard = () => {
  </div>
  </div>
 
- <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100 ">
- <div className="flex items-center gap-2 text-slate-500 text-[13px] font-medium">
+ <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100 dark:border-gray-700 ">
+ <div className="flex items-center gap-2 text-slate-500 dark:text-gray-400 text-[13px] font-medium">
  <span>Patients</span>
  <span className="flex items-center gap-1 text-indigo-900 font-extrabold">
  <Users size={14} className="text-indigo-400" /> {doctor.total_patients || 0}
@@ -821,8 +821,8 @@ const AdminDashboard = () => {
  </div>
  
  <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
- <span className="text-slate-600 font-bold text-[13px]">Fees:</span>
- <span className="flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+ <span className="text-slate-600 dark:text-gray-300 font-bold text-[13px]">Fees:</span>
+ <span className="flex items-center gap-1 bg-white dark:bg-gray-800 px-2.5 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
  LKR {doctor.consultation_fee ? parseFloat(doctor.consultation_fee).toLocaleString() : '0'}
  </span>
  </div>
@@ -832,7 +832,7 @@ const AdminDashboard = () => {
  </div>
  
  {filteredDoctors.length === 0 && (
- <div className="col-span-full p-10 mt-4 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+ <div className="col-span-full p-10 mt-4 text-center text-indigo-600 font-medium bg-white dark:bg-gray-800 rounded-2xl border border-indigo-100 border-dashed">
  No doctors match your search.
  </div>
  )}
@@ -846,7 +846,7 @@ const AdminDashboard = () => {
  className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
  doctorCurrentPage === i + 1 
  ? 'bg-indigo-600 text-white shadow-md' 
- : 'bg-white text-slate-500 hover:bg-indigo-50 border border-slate-200 '
+ : 'bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400 hover:bg-indigo-50 border border-slate-200 dark:border-gray-600 '
  }`}
  >
  {i + 1}
@@ -876,7 +876,7 @@ const AdminDashboard = () => {
  {/* Search and Filter for Patients Tab */}
  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
  <div>
- <h3 className="text-[15px] font-bold text-slate-700 mb-2">
+ <h3 className="text-[15px] font-bold text-slate-700 dark:text-gray-200 mb-2">
  Search patients
  {patientSearchQuery && (
  <span className="ml-2 text-xs font-normal text-blue-500">
@@ -892,12 +892,12 @@ const AdminDashboard = () => {
  placeholder="Search name / email / mobile"
  value={patientSearchQuery}
  onChange={(e) => setPatientSearchQuery(e.target.value)}
- className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white "
+ className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 dark:text-gray-200 placeholder-slate-400 bg-white dark:bg-gray-800 "
  />
  {patientSearchQuery && (
  <button
  onClick={() => setPatientSearchQuery('')}
- className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+ className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-gray-300 transition-colors"
  >
  <X size={16} />
  </button>
@@ -906,11 +906,11 @@ const AdminDashboard = () => {
  </div>
  </div>
 
- <div className="flex items-center gap-3 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+ <div className="flex items-center gap-3 bg-white dark:bg-gray-800 p-1.5 rounded-full border border-slate-200 dark:border-gray-600 shadow-sm">
  <button 
  onClick={() => setPatientTypeFilter('All')}
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
- patientTypeFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'
+ patientTypeFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:bg-gray-800'
  }`}
  >
  All
@@ -920,7 +920,7 @@ const AdminDashboard = () => {
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
  patientTypeFilter === 'Walk-in' 
  ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm' 
- : 'border-transparent text-slate-500 hover:bg-slate-50 '
+ : 'border-transparent text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900 '
  }`}
  >
  Walk-in
@@ -930,7 +930,7 @@ const AdminDashboard = () => {
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
  patientTypeFilter === 'Online' 
  ? 'bg-purple-50 border-purple-200 text-purple-700 shadow-sm' 
- : 'border-transparent text-slate-500 hover:bg-slate-50 '
+ : 'border-transparent text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900 '
  }`}
  >
  Online
@@ -938,9 +938,9 @@ const AdminDashboard = () => {
  </div>
  </div>
 
- <div className="bg-white /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+ <div className="bg-white dark:bg-gray-800 /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
  <div className="p-5 border-b border-blue-50">
- <h3 className="text-xl font-extrabold text-slate-800 ">Registered Patients</h3>
+ <h3 className="text-xl font-extrabold text-slate-800 dark:text-white ">Registered Patients</h3>
  </div>
  <div className="bg-[#f8eaff]/30 p-6 rounded-3xl border border-indigo-50 mt-2">
  <div className="flex flex-col gap-3">
@@ -948,26 +948,26 @@ const AdminDashboard = () => {
  <div 
  key={patient.id} 
  onClick={() => setSelectedPatient(patient)}
- className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
+ className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
  >
  <div className="flex items-center gap-4">
- <div className="w-12 h-12 rounded-xl bg-[#bae6fd] flex items-center justify-center text-slate-800 text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
+ <div className="w-12 h-12 rounded-xl bg-[#bae6fd] flex items-center justify-center text-slate-800 dark:text-white text-[18px] font-bold overflow-hidden flex-shrink-0 shadow-inner">
  {patient.full_name ? patient.full_name.substring(0, 2).toUpperCase() : 'US'}
  </div>
  <div className="flex flex-col">
  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
  <h4 className="font-extrabold text-indigo-900 text-[15px]">{patient.full_name}</h4>
- <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${patient.blood_group && patient.blood_group !== 'N/A' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-500 '}`}>
+ <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${patient.blood_group && patient.blood_group !== 'N/A' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-gray-400 '}`}>
  {patient.blood_group || 'N/A'}
  </span>
  </div>
- <p className="text-slate-500 text-[12px] font-medium">
+ <p className="text-slate-500 dark:text-gray-400 text-[12px] font-medium">
  {patient.email?.includes('@caresync.local') ? 'No email provided' : patient.email}
  </p>
  </div>
  </div>
 
- <div className="flex items-center gap-6 sm:gap-6 bg-slate-50 /50 px-4 py-2 rounded-xl border border-slate-100 ">
+ <div className="flex items-center gap-6 sm:gap-6 bg-slate-50 dark:bg-gray-900 /50 px-4 py-2 rounded-xl border border-slate-100 dark:border-gray-700 ">
  <div className="flex flex-col text-left sm:text-right">
  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-0.5">Mobile</span>
  <span className="text-indigo-900 font-extrabold text-[13px]">
@@ -987,7 +987,7 @@ const AdminDashboard = () => {
  </div>
  ))}
  {filteredPatients.length === 0 && (
- <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+ <div className="w-full p-10 text-center text-indigo-600 font-medium bg-white dark:bg-gray-800 rounded-2xl border border-indigo-100 border-dashed">
  No patients match your search.
  </div>
  )}
@@ -1001,7 +1001,7 @@ const AdminDashboard = () => {
  className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
  patientCurrentPage === i + 1 
  ? 'bg-indigo-600 text-white shadow-md' 
- : 'bg-white text-slate-500 hover:bg-indigo-50 border border-slate-200 '
+ : 'bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400 hover:bg-indigo-50 border border-slate-200 dark:border-gray-600 '
  }`}
  >
  {i + 1}
@@ -1023,7 +1023,7 @@ const AdminDashboard = () => {
  <h3 className="text-2xl font-extrabold text-indigo-900">Clinic Appointments</h3>
  <p className="text-indigo-600 font-medium text-sm mt-1">Manage all scheduled appointments and bookings</p>
  </div>
- <div className="bg-white rounded-full p-1 border border-indigo-100 shadow-sm flex inline-flex">
+ <div className="bg-white dark:bg-gray-800 rounded-full p-1 border border-indigo-100 shadow-sm flex inline-flex">
  {['All', 'Doctor', 'Services'].map((filter) => (
  <button
  key={filter}
@@ -1031,7 +1031,7 @@ const AdminDashboard = () => {
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
  appointmentFilter === filter 
  ? 'bg-[#1e293b] text-white shadow-md' 
- : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 '
+ : 'text-slate-500 hover:text-slate-700 dark:text-gray-200 hover:bg-slate-50 dark:bg-gray-900 '
  }`}
  >
  {filter}
@@ -1042,13 +1042,13 @@ const AdminDashboard = () => {
 
  <div className="mb-6 flex flex-col md:flex-row justify-end gap-4">
     <div className="flex flex-col items-end gap-3">
-      <div className="flex bg-white border border-slate-200 rounded-full p-1 shadow-sm overflow-x-auto max-w-full">
+      <div className="flex bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-full p-1 shadow-sm overflow-x-auto max-w-full">
         {['All Time', 'Today', 'This Week', 'This Month', 'Custom'].map(f => (
           <button
             key={f}
             onClick={() => setDateFilter(f)}
             className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all whitespace-nowrap ${
-              dateFilter === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 '
+              dateFilter === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:bg-gray-800 hover:text-slate-800 dark:text-white '
             }`}
           >
             {f}
@@ -1057,10 +1057,10 @@ const AdminDashboard = () => {
       </div>
       
       {dateFilter === 'Custom' && (
-        <div className="flex gap-2 items-center bg-white border border-slate-200 p-1.5 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2">
-          <input type="date" value={customDates.start} onChange={e => setCustomDates({...customDates, start: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+        <div className="flex gap-2 items-center bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 p-1.5 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2">
+          <input type="date" value={customDates.start} onChange={e => setCustomDates({...customDates, start: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 rounded-full focus:outline-none focus:border-blue-400" />
           <span className="text-slate-400 text-xs font-bold">TO</span>
-          <input type="date" value={customDates.end} onChange={e => setCustomDates({...customDates, end: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 border border-slate-200 rounded-full focus:outline-none focus:border-blue-400" />
+          <input type="date" value={customDates.end} onChange={e => setCustomDates({...customDates, end: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 rounded-full focus:outline-none focus:border-blue-400" />
         </div>
       )}
     </div>
@@ -1071,7 +1071,7 @@ const AdminDashboard = () => {
  if (item._type === 'Doctor') {
  const appt = item;
  return (
- <div key={`doc-${appt.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+ <div key={`doc-${appt.id}`} className="bg-white dark:bg-gray-800 rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
  <div className="mb-3">
  <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{appt.patient_name}</h4>
  <p className="text-indigo-600 font-bold text-[12px]">
@@ -1080,7 +1080,7 @@ const AdminDashboard = () => {
  </div>
  
  <div className="mb-4 bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-50">
- <p className="text-slate-600 font-bold text-[13px]">
+ <p className="text-slate-600 dark:text-gray-300 font-bold text-[13px]">
  Dr. {appt.doctor_name}
  </p>
  <p className="text-indigo-500 font-medium text-[12px] mt-0.5">
@@ -1089,15 +1089,15 @@ const AdminDashboard = () => {
  </div>
  
  <div className="mb-4 flex items-center justify-between">
- <p className="text-slate-500 font-bold text-[13px]">Fees:</p>
- <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
+ <p className="text-slate-500 dark:text-gray-400 font-bold text-[13px]">Fees:</p>
+ <p className="text-indigo-800 font-extrabold text-[15px] flex items-center gap-1 bg-white dark:bg-gray-800 px-2.5 py-1 rounded-md border border-indigo-100 shadow-sm">
  <span className="text-indigo-600 text-[10px] mr-0.5">LKR</span> 
  {appt.fees ? parseFloat(appt.fees).toLocaleString() : '0'}
  </p>
  </div>
 
  <div className="mt-auto flex flex-col gap-4">
- <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+ <div className="flex items-center justify-between border-t border-slate-100 dark:border-gray-700 pt-3 mt-1">
  <span className="flex items-center gap-1.5 text-indigo-600 font-bold text-[11px] bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100">
  <Calendar size={13} className="text-indigo-500" />
  {new Date(appt.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {appt.time}
@@ -1142,7 +1142,7 @@ const AdminDashboard = () => {
  } else {
  const booking = item;
  return (
- <div key={`service-${booking.id}`} className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
+ <div key={`service-${booking.id}`} className="bg-white dark:bg-gray-800 rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 transition-all flex flex-col h-full relative">
  <div className="mb-3">
  <h4 className="font-extrabold text-indigo-900 text-[17px] mb-1">{booking.patientName}</h4>
  <p className="text-indigo-600 font-bold text-[12px]">
@@ -1151,7 +1151,7 @@ const AdminDashboard = () => {
  </div>
  
  <div className="mb-4 bg-blue-50/50 p-2.5 rounded-xl border border-blue-100">
- <p className="text-slate-600 font-bold text-[13px]">
+ <p className="text-slate-600 dark:text-gray-300 font-bold text-[13px]">
  {booking.serviceName}
  </p>
  <p className="text-blue-500 font-medium text-[12px] mt-0.5">
@@ -1160,15 +1160,15 @@ const AdminDashboard = () => {
  </div>
  
  <div className="mb-4 flex items-center justify-between">
- <p className="text-slate-500 font-bold text-[13px]">Amount:</p>
- <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
+ <p className="text-slate-500 dark:text-gray-400 font-bold text-[13px]">Amount:</p>
+ <p className="text-blue-800 font-extrabold text-[15px] flex items-center gap-1 bg-white dark:bg-gray-800 px-2.5 py-1 rounded-md border border-blue-100 shadow-sm">
  <span className="text-blue-600 text-[10px] mr-0.5">LKR</span> 
  {booking.price ? parseFloat(booking.price).toLocaleString() : '0'}
  </p>
  </div>
 
  <div className="mt-auto flex flex-col gap-4">
- <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+ <div className="flex items-center justify-between border-t border-slate-100 dark:border-gray-700 pt-3 mt-1">
  <span className="flex items-center gap-1.5 text-blue-600 font-bold text-[11px] bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100">
  <Calendar size={13} className="text-blue-500" />
  {new Date(booking.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} — {booking.time}
@@ -1204,7 +1204,7 @@ const AdminDashboard = () => {
  </div>
  
  {combinedAppointments.length === 0 && (
- <div className="p-10 text-center bg-white rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm mt-4">
+ <div className="p-10 text-center bg-white dark:bg-gray-800 rounded-[1.2rem] border border-indigo-100 border-dashed shadow-sm mt-4">
  <p className="text-indigo-600 font-medium">No appointments found for this filter.</p>
  </div>
  )}
@@ -1218,7 +1218,7 @@ const AdminDashboard = () => {
  className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-all ${
  appointmentCurrentPage === i + 1 
  ? 'bg-[#1e293b] text-white shadow-md' 
- : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200 '
+ : 'bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400 hover:bg-slate-50 border border-slate-200 dark:border-gray-600 '
  }`}
  >
  {i + 1}
@@ -1231,7 +1231,7 @@ const AdminDashboard = () => {
 
  {/* EARNINGS TAB */}
  {activeTab === 'Earnings' && (
- <div className="bg-white /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
+ <div className="bg-white dark:bg-gray-800 /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
  <div className="p-6 border-b border-blue-100 bg-blue-50/30">
  <h3 className="text-xl font-extrabold text-blue-800 flex items-center gap-2">
  <DollarSign size={24} /> Detailed Revenue Tracking
@@ -1241,7 +1241,7 @@ const AdminDashboard = () => {
  <div className="overflow-x-auto">
  <table className="w-full text-left border-collapse">
  <thead>
- <tr className="bg-white border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
+ <tr className="bg-white dark:bg-gray-800 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
  <th className="p-4 px-6 font-bold">Doctor Name</th>
  <th className="p-4 font-bold">Specialization</th>
  <th className="p-4 font-bold text-right">Fee (LKR)</th>
@@ -1252,17 +1252,17 @@ const AdminDashboard = () => {
  <tbody className="divide-y divide-blue-50">
  {earnings.map(earn => (
  <tr key={earn.doctor_id} className="hover:bg-blue-50/30 transition-colors">
- <td className="p-4 px-6 font-bold text-slate-700 ">{earn.doctor_name}</td>
- <td className="p-4 text-sm text-slate-600 font-medium">{earn.specialization}</td>
- <td className="p-4 text-right text-sm text-slate-600 font-medium">{parseFloat(earn.consultation_fee).toLocaleString()}</td>
- <td className="p-4 text-right font-bold text-slate-700 ">{earn.completed_appointments}</td>
+ <td className="p-4 px-6 font-bold text-slate-700 dark:text-gray-200 ">{earn.doctor_name}</td>
+ <td className="p-4 text-sm text-slate-600 dark:text-gray-300 font-medium">{earn.specialization}</td>
+ <td className="p-4 text-right text-sm text-slate-600 dark:text-gray-300 font-medium">{parseFloat(earn.consultation_fee).toLocaleString()}</td>
+ <td className="p-4 text-right font-bold text-slate-700 dark:text-gray-200 ">{earn.completed_appointments}</td>
  <td className="p-4 px-6 text-right font-black text-blue-600">
  {parseFloat(earn.total_earnings).toLocaleString()}
  </td>
  </tr>
  ))}
  {earnings.length === 0 && (
- <tr><td colSpan="5" className="p-8 text-center text-slate-500 ">No earning data available.</td></tr>
+ <tr><td colSpan="5" className="p-8 text-center text-slate-500 dark:text-gray-400 ">No earning data available.</td></tr>
  )}
  </tbody>
  </table>
@@ -1292,11 +1292,11 @@ const AdminDashboard = () => {
  {/* Selected Doctor Details Modal */}
  {selectedDoctor && (
  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
- <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+ <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
  <div className="relative h-32 bg-gradient-to-r from-emerald-500 to-teal-600">
  <button 
  onClick={() => setSelectedDoctor(null)}
- className="absolute top-4 right-4 text-white hover:bg-white /20 p-2 rounded-full transition-colors"
+ className="absolute top-4 right-4 text-white hover:bg-white dark:bg-gray-800 /20 p-2 rounded-full transition-colors"
  >
  <X size={20} />
  </button>
@@ -1304,13 +1304,13 @@ const AdminDashboard = () => {
  
  <div className="px-8 pb-8">
  <div className="flex justify-between items-start mb-6">
- <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
+ <div className="w-24 h-24 rounded-2xl bg-white dark:bg-gray-800 border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
  <img src={`${import.meta.env.VITE_API_URL}/api/users/profile-image/${selectedDoctor.id}`} alt={selectedDoctor.full_name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = selectedDoctor.full_name.charAt(0); }} />
  </div>
  
  {/* Toggle Switch */}
  <div className="flex flex-col items-end gap-2 mt-4">
- <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Account Status</span>
+ <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Account Status</span>
   {selectedDoctor.specialization === 'Not Specified' ? (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-600 rounded-lg text-sm font-bold">
       <AlertCircle size={16} />
@@ -1319,7 +1319,7 @@ const AdminDashboard = () => {
   ) : (
     <div className={`flex items-center gap-3 ${isApproving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => !isApproving && handleApproveDoctor(selectedDoctor.id, selectedDoctor.is_approved)}>
     <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${selectedDoctor.is_approved ? 'bg-blue-500' : 'bg-rose-200'}`}>
-    <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedDoctor.is_approved ? 'translate-x-6' : 'translate-x-0'}`}></div>
+    <div className={`bg-white dark:bg-gray-800 w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedDoctor.is_approved ? 'translate-x-6' : 'translate-x-0'}`}></div>
     </div>
     <span className={`text-sm font-black uppercase tracking-wider ${selectedDoctor.is_approved ? 'text-blue-600' : 'text-rose-500'}`}>
     {selectedDoctor.is_approved ? 'Approved' : 'Suspended'}
@@ -1330,37 +1330,37 @@ const AdminDashboard = () => {
  </div>
 
  <div>
- <h3 className="text-2xl font-black text-slate-800 ">Dr. {selectedDoctor.full_name}</h3>
+ <h3 className="text-2xl font-black text-slate-800 dark:text-white ">Dr. {selectedDoctor.full_name}</h3>
  <p className="text-teal-600 font-bold text-sm mt-1">{selectedDoctor.specialization}</p>
  
  <div className="grid grid-cols-2 gap-4 mt-6">
- <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 ">
- <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Experience</p>
- <p className="text-slate-800 font-semibold">{parseInt(selectedDoctor.experience) || 0} Years</p>
+ <div className="bg-slate-50 dark:bg-gray-900 p-3 rounded-xl border border-slate-100 dark:border-gray-700 ">
+ <p className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Experience</p>
+ <p className="text-slate-800 dark:text-white font-semibold">{parseInt(selectedDoctor.experience) || 0} Years</p>
  </div>
- <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 ">
- <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Consultation Fee</p>
- <p className="text-slate-800 font-semibold">LKR {selectedDoctor.consultation_fee ? parseFloat(selectedDoctor.consultation_fee).toLocaleString() : '0'}</p>
+ <div className="bg-slate-50 dark:bg-gray-900 p-3 rounded-xl border border-slate-100 dark:border-gray-700 ">
+ <p className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Consultation Fee</p>
+ <p className="text-slate-800 dark:text-white font-semibold">LKR {selectedDoctor.consultation_fee ? parseFloat(selectedDoctor.consultation_fee).toLocaleString() : '0'}</p>
  </div>
- <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 ">
- <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Email</p>
- <p className="text-slate-800 font-semibold text-sm truncate" title={selectedDoctor.email}>{selectedDoctor.email}</p>
+ <div className="bg-slate-50 dark:bg-gray-900 p-3 rounded-xl border border-slate-100 dark:border-gray-700 ">
+ <p className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Email</p>
+ <p className="text-slate-800 dark:text-white font-semibold text-sm truncate" title={selectedDoctor.email}>{selectedDoctor.email}</p>
  </div>
- <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 ">
- <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Phone</p>
- <p className="text-slate-800 font-semibold text-sm">{selectedDoctor.mobile_number || 'N/A'}</p>
+ <div className="bg-slate-50 dark:bg-gray-900 p-3 rounded-xl border border-slate-100 dark:border-gray-700 ">
+ <p className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Phone</p>
+ <p className="text-slate-800 dark:text-white font-semibold text-sm">{selectedDoctor.mobile_number || 'N/A'}</p>
  </div>
  </div>
  </div>
 
  {/* Medical ID Cards */}
- <div className="mt-6 pt-6 border-t border-slate-100">
-   <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-3">Medical ID Cards</p>
+ <div className="mt-6 pt-6 border-t border-slate-100 dark:border-gray-700">
+   <p className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-3">Medical ID Cards</p>
    <div className="grid grid-cols-2 gap-4">
      {selectedDoctor.has_id_card_front ? (
        <div className="flex flex-col items-center gap-2">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Side</span>
-         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm cursor-pointer">
+         <div className="w-full h-32 rounded-xl border border-slate-200 dark:border-gray-600 overflow-hidden shadow-sm cursor-pointer">
            <AuthorizedImage 
              url={`${import.meta.env.VITE_API_URL}/api/admin/doctors/${selectedDoctor.id}/id-card/front`} 
              token={token} 
@@ -1370,7 +1370,7 @@ const AdminDashboard = () => {
          </div>
        </div>
      ) : (
-       <div className="flex flex-col items-center justify-center h-32 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+       <div className="flex flex-col items-center justify-center h-32 bg-slate-50 dark:bg-gray-900 rounded-xl border border-dashed border-slate-200 dark:border-gray-600">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Front Side Missing</span>
        </div>
      )}
@@ -1378,7 +1378,7 @@ const AdminDashboard = () => {
      {selectedDoctor.has_id_card_rear ? (
        <div className="flex flex-col items-center gap-2">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rear Side</span>
-         <div className="w-full h-32 rounded-xl border border-slate-200 overflow-hidden shadow-sm cursor-pointer">
+         <div className="w-full h-32 rounded-xl border border-slate-200 dark:border-gray-600 overflow-hidden shadow-sm cursor-pointer">
            <AuthorizedImage 
              url={`${import.meta.env.VITE_API_URL}/api/admin/doctors/${selectedDoctor.id}/id-card/rear`} 
              token={token} 
@@ -1388,14 +1388,14 @@ const AdminDashboard = () => {
          </div>
        </div>
      ) : (
-       <div className="flex flex-col items-center justify-center h-32 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+       <div className="flex flex-col items-center justify-center h-32 bg-slate-50 dark:bg-gray-900 rounded-xl border border-dashed border-slate-200 dark:border-gray-600">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rear Side Missing</span>
        </div>
      )}
    </div>
  </div>
 
- <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+ <div className="mt-8 pt-6 border-t border-slate-100 dark:border-gray-700 flex justify-end">
  <button 
  onClick={() => handleDeleteDoctor(selectedDoctor)}
  className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold transition-colors"
@@ -1412,18 +1412,18 @@ const AdminDashboard = () => {
  {/* Custom Confirmation Modal */}
  {doctorToDelete && (
  <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-sm">
- <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all">
+ <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-xl transform transition-all">
  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-100 mb-4 mx-auto">
  <Trash2 className="text-rose-600" size={24} />
  </div>
- <h3 className="text-lg font-bold text-center text-slate-800 mb-2">Delete Doctor?</h3>
- <p className="text-center text-slate-500 text-sm mb-6">
- Are you sure you want to delete <span className="font-bold text-slate-700 ">Dr. {doctorToDelete.full_name}</span>? This action cannot be undone.
+ <h3 className="text-lg font-bold text-center text-slate-800 dark:text-white mb-2">Delete Doctor?</h3>
+ <p className="text-center text-slate-500 dark:text-gray-400 text-sm mb-6">
+ Are you sure you want to delete <span className="font-bold text-slate-700 dark:text-gray-200 ">Dr. {doctorToDelete.full_name}</span>? This action cannot be undone.
  </p>
  <div className="flex justify-between gap-3">
  <button
  onClick={() => setDoctorToDelete(null)}
- className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+ className="flex-1 px-4 py-2 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-200 rounded-lg font-medium hover:bg-slate-200 transition-colors"
  >
  Cancel
  </button>
@@ -1441,18 +1441,18 @@ const AdminDashboard = () => {
  {/* Appointment Cancellation Confirmation Modal */}
  {appointmentToCancel && (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity">
- <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-rose-100 transform transition-all scale-100 opacity-100">
+ <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-rose-100 transform transition-all scale-100 opacity-100">
  <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
  <XCircle className="w-8 h-8 text-rose-500" />
  </div>
- <h3 className="text-2xl font-extrabold text-slate-800 text-center mb-2">Cancel Appointment</h3>
- <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed">
+ <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white text-center mb-2">Cancel Appointment</h3>
+ <p className="text-slate-500 dark:text-gray-400 text-center text-sm font-medium mb-8 leading-relaxed">
  Are you absolutely sure you want to cancel this appointment? This action cannot be undone.
  </p>
  <div className="flex gap-4 justify-center">
  <button 
  onClick={() => setAppointmentToCancel(null)}
- className="px-6 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors flex-1"
+ className="px-6 py-2.5 rounded-xl font-bold text-slate-600 dark:text-gray-300 bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 transition-colors flex-1"
  >
  No, Keep it
  </button>
@@ -1474,7 +1474,7 @@ const AdminDashboard = () => {
     onClick={() => setEnlargedImage(null)}
   >
     <button 
-      className="absolute top-6 right-6 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+      className="absolute top-6 right-6 text-white hover:bg-white dark:bg-gray-800/20 p-2 rounded-full transition-colors"
       onClick={() => setEnlargedImage(null)}
     >
       <X size={32} />

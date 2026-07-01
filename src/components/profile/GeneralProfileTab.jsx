@@ -255,7 +255,7 @@ const GeneralProfileTab = () => {
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 text-3xl font-bold shadow-inner overflow-hidden border-2 border-white dark:border-slate-800">
                 <img 
-                  src={(user?.profile_image && !user.profile_image.includes('localhost') && !user.profile_image.includes('127.0.0.1')) ? user.profile_image : `${import.meta.env.VITE_API_URL}/api/users/profile-image/${user?.id}?t=${Date.now()}`}
+                  src={(typeof user?.profile_image === 'string' && !user.profile_image.includes('localhost') && !user.profile_image.includes('127.0.0.1')) ? user.profile_image : `${import.meta.env.VITE_API_URL}/api/users/profile-image/${user?.id}?t=${Date.now()}`}
                   alt="Profile" 
                   className="w-full h-full object-cover"
                   onError={(e) => {

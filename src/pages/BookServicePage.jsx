@@ -283,7 +283,7 @@ const BookServicePage = () => {
                         <Loader className="animate-spin h-6 w-6" />
                       </div>
                     ) : schedules.length === 0 ? (
-                      <div className="text-sm text-gray-500 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
+                      <div className="text-sm text-gray-500 dark:text-gray-400 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
                         No availability currently configured for this service.
                       </div>
                     ) : (
@@ -358,18 +358,18 @@ const BookServicePage = () => {
                                   type="button"
                                   disabled={slotPage === 0}
                                   onClick={() => setSlotPage(p => p - 1)}
-                                  className="px-4 py-2 text-xs font-bold rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition"
+                                  className="px-4 py-2 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 disabled:opacity-50 transition"
                                 >
                                   Prev
                                 </button>
-                                <span className="text-xs font-semibold text-gray-500">
+                                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
                                   Page {slotPage + 1} of {totalPages}
                                 </span>
                                 <button
                                   type="button"
                                   disabled={slotPage >= totalPages - 1}
                                   onClick={() => setSlotPage(p => p + 1)}
-                                  className="px-4 py-2 text-xs font-bold rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 transition"
+                                  className="px-4 py-2 text-xs font-bold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 disabled:opacity-50 transition"
                                 >
                                   Next
                                 </button>
@@ -414,14 +414,14 @@ const BookServicePage = () => {
                     </div>
 
                     <div className="border-t border-teal-100 dark:border-gray-700 pt-4">
-                      <span className="block text-[10px] font-bold tracking-wider uppercase text-gray-500 mb-2">Payment Method</span>
+                      <span className="block text-[10px] font-bold tracking-wider uppercase text-gray-500 dark:text-gray-400 mb-2">Payment Method</span>
                       <div className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-1 rounded-xl">
                         <button
                           type="button"
                           onClick={() => setPaymentMethod('Cash')}
                           className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${paymentMethod === 'Cash'
                             ? 'bg-teal-500 text-white shadow'
-                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
                             }`}
                         >
                           Cash on Arrival
@@ -431,7 +431,7 @@ const BookServicePage = () => {
                           onClick={() => setPaymentMethod('Online')}
                           className={`flex-1 py-2 text-xs font-bold rounded-lg transition ${paymentMethod === 'Online'
                             ? 'bg-teal-500 text-white shadow'
-                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
                             }`}
                         >
                           Pay Online
@@ -486,15 +486,15 @@ const BookServicePage = () => {
 
               <div className="space-y-3 bg-gray-50 dark:bg-gray-900 p-4 rounded-2xl text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Service</span>
+                  <span className="text-gray-500 dark:text-gray-400">Service</span>
                   <span className="font-bold text-gray-800 dark:text-white">{service.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Date</span>
+                  <span className="text-gray-500 dark:text-gray-400">Date</span>
                   <span className="font-bold text-gray-800 dark:text-white">{selectedDateObj?.formattedDate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Time</span>
+                  <span className="text-gray-500 dark:text-gray-400">Time</span>
                   <span className="font-bold text-gray-800 dark:text-white">{formatTimeDisplay(selectedTime)}</span>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between font-bold">
@@ -506,7 +506,7 @@ const BookServicePage = () => {
               <div className="flex gap-3 p-6 pt-0 mt-4 print:hidden">
                 <button
                   onClick={printTicket}
-                  className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-3 rounded-2xl flex items-center justify-center gap-1.5 transition"
+                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200 font-bold py-3 rounded-2xl flex items-center justify-center gap-1.5 transition"
                 >
                   <Printer className="h-4 w-4" /> Print
                 </button>

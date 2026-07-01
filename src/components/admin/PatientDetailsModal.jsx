@@ -48,7 +48,7 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
 
  return (
  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
- <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-white/20">
+ <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-white/20">
  
  {/* Header */}
  <div className="p-6 sm:p-8 bg-gradient-to-br from-indigo-50 to-white border-b border-indigo-100 flex items-start justify-between relative overflow-hidden">
@@ -60,8 +60,8 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  {patient.full_name ? patient.full_name.substring(0, 2).toUpperCase() : 'US'}
  </div>
  <div>
- <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">{patient.full_name}</h2>
- <div className="flex items-center gap-3 mt-1.5 text-sm text-slate-500 font-medium">
+ <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">{patient.full_name}</h2>
+ <div className="flex items-center gap-3 mt-1.5 text-sm text-slate-500 dark:text-gray-400 font-medium">
  <span>{patient.email?.includes('@caresync.local') ? 'No email provided' : patient.email}</span>
  <span className="w-1 h-1 rounded-full bg-slate-300"></span>
  <span>{patient.mobile_number || 'No Mobile'}</span>
@@ -79,53 +79,53 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  
  <button 
  onClick={onClose}
- className="relative z-10 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+ className="relative z-10 p-2 text-slate-400 hover:text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:bg-gray-800 rounded-full transition-colors"
  >
  <X size={24} />
  </button>
  </div>
 
  {/* Content */}
- <div className="p-6 sm:p-8 overflow-y-auto flex-1 bg-slate-50 /50">
+ <div className="p-6 sm:p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-gray-900 /50">
  {loading ? (
  <div className="flex flex-col items-center justify-center h-48">
  <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
- <p className="text-slate-500 font-medium">Loading details...</p>
+ <p className="text-slate-500 dark:text-gray-400 font-medium">Loading details...</p>
  </div>
  ) : (
  <div className="space-y-8">
  
  {/* Stats Grid */}
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
- <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+ <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center text-center">
  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-2">
  <Calendar size={20} />
  </div>
- <span className="text-2xl font-black text-slate-800 ">{totalAppointments}</span>
+ <span className="text-2xl font-black text-slate-800 dark:text-white ">{totalAppointments}</span>
  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Total Bookings</span>
  </div>
  
- <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+ <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center text-center">
  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 mb-2">
  <CheckCircle size={20} />
  </div>
- <span className="text-2xl font-black text-slate-800 ">{completedAppointments}</span>
+ <span className="text-2xl font-black text-slate-800 dark:text-white ">{completedAppointments}</span>
  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Completed</span>
  </div>
 
- <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+ <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center text-center">
  <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-600 mb-2">
  <XCircle size={20} />
  </div>
- <span className="text-2xl font-black text-slate-800 ">{cancelledAppointments}</span>
+ <span className="text-2xl font-black text-slate-800 dark:text-white ">{cancelledAppointments}</span>
  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Cancelled</span>
  </div>
  
- <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+ <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col items-center justify-center text-center">
  <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 mb-2">
  <Activity size={20} />
  </div>
- <span className="text-2xl font-black text-slate-800 ">{uniqueDoctors.length}</span>
+ <span className="text-2xl font-black text-slate-800 dark:text-white ">{uniqueDoctors.length}</span>
  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Doctors Seen</span>
  </div>
  </div>
@@ -139,7 +139,7 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  </h3>
  <div className="flex flex-wrap gap-2">
  {uniqueDoctors.map((doc, idx) => (
- <span key={idx} className="px-4 py-2 bg-white border border-indigo-100 rounded-xl text-sm font-bold text-indigo-900 shadow-sm">
+ <span key={idx} className="px-4 py-2 bg-white dark:bg-gray-800 border border-indigo-100 rounded-xl text-sm font-bold text-indigo-900 shadow-sm">
  Dr. {doc}
  </span>
  ))}
@@ -155,10 +155,10 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  </h3>
  
  {appointments.length > 0 ? (
- <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+ <div className="bg-white dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
  <div className="divide-y divide-slate-50">
  {appointments.map(appt => (
- <div key={appt.id} className="p-4 hover:bg-slate-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+ <div key={appt.id} className="p-4 hover:bg-slate-50 dark:bg-gray-900 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
  <div className="flex items-start gap-4">
  <div className="mt-1">
  {appt.status === 'Completed' ? (
@@ -170,20 +170,20 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  )}
  </div>
  <div>
- <p className="font-bold text-slate-800 ">Dr. {appt.doctor_name}</p>
- <p className="text-xs font-medium text-slate-500 mt-0.5">{appt.doctor_specialization}</p>
+ <p className="font-bold text-slate-800 dark:text-white ">Dr. {appt.doctor_name}</p>
+ <p className="text-xs font-medium text-slate-500 dark:text-gray-400 mt-0.5">{appt.doctor_specialization}</p>
  {appt.reason && (
- <p className="text-sm text-slate-600 mt-2 bg-slate-100 px-3 py-1.5 rounded-lg inline-block">
+ <p className="text-sm text-slate-600 dark:text-gray-300 mt-2 bg-slate-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg inline-block">
  {appt.reason}
  </p>
  )}
  </div>
  </div>
- <div className="flex flex-col sm:items-end text-left sm:text-right bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none">
+ <div className="flex flex-col sm:items-end text-left sm:text-right bg-slate-50 dark:bg-gray-900 sm:bg-transparent p-3 sm:p-0 rounded-xl sm:rounded-none">
  <span className="text-sm font-bold text-indigo-900">
  {new Date(appt.date).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
  </span>
- <span className="text-xs font-bold text-slate-500 mt-1">
+ <span className="text-xs font-bold text-slate-500 dark:text-gray-400 mt-1">
  {appt.time.substring(0, 5)}
  </span>
  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md mt-2 inline-block ${
@@ -199,12 +199,12 @@ const PatientDetailsModal = ({ token, patient, onClose }) => {
  </div>
  </div>
  ) : (
- <div className="bg-white border border-slate-100 rounded-2xl p-8 text-center shadow-sm">
- <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+ <div className="bg-white dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-2xl p-8 text-center shadow-sm">
+ <div className="w-16 h-16 bg-slate-50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-3">
  <Calendar className="text-slate-300" size={24} />
  </div>
- <h4 className="text-slate-700 font-bold mb-1">No Appointments Found</h4>
- <p className="text-slate-500 text-sm">This patient hasn't booked any appointments yet.</p>
+ <h4 className="text-slate-700 dark:text-gray-200 font-bold mb-1">No Appointments Found</h4>
+ <p className="text-slate-500 dark:text-gray-400 text-sm">This patient hasn't booked any appointments yet.</p>
  </div>
  )}
  </div>

@@ -15,7 +15,7 @@ const ToolButton = ({ active, onClick, icon: Icon, label }) => (
     className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 transition-all duration-200 text-center w-full
       ${active
         ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200'
-        : 'bg-white border-gray-100 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm'
+        : 'bg-white dark:bg-gray-800 border-gray-100 text-gray-700 dark:text-gray-200 hover:border-blue-300 hover:text-blue-600 hover:shadow-sm'
       }`}
   >
     <Icon size={20} strokeWidth={1.8} />
@@ -26,7 +26,7 @@ const ToolButton = ({ active, onClick, icon: Icon, label }) => (
 const SliderRow = ({ label, value, min, max, step, onChange, icon: Icon }) => (
   <div className="px-1">
     <div className="flex items-center justify-between mb-1.5">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">
         <Icon size={14} />
         {label}
       </div>
@@ -102,7 +102,7 @@ const AccessibilityPanel = () => {
 
       {/* Panel */}
       <div
-        className={`fixed bottom-20 left-6 z-[9999] w-[260px] bg-white rounded-2xl shadow-2xl shadow-blue-100/60 border border-gray-100 transition-all duration-300 ease-out overflow-hidden
+        className={`fixed bottom-20 left-6 z-[9999] w-[260px] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl shadow-blue-100/60 border border-gray-100 transition-all duration-300 ease-out overflow-hidden
           ${open ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'}`}
         style={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto' }}
       >
@@ -114,7 +114,7 @@ const AccessibilityPanel = () => {
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="hover:bg-white/20 rounded-full p-1 transition-colors"
+            className="hover:bg-white dark:bg-gray-800/20 rounded-full p-1 transition-colors"
           >
             <X size={16} />
           </button>
@@ -138,7 +138,7 @@ const AccessibilityPanel = () => {
 
         {/* Text Align */}
         <div className="px-3 py-2">
-          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Text Align</p>
+          <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Text Align</p>
           <div className="grid grid-cols-4 gap-1">
             {textAlignOptions.map(({ value, icon: Icon, label }) => (
               <button
@@ -148,7 +148,7 @@ const AccessibilityPanel = () => {
                 className={`flex flex-col items-center justify-center py-2 rounded-lg border-2 transition-all text-[10px] font-semibold gap-1
                   ${settings.textAlign === value
                     ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-gray-100 text-gray-500 hover:border-blue-300 hover:text-blue-600'
+                    : 'border-gray-100 text-gray-500 dark:text-gray-400 hover:border-blue-300 hover:text-blue-600'
                   }`}
               >
                 <Icon size={14} />

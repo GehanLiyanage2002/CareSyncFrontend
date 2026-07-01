@@ -59,7 +59,7 @@ const DoctorDashboard = () => {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 activeTab === item.id 
                   ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 shadow-sm' 
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
               <item.icon size={20} className={activeTab === item.id ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'} />

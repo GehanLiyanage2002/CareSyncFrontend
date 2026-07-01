@@ -395,7 +395,7 @@ const BookAppointmentPage = () => {
                   <Loader className="animate-spin h-6 w-6" />
                 </div>
               ) : dates.length === 0 ? (
-                <div className="text-sm text-gray-500 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
+                <div className="text-sm text-gray-500 dark:text-gray-400 py-3 italic bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 w-full text-center border border-gray-100 dark:border-gray-700">
                   No availability currently configured.
                 </div>
               ) : (
@@ -630,7 +630,7 @@ const BookAppointmentPage = () => {
                   className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
                     paymentMethod === 'Cash'
                       ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
                   }`}
                 >
                   Cash
@@ -641,7 +641,7 @@ const BookAppointmentPage = () => {
                   className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
                     paymentMethod === 'Online'
                       ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
                   }`}
                 >
                   Online
@@ -752,7 +752,7 @@ const BookAppointmentPage = () => {
                   </span>
                 </div>
                 <div className="border-t border-gray-100 dark:border-gray-700 pt-2 flex justify-between text-sm font-bold">
-                  <span className="text-gray-500">Paid Amount</span>
+                  <span className="text-gray-500 dark:text-gray-400">Paid Amount</span>
                   <span className="text-blue-900 dark:text-blue-400">Rs. {doctor.consultationFee}</span>
                 </div>
               </div>
@@ -772,7 +772,7 @@ const BookAppointmentPage = () => {
                 <button
                   type="button"
                   onClick={printTicket}
-                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
+                  className="flex-1 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition text-sm"
                 >
                   <Printer className="h-4 w-4" />
                   <span>Print</span>

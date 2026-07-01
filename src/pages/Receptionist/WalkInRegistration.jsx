@@ -222,7 +222,7 @@ const WalkInRegistration = () => {
  <div className="space-y-8 animate-fadeIn">
  {/* Search Bar Section */}
  <div className="relative" ref={dropdownRef}>
- <label className="block text-[15px] font-extrabold text-slate-800 mb-3">Search patients</label>
+ <label className="block text-[15px] font-extrabold text-slate-800 dark:text-white mb-3">Search patients</label>
  <div className="flex items-center gap-4">
  <div className="relative flex-1">
  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-blue-500">
@@ -233,7 +233,7 @@ const WalkInRegistration = () => {
  value={searchQuery}
  onChange={handleSearchChange}
  placeholder="Search name / phone / email"
- className="block w-full pl-12 pr-6 py-3.5 bg-white border border-slate-200 text-slate-800 placeholder-slate-400 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-blue-500 transition-all font-medium text-[15px] shadow-sm"
+ className="block w-full pl-12 pr-6 py-3.5 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-blue-500 transition-all font-medium text-[15px] shadow-sm"
  />
  </div>
  <button 
@@ -250,12 +250,12 @@ const WalkInRegistration = () => {
 
  {/* Search Dropdown */}
  {showDropdown && (
- <div className="absolute top-[105px] left-0 w-full md:w-[calc(100%-110px)] z-50 bg-white rounded-2xl shadow-xl border border-slate-100 max-h-[28rem] overflow-y-auto">
+ <div className="absolute top-[105px] left-0 w-full md:w-[calc(100%-110px)] z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-slate-100 dark:border-gray-700 max-h-[28rem] overflow-y-auto">
  <div className="p-2">
  <p className="text-xs font-bold text-slate-400 px-3 pb-2 pt-1 uppercase tracking-wider">Suggested Patients</p>
  
  {isSearching ? (
- <div className="flex items-center justify-center p-4 text-slate-500 gap-2">
+ <div className="flex items-center justify-center p-4 text-slate-500 dark:text-gray-400 gap-2">
  <Activity className="animate-spin text-blue-500" size={16} />
  <span className="text-sm font-bold">Searching...</span>
  </div>
@@ -263,14 +263,14 @@ const WalkInRegistration = () => {
  searchResults.map((patient) => (
  <div 
  key={patient.id} 
- className="px-4 py-3 hover:bg-slate-50 rounded-xl transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
+ className="px-4 py-3 hover:bg-slate-50 dark:bg-gray-900 rounded-xl transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group"
  >
  <div className="cursor-pointer flex-1" onClick={() => handleSelectPatient(patient)}>
- <p className="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{patient.full_name}</p>
+ <p className="font-bold text-slate-800 dark:text-white text-sm group-hover:text-blue-600 transition-colors">{patient.full_name}</p>
  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
- <span className="text-xs text-slate-500 flex items-center gap-1"><Phone size={12}/> {patient.mobile_number}</span>
+ <span className="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-1"><Phone size={12}/> {patient.mobile_number}</span>
  {patient.email && !patient.email.includes('@caresync.local') ? (
- <span className="text-xs text-slate-500 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>
+ <span className="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-1"><Mail size={12}/> {patient.email}</span>
  ) : (
  <span className="text-xs text-slate-400/70 flex items-center gap-1 italic"><Mail size={12}/> None</span>
  )}
@@ -305,25 +305,25 @@ const WalkInRegistration = () => {
  </div>
  ))
  ) : searchQuery.length >= 2 ? (
- <div className="p-4 text-center text-sm font-bold text-slate-500 ">No patients found.</div>
+ <div className="p-4 text-center text-sm font-bold text-slate-500 dark:text-gray-400 ">No patients found.</div>
  ) : null}
  </div>
  </div>
  )}
  </div>
 
- <div className={`bg-white rounded-3xl border border-blue-50 shadow-sm p-8 lg:p-10 relative overflow-hidden transition-all duration-300 ${showDropdown ? 'hidden' : 'block'}`}>
+ <div className={`bg-white dark:bg-gray-800 rounded-3xl border border-blue-50 shadow-sm p-8 lg:p-10 relative overflow-hidden transition-all duration-300 ${showDropdown ? 'hidden' : 'block'}`}>
  {/* Decorative BG element */}
  <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60"></div>
  
  <div className="relative z-10">
- <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-100 ">
+ <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-100 dark:border-gray-700 ">
  <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center text-blue-600 shadow-inner">
  <UserPlus size={28} />
  </div>
  <div>
- <h3 className="text-2xl font-extrabold text-slate-800 ">Walk-in Registration</h3>
- <p className="text-sm font-medium text-slate-500 mt-1">Quickly add a new patient to the system.</p>
+ <h3 className="text-2xl font-extrabold text-slate-800 dark:text-white ">Walk-in Registration</h3>
+ <p className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-1">Quickly add a new patient to the system.</p>
  </div>
  </div>
 
@@ -332,7 +332,7 @@ const WalkInRegistration = () => {
  
  {/* Patient Name */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Full Name *</label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Full Name *</label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <User size={18} />
@@ -345,14 +345,14 @@ const WalkInRegistration = () => {
  autoComplete="off"
  required
  placeholder="e.g. John Doe"
- className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+ className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />
  </div>
  </div>
 
  {/* Phone Number */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Phone Number *</label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Phone Number *</label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Phone size={18} />
@@ -366,14 +366,14 @@ const WalkInRegistration = () => {
  required
  maxLength="10"
  placeholder="e.g. 0771234567"
- className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+ className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />
  </div>
  </div>
 
  {/* Date of Birth */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Date of Birth <span className="text-slate-400 font-normal">(Optional)</span></label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Date of Birth <span className="text-slate-400 font-normal">(Optional)</span></label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Calendar size={18} />
@@ -384,14 +384,14 @@ const WalkInRegistration = () => {
  value={formData.date_of_birth}
  onChange={handleChange}
  max={new Date().toISOString().split('T')[0]}
- className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+ className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />
  </div>
  </div>
 
  {/* Gender */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Gender <span className="text-slate-400 font-normal">(Optional)</span></label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Gender <span className="text-slate-400 font-normal">(Optional)</span></label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Users size={18} />
@@ -400,7 +400,7 @@ const WalkInRegistration = () => {
  name="gender"
  value={formData.gender}
  onChange={handleChange}
- className="block w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium appearance-none cursor-pointer"
+ className="block w-full pl-11 pr-10 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium appearance-none cursor-pointer"
  >
  <option value="" disabled>Select Gender</option>
  <option value="Male">Male</option>
@@ -415,7 +415,7 @@ const WalkInRegistration = () => {
 
  {/* Email (Optional) */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Email Address <span className="text-slate-400 font-normal">(Optional)</span></label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Email Address <span className="text-slate-400 font-normal">(Optional)</span></label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Mail size={18} />
@@ -427,14 +427,14 @@ const WalkInRegistration = () => {
  onChange={handleChange}
  autoComplete="off"
  placeholder="e.g. john@example.com"
- className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+ className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />
  </div>
  </div>
 
  {/* Blood Group */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Blood Group <span className="text-slate-400 font-normal">(Optional)</span></label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Blood Group <span className="text-slate-400 font-normal">(Optional)</span></label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Droplets size={18} />
@@ -443,7 +443,7 @@ const WalkInRegistration = () => {
  name="blood_group"
  value={formData.blood_group}
  onChange={handleChange}
- className="block w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium appearance-none cursor-pointer"
+ className="block w-full pl-11 pr-10 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium appearance-none cursor-pointer"
  >
  <option value="" disabled>Select Blood Group</option>
  {bloodGroups.map((bg) => (
@@ -458,7 +458,7 @@ const WalkInRegistration = () => {
 
  {/* Emergency Contact Name */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Emergency Contact Name</label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Emergency Contact Name</label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Activity size={18} />
@@ -469,14 +469,14 @@ const WalkInRegistration = () => {
  value={formData.emergency_contact_name}
  onChange={handleChange}
  placeholder="e.g. Jane Doe"
- className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+ className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />
  </div>
  </div>
 
  {/* Emergency Contact Number */}
  <div>
- <label className="block text-sm font-bold text-slate-700 mb-2">Emergency Contact Phone</label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Emergency Contact Phone</label>
  <div className="relative">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Phone size={18} />
@@ -488,14 +488,14 @@ const WalkInRegistration = () => {
  onChange={handleChange}
  maxLength="10"
  placeholder="e.g. 0777654321"
- className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
+ className="block w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium"
  />
  </div>
  </div>
 
  </div>
 
- <div className="pt-6 border-t border-slate-100 flex justify-end">
+ <div className="pt-6 border-t border-slate-100 dark:border-gray-700 flex justify-end">
  <button
  type="submit"
  disabled={loading}
@@ -532,8 +532,8 @@ const WalkInRegistration = () => {
  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
  </div>
  <div>
- <h4 className="text-lg font-bold text-slate-800 ">Registration Successful!</h4>
- <p className="text-sm font-medium text-slate-600 mt-0.5">
+ <h4 className="text-lg font-bold text-slate-800 dark:text-white ">Registration Successful!</h4>
+ <p className="text-sm font-medium text-slate-600 dark:text-gray-300 mt-0.5">
  Patient <strong>{recentlyRegisteredPatient.full_name}</strong> is now registered in the system.
  </p>
  </div>

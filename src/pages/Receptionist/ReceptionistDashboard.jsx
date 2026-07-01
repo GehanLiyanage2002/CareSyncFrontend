@@ -38,9 +38,9 @@ const ReceptionistDashboard = () => {
  ];
 
  return (
- <div className="flex flex-col min-h-screen bg-slate-50 overflow-hidden font-sans">
+ <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-gray-900 overflow-hidden font-sans">
  {/* Header Navbar */}
- <header className="bg-white /95 backdrop-blur-md shadow-sm sticky top-0 z-50 flex items-center justify-between px-6 py-4">
+ <header className="bg-white dark:bg-gray-800 /95 backdrop-blur-md shadow-sm sticky top-0 z-50 flex items-center justify-between px-6 py-4">
  {/* Logo */}
  <div className="flex items-center gap-3">
  <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-md shadow-blue-200">
@@ -59,8 +59,8 @@ const ReceptionistDashboard = () => {
  key={item.name}
  onClick={() => setActiveTab(item.name)}
  className={`flex items-center flex-col px-5 py-1.5 rounded-full transition-all duration-300 min-w-[90px] ${activeTab === item.name
- ? 'bg-white text-blue-600 shadow-sm'
- : 'text-slate-500 hover:text-blue-600 hover:bg-blue-100/50'
+ ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm'
+ : 'text-slate-500 dark:text-gray-400 hover:text-blue-600 hover:bg-blue-100/50'
  }`}
  >
  {React.cloneElement(item.icon, { size: 18, className: 'mb-0.5' })}
@@ -97,12 +97,12 @@ const ReceptionistDashboard = () => {
  </div>
 
  <div className={`${activeTab === 'Booking' ? 'block animate-fadeIn' : 'hidden'}`}>
- <div className="bg-white /50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 p-12 text-center shadow-sm">
- <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+ <div className="bg-white dark:bg-gray-800 /50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 dark:border-gray-600 p-12 text-center shadow-sm">
+ <div className="w-20 h-20 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
  <Calendar size={32} />
  </div>
- <h2 className="text-xl font-bold text-slate-800 mb-2">Booking System</h2>
- <p className="text-slate-500">Coming soon in Phase 2</p>
+ <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Booking System</h2>
+ <p className="text-slate-500 dark:text-gray-400">Coming soon in Phase 2</p>
  </div>
  </div>
 

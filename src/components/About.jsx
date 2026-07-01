@@ -19,7 +19,7 @@ const About = () => {
               </span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight mb-6">
               Welcome To Our <br className="hidden md:block" />
               Medical Clinic
             </h2>

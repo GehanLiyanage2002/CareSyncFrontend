@@ -191,12 +191,12 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  if (successToken) {
  return (
  <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
- <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative animate-in zoom-in-95 duration-200">
+ <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative animate-in zoom-in-95 duration-200">
  <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
  <CheckCircle size={32} />
  </div>
- <h3 className="text-xl font-bold text-slate-800 mb-2">Booking Confirmed!</h3>
- <p className="text-slate-500 text-sm mb-6">Appointment scheduled for {patient.full_name}</p>
+ <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Booking Confirmed!</h3>
+ <p className="text-slate-500 dark:text-gray-400 text-sm mb-6">Appointment scheduled for {patient.full_name}</p>
  
  <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 mb-6">
  <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mb-1">Queue Token</p>
@@ -216,34 +216,34 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
 
  return (
  <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
- <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+ <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
  
  {/* Header */}
- <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white z-10 shrink-0">
+ <div className="px-6 py-4 border-b border-slate-100 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800 z-10 shrink-0">
  <div>
- <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+ <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
  <Calendar className="text-blue-500" size={20} />
  Quick Book Appointment
  </h2>
- <p className="text-sm font-medium text-slate-500 mt-0.5">Booking for: <span className="text-blue-600 font-bold">{patient.full_name}</span></p>
+ <p className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-0.5">Booking for: <span className="text-blue-600 font-bold">{patient.full_name}</span></p>
  </div>
- <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
+ <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:bg-gray-800 rounded-full text-slate-400 hover:text-slate-600 dark:text-gray-300 transition-colors">
  <X size={20} />
  </button>
  </div>
 
  {/* Content */}
- <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50 /30">
+ <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50 dark:bg-gray-900 /30">
  
  {step === 1 && (
  <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
  {/* 1. Select Doctor & Date */}
- <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+ <div className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-slate-100 dark:border-gray-700 shadow-sm">
  <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
  
  {/* Search */}
  <div className="flex-1">
- <label className="block text-sm font-bold text-slate-700 mb-2">Select Doctor</label>
+ <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">Select Doctor</label>
  <div className="relative max-w-md">
  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
  <Search size={18} />
@@ -253,7 +253,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  value={searchQuery}
  onChange={(e) => setSearchQuery(e.target.value)}
  placeholder="Search doctors by name or specialization..."
- className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-200 text-slate-800 placeholder-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium text-sm shadow-sm"
+ className="block w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all font-medium text-sm shadow-sm"
  />
  </div>
  </div>
@@ -266,7 +266,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  min={todayStr}
  value={selectedDate}
  onChange={(e) => setSelectedDate(e.target.value)}
- className="w-48 border border-slate-200 rounded-full px-4 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all shadow-sm"
+ className="w-48 border border-slate-200 dark:border-gray-600 rounded-full px-4 py-3 text-sm font-medium text-slate-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all shadow-sm"
  />
  </div>
  </div>
@@ -281,7 +281,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 border ${
  selectedSpecialization === spec
  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
- : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+ : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 border-slate-200 dark:border-gray-600 hover:border-blue-300 hover:bg-slate-50'
  }`}
  >
  {spec}
@@ -294,11 +294,11 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  {loadingDoctors ? (
  <div className="flex flex-col items-center justify-center py-12 text-blue-500 gap-3">
  <Loader className="animate-spin" size={32} />
- <p className="text-sm font-bold text-slate-500 ">Finding available doctors...</p>
+ <p className="text-sm font-bold text-slate-500 dark:text-gray-400 ">Finding available doctors...</p>
  </div>
  ) : filteredDoctors.length === 0 ? (
- <div className="py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl">
- <p className="text-sm font-bold text-slate-500 ">No doctors available matching your criteria on this date.</p>
+ <div className="py-12 text-center border-2 border-dashed border-slate-200 dark:border-gray-600 rounded-2xl">
+ <p className="text-sm font-bold text-slate-500 dark:text-gray-400 ">No doctors available matching your criteria on this date.</p>
  </div>
  ) : (
  <div className="flex gap-4 overflow-x-auto pb-6 pt-2 px-2 snap-x snap-mandatory scrollbar-thin">
@@ -306,7 +306,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  <button
  key={doc.doctor_id}
  onClick={() => handleSelectDoctor(doc)}
- className="flex flex-col items-center p-6 rounded-3xl border min-w-[240px] max-w-[240px] shrink-0 snap-center transition-all bg-white text-center shadow-sm hover:shadow-md border-slate-100 hover:border-blue-300 relative group"
+ className="flex flex-col items-center p-6 rounded-3xl border min-w-[240px] max-w-[240px] shrink-0 snap-center transition-all bg-white dark:bg-gray-800 text-center shadow-sm hover:shadow-md border-slate-100 dark:border-gray-700 hover:border-blue-300 relative group"
  >
  {/* Profile Image */}
  <div className="relative mb-4 mt-2">
@@ -325,7 +325,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  </div>
  </div>
 
- <h3 className="font-bold text-slate-800 text-lg mb-1">{doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`}</h3>
+ <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-1">{doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`}</h3>
  <p className="text-blue-500 text-xs font-bold uppercase tracking-wider mb-2">{doc.specialization}</p>
  
  <p className="text-slate-400 text-[11px] font-medium mt-auto">{doc.location || 'CareSync Medical Center'}</p>
@@ -346,13 +346,13 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-right-4 duration-300 max-w-4xl mx-auto">
  
  {/* Left Column: Time Slots */}
- <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col h-full">
- <h3 className="text-lg font-bold text-slate-800 mb-6">Available Time Slots</h3>
+ <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col h-full">
+ <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">Available Time Slots</h3>
  
  {loadingSlots ? (
  <div className="flex flex-col items-center justify-center flex-1 py-12 text-blue-500 gap-3">
  <Loader className="animate-spin" size={32} />
- <p className="text-sm font-medium text-slate-500 ">Loading slots...</p>
+ <p className="text-sm font-medium text-slate-500 dark:text-gray-400 ">Loading slots...</p>
  </div>
  ) : slots.length === 0 ? (
  <div className="py-12 text-center flex-1 border-2 border-dashed border-rose-100 rounded-2xl bg-rose-50/50 flex flex-col justify-center">
@@ -370,7 +370,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  ? 'bg-blue-600 border-blue-600 text-white shadow-md scale-[1.02]'
  : slotObj.isBuffer
  ? 'bg-amber-50 border-amber-200 text-amber-700 hover:border-amber-400 hover:bg-amber-100'
- : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
+ : 'bg-white dark:bg-gray-800 border-slate-200 dark:border-gray-600 text-slate-600 dark:text-gray-300 hover:border-blue-300 hover:bg-blue-50'
  }`}
  >
  <span className="font-bold">{formatTimeDisplay(slotObj.time)}</span>
@@ -380,11 +380,11 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  </div>
 
  {totalSlotPages > 1 && (
- <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between">
+ <div className="mt-8 pt-4 border-t border-slate-100 dark:border-gray-700 flex items-center justify-between">
  <button
  disabled={slotPage === 0}
  onClick={() => setSlotPage(p => p - 1)}
- className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+ className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-gray-400 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
  >
  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -397,7 +397,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  <button
  disabled={slotPage >= totalSlotPages - 1}
  onClick={() => setSlotPage(p => p + 1)}
- className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+ className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-600 bg-slate-50 dark:bg-gray-900 text-slate-500 dark:text-gray-400 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
  >
  Next
  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -414,30 +414,30 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  <div className="bg-blue-50/40 border border-blue-100/50 rounded-3xl p-6 space-y-5 flex flex-col h-full">
  <div className="border-b border-blue-100 pb-4">
  <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 mb-1">Selected Doctor</span>
- <span className="text-lg font-bold text-slate-800 ">{selectedDoctor.name.startsWith('Dr.') ? selectedDoctor.name : `Dr. ${selectedDoctor.name}`}</span>
+ <span className="text-lg font-bold text-slate-800 dark:text-white ">{selectedDoctor.name.startsWith('Dr.') ? selectedDoctor.name : `Dr. ${selectedDoctor.name}`}</span>
  </div>
 
  <div>
  <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 mb-1">Doctor Speciality</span>
- <span className="text-sm font-semibold text-slate-700 ">{selectedDoctor.specialization}</span>
+ <span className="text-sm font-semibold text-slate-700 dark:text-gray-200 ">{selectedDoctor.specialization}</span>
  </div>
 
  <div>
  <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 mb-1">Selected Date</span>
- <span className="text-sm font-semibold text-slate-700 ">
+ <span className="text-sm font-semibold text-slate-700 dark:text-gray-200 ">
  {new Date(selectedDate).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
  </span>
  </div>
 
  <div>
  <span className="block text-[10px] font-bold tracking-wider uppercase text-blue-500 mb-1">Selected Time</span>
- <span className="text-sm font-semibold text-slate-700 ">
+ <span className="text-sm font-semibold text-slate-700 dark:text-gray-200 ">
  {selectedTime ? formatTimeDisplay(selectedTime) : 'Not selected'}
  </span>
  </div>
 
  <div className="border-t border-blue-100 pt-4 flex justify-between items-center">
- <span className="text-xs font-bold text-slate-500 uppercase">Consultation Fee</span>
+ <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase">Consultation Fee</span>
  <span className="text-lg font-bold text-blue-900">Rs. {selectedDoctor.consultationFee || 1500}</span>
  </div>
 
@@ -458,7 +458,7 @@ const QuickBookModal = ({ patient, onClose, onBookingSuccess }) => {
  </button>
  <button
  onClick={() => setStep(1)}
- className="w-full py-3 text-sm font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-2xl transition-colors"
+ className="w-full py-3 text-sm font-bold text-slate-500 hover:text-slate-800 dark:text-white hover:bg-slate-100 dark:bg-gray-800 rounded-2xl transition-colors"
  >
  Cancel / Go Back
  </button>

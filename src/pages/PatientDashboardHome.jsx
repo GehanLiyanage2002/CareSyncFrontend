@@ -398,7 +398,7 @@ const PatientDashboardHome = () => {
       {isRescheduleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
-            <button onClick={() => setIsRescheduleModalOpen(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-gray-300 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
+            <button onClick={() => setIsRescheduleModalOpen(false)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:text-gray-300 bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 rounded-full transition-colors">
               <X className="w-5 h-5" />
             </button>
             <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6">Reschedule Appointment</h3>
@@ -439,10 +439,10 @@ const PatientDashboardHome = () => {
                           {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
                         </span>
                         <div className="flex gap-1">
-                          <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${prevMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-700 dark:text-gray-200'}`}>
+                          <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${prevMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-200'}`}>
                             <ChevronUp className="w-4 h-4" />
                           </button>
-                          <button onClick={increaseMonth} disabled={nextMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${nextMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-700 dark:text-gray-200'}`}>
+                          <button onClick={increaseMonth} disabled={nextMonthButtonDisabled} type="button" className={`p-1.5 rounded-md ${nextMonthButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-200'}`}>
                             <ChevronDown className="w-4 h-4" />
                           </button>
                         </div>

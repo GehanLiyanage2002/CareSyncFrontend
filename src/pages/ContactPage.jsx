@@ -96,7 +96,7 @@ const ContactPage = () => {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Enter your name" 
-                      className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                      className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                     />
                   </div>
                   <div className="w-full sm:w-1/2">
@@ -106,7 +106,7 @@ const ContactPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="Email" 
-                      className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                      className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                     />
                   </div>
                 </div>
@@ -118,7 +118,7 @@ const ContactPage = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     placeholder="Enter Subject" 
-                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
+                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium"
                   />
                 </div>
 
@@ -129,7 +129,7 @@ const ContactPage = () => {
                     value={formData.message}
                     onChange={handleChange}
                     placeholder="Enter Message" 
-                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:bg-gray-800 transition-all duration-200 text-sm font-medium resize-y"
+                    className="block w-full px-4 py-3.5 bg-slate-50 border border-slate-200 dark:border-gray-600 text-slate-800 dark:text-white placeholder-slate-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-800 dark:bg-gray-800 transition-all duration-200 text-sm font-medium resize-y"
                   ></textarea>
                 </div>
                 

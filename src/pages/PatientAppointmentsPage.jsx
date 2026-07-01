@@ -139,7 +139,7 @@ const PatientAppointmentsPage = () => {
         {/* Page Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900">My Appointments</h1>
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">My Appointments</h1>
             <p className="text-slate-500 dark:text-gray-400 mt-1 text-sm font-medium">
               Track and manage all your past and upcoming visits.
             </p>

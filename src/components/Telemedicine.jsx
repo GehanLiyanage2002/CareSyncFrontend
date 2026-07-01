@@ -47,7 +47,7 @@ const Telemedicine = () => {
               </span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#111827] leading-tight mb-6">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#111827] dark:text-white leading-tight mb-6">
               Consult Top Doctors <br className="hidden md:block" />
               <span className="text-[#3b82f6]">
                 From Anywhere

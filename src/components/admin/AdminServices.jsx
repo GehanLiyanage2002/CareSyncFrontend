@@ -334,24 +334,24 @@ const AdminServices = () => {
  return (
  <>
  {showForm && (
- <div className="bg-white /90 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200 /50 p-6">
- <div className="mb-10 space-y-8 bg-slate-50 /50 p-6 rounded-3xl border border-slate-100 ">
+ <div className="bg-white dark:bg-gray-800 /90 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200 dark:border-gray-600 /50 p-6">
+ <div className="mb-10 space-y-8 bg-slate-50 dark:bg-gray-900 /50 p-6 rounded-3xl border border-slate-100 dark:border-gray-700 ">
  
  <div className="flex justify-between items-start mb-2">
  <div>
- <h2 className="text-[22px] font-extrabold text-slate-800 ">{isEditing ? 'Edit Service' : 'Add New Service'}</h2>
- <p className="text-[13px] text-slate-500 mt-1">Fill in the service's profile, schedule, and consultation fee details.</p>
+ <h2 className="text-[22px] font-extrabold text-slate-800 dark:text-white ">{isEditing ? 'Edit Service' : 'Add New Service'}</h2>
+ <p className="text-[13px] text-slate-500 dark:text-gray-400 mt-1">Fill in the service's profile, schedule, and consultation fee details.</p>
  </div>
  <button 
  onClick={closeForm}
- className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-full text-[13px] font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+ className="px-4 py-2 bg-white dark:bg-gray-800 hover:bg-slate-50 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-gray-600 rounded-full text-[13px] font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
  >
  <XCircle size={15} className="text-slate-400" /> Cancel
  </button>
  </div>
 
  {/* GENERAL INFO FORM */}
- <form onSubmit={handleSaveInfo} className="bg-white p-6 rounded-[20px] border border-slate-200 shadow-sm">
+ <form onSubmit={handleSaveInfo} className="bg-white dark:bg-gray-800 p-6 rounded-[20px] border border-slate-200 dark:border-gray-600 shadow-sm">
  <h3 className="text-[16px] font-bold text-[#1f2937] mb-6">Basic Information</h3>
  
  <div className="flex items-center gap-4 mb-8">
@@ -364,7 +364,7 @@ const AdminServices = () => {
  )}
  </div>
  <button type="button"
- className="absolute bottom-0 right-[-4px] p-1.5 bg-white rounded-full shadow-md border border-slate-200 text-slate-600 hover:text-blue-600 transition-colors"
+ className="absolute bottom-0 right-[-4px] p-1.5 bg-white dark:bg-gray-800 rounded-full shadow-md border border-slate-200 dark:border-gray-600 text-slate-600 dark:text-gray-300 hover:text-blue-600 transition-colors"
  title="Upload Photo">
  {uploadingImage ? <svg className="animate-spin h-3.5 w-3.5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>}
  </button>
@@ -372,7 +372,7 @@ const AdminServices = () => {
  accept="image/png, image/jpeg" className="hidden" />
  </div>
  <div>
- <h4 className="font-bold text-slate-800 text-[14px]">{currentService.name || 'New Service'}</h4>
+ <h4 className="font-bold text-slate-800 dark:text-white text-[14px]">{currentService.name || 'New Service'}</h4>
  <p className="text-[12px] text-slate-400 font-medium">Service Account</p>
  <p className="text-[11px] text-slate-400 mt-0.5">Click the camera icon to upload a photo</p>
  </div>
@@ -381,42 +381,42 @@ const AdminServices = () => {
  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
  <div className="space-y-5">
  <div>
- <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Service Name *</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-1.5">Service Name *</label>
  <input 
  type="text" 
  value={currentService.name}
  onChange={e => setCurrentService({...currentService, name: e.target.value})}
  placeholder="e.g. Full Body Checkup" 
- className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+ className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
  required
  />
  </div>
  <div>
- <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Clinic Location</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-1.5">Clinic Location</label>
  <input 
  type="text" 
  value={currentService.location}
  onChange={e => setCurrentService({...currentService, location: e.target.value})}
  placeholder="e.g. Ground Floor, Room 102" 
- className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+ className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
  />
  </div>
  </div>
 
  <div className="space-y-5">
  <div>
- <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">About this Service</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-1.5">About this Service</label>
  <textarea 
  value={currentService.description}
  onChange={e => setCurrentService({...currentService, description: e.target.value})}
  placeholder="Describe the medical service..." 
- className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] h-[106px] resize-none"
+ className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] h-[106px] resize-none"
  />
  </div>
  </div>
  </div>
 
- <div className="flex justify-end pt-4 border-t border-slate-100 ">
+ <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-gray-700 ">
  <button type="submit" className="px-6 py-2.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white rounded-xl text-[14px] font-semibold shadow-sm transition-colors">
  {isEditing ? 'Save Details' : 'Create Service Account'}
  </button>
@@ -424,7 +424,7 @@ const AdminServices = () => {
  </form>
 
  {/* SCHEDULE MANAGER */}
- <div className="bg-white p-6 rounded-[20px] border border-slate-200 shadow-sm">
+ <div className="bg-white dark:bg-gray-800 p-6 rounded-[20px] border border-slate-200 dark:border-gray-600 shadow-sm">
  <h3 className="text-[18px] font-bold text-[#1f2937] mb-5">Schedule Manager</h3>
  
  {!isEditing && (
@@ -435,8 +435,8 @@ const AdminServices = () => {
  )}
  
  <form onSubmit={handleAddSchedule}>
- <div className="bg-[#f8fafc] border border-slate-100 rounded-xl p-5 mb-5">
- <h5 className="flex items-center gap-2 text-[14px] font-bold text-slate-700 mb-4">
+ <div className="bg-[#f8fafc] border border-slate-100 dark:border-gray-700 rounded-xl p-5 mb-5">
+ <h5 className="flex items-center gap-2 text-[14px] font-bold text-slate-700 dark:text-gray-200 mb-4">
  <Calendar size={16} className="text-blue-500" /> Working Day 1
  </h5>
  
@@ -450,7 +450,7 @@ const AdminServices = () => {
  onChange={() => setNewSchedule({...newSchedule, type: 'date'})} 
  className="text-blue-600 focus:ring-blue-500"
  />
- <span className="text-[13px] font-semibold text-slate-700 ">Specific Date</span>
+ <span className="text-[13px] font-semibold text-slate-700 dark:text-gray-200 ">Specific Date</span>
  </label>
  <label className="flex items-center gap-2 cursor-pointer">
  <input 
@@ -460,27 +460,27 @@ const AdminServices = () => {
  onChange={() => setNewSchedule({...newSchedule, type: 'weekday'})} 
  className="text-blue-600 focus:ring-blue-500"
  />
- <span className="text-[13px] font-semibold text-slate-700 ">Recurring Week Day</span>
+ <span className="text-[13px] font-semibold text-slate-700 dark:text-gray-200 ">Recurring Week Day</span>
  </label>
  </div>
 
  {newSchedule.type === 'date' ? (
  <div>
- <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Date</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-1.5">Date</label>
  <input 
  type="date" 
  value={newSchedule.schedule_date}
  onChange={e => setNewSchedule({...newSchedule, schedule_date: e.target.value})}
- className="w-full max-w-xl px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+ className="w-full max-w-xl px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
  required={newSchedule.type === 'date'}
  />
  </div>
  ) : (
  <div>
- <label className="block text-[13px] font-semibold text-slate-600 mb-2">Select Days</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-2">Select Days</label>
  <div className="flex flex-wrap gap-2">
  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
- <label key={day} className={`px-4 py-2 rounded-full border text-[13px] font-semibold cursor-pointer transition-colors shadow-sm select-none ${newSchedule.day_of_week.includes(day) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'}`}>
+ <label key={day} className={`px-4 py-2 rounded-full border text-[13px] font-semibold cursor-pointer transition-colors shadow-sm select-none ${newSchedule.day_of_week.includes(day) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 border-slate-200 dark:border-gray-600 hover:border-blue-300 hover:text-blue-600'}`}>
  <input 
  type="checkbox" 
  className="hidden" 
@@ -502,22 +502,22 @@ const AdminServices = () => {
  
  <div className="flex flex-wrap gap-6 max-w-xl">
  <div className="flex-1">
- <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Start Time</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-1.5">Start Time</label>
  <input 
  type="time" 
  value={newSchedule.start_time}
  onChange={e => setNewSchedule({...newSchedule, start_time: e.target.value})}
- className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+ className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
  required
  />
  </div>
  <div className="flex-1">
- <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">End Time</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-1.5">End Time</label>
  <input 
  type="time" 
  value={newSchedule.end_time}
  onChange={e => setNewSchedule({...newSchedule, end_time: e.target.value})}
- className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
+ className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px]"
  required
  />
  </div>
@@ -526,7 +526,7 @@ const AdminServices = () => {
  </div>
 
  <div className="flex justify-center mb-6">
- <button type="submit" className="w-full border border-dashed border-slate-300 text-slate-500 hover:text-blue-600 hover:border-blue-400 py-3 rounded-xl flex items-center justify-center gap-2 text-[14px] font-semibold transition-colors bg-white ">
+ <button type="submit" className="w-full border border-dashed border-slate-300 text-slate-500 dark:text-gray-400 hover:text-blue-600 hover:border-blue-400 py-3 rounded-xl flex items-center justify-center gap-2 text-[14px] font-semibold transition-colors bg-white dark:bg-gray-800 ">
  <Plus size={16} /> Add Schedule Day
  </button>
  </div>
@@ -534,15 +534,15 @@ const AdminServices = () => {
 
  {schedules.length > 0 && (
  <div className="mt-6 mb-6">
- <h5 className="font-bold text-slate-700 text-sm mb-3">Saved Schedules</h5>
+ <h5 className="font-bold text-slate-700 dark:text-gray-200 text-sm mb-3">Saved Schedules</h5>
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
  {schedules.map(sch => (
- <div key={sch.id} className="p-4 bg-[#f8fafc] border border-slate-200 rounded-xl flex justify-between items-center group">
+ <div key={sch.id} className="p-4 bg-[#f8fafc] border border-slate-200 dark:border-gray-600 rounded-xl flex justify-between items-center group">
  <div>
- <p className="font-bold text-slate-800 text-[14px]">
+ <p className="font-bold text-slate-800 dark:text-white text-[14px]">
  {sch.day_of_week ? `Every ${sch.day_of_week}` : sch.schedule_date}
  </p>
- <p className="text-[13px] text-slate-500 font-medium">{sch.start_time} - {sch.end_time}</p>
+ <p className="text-[13px] text-slate-500 dark:text-gray-400 font-medium">{sch.start_time} - {sch.end_time}</p>
  </div>
  <button 
  onClick={() => handleDeleteSchedule(sch.id)}
@@ -560,7 +560,7 @@ const AdminServices = () => {
  </div>
 
  {/* FEE MANAGER */}
- <div className="bg-white p-6 rounded-[20px] border border-slate-200 shadow-sm">
+ <div className="bg-white dark:bg-gray-800 p-6 rounded-[20px] border border-slate-200 dark:border-gray-600 shadow-sm">
  <h3 className="text-[18px] font-bold text-[#1f2937] mb-5">Consultation Fee Manager</h3>
  
  {!isEditing && (
@@ -572,7 +572,7 @@ const AdminServices = () => {
 
  <form onSubmit={handleSaveFee}>
  <div className="max-w-md">
- <label className="block text-[13px] font-semibold text-slate-600 mb-1.5">Service Fee (Rs.)</label>
+ <label className="block text-[13px] font-semibold text-slate-600 dark:text-gray-300 mb-1.5">Service Fee (Rs.)</label>
  <div className="relative">
  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[14px]">Rs.</span>
  <input 
@@ -581,14 +581,14 @@ const AdminServices = () => {
  onChange={e => setCurrentService({...currentService, price: e.target.value})}
  placeholder="1500"
  min="0"
- className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 bg-[#f8fafc] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[15px] font-bold text-slate-700 transition-all"
+ className="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-gray-600 bg-[#f8fafc] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[15px] font-bold text-slate-700 dark:text-gray-200 transition-all"
  required
  />
  </div>
  </div>
 
- <div className="flex justify-between items-center mt-10 pt-4 border-t border-slate-100 ">
- <button type="button" onClick={closeForm} className="text-[14px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
+ <div className="flex justify-between items-center mt-10 pt-4 border-t border-slate-100 dark:border-gray-700 ">
+ <button type="button" onClick={closeForm} className="text-[14px] font-bold text-slate-500 hover:text-slate-800 dark:text-white transition-colors">
  Cancel
  </button>
  <button type="submit" className="px-6 py-2.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white rounded-xl text-[14px] font-semibold shadow-sm transition-colors">
@@ -607,7 +607,7 @@ const AdminServices = () => {
  <>
  <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
  <div>
- <h3 className="text-[15px] font-bold text-slate-700 mb-2">
+ <h3 className="text-[15px] font-bold text-slate-700 dark:text-gray-200 mb-2">
  Search services
  {serviceSearchQuery && (
  <span className="ml-2 text-xs font-normal text-blue-500">
@@ -623,12 +623,12 @@ const AdminServices = () => {
  placeholder="Search name / description"
  value={serviceSearchQuery}
  onChange={(e) => setServiceSearchQuery(e.target.value)}
- className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 placeholder-slate-400 bg-white "
+ className="w-full pl-11 pr-10 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-sm text-sm font-medium text-slate-700 dark:text-gray-200 placeholder-slate-400 bg-white dark:bg-gray-800 "
  />
  {serviceSearchQuery && (
  <button
  onClick={() => setServiceSearchQuery('')}
- className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+ className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-gray-300 transition-colors"
  >
  <X size={16} />
  </button>
@@ -637,11 +637,11 @@ const AdminServices = () => {
  </div>
  </div>
 
- <div className="flex items-center gap-3 bg-white p-1.5 rounded-full border border-slate-200 shadow-sm">
+ <div className="flex items-center gap-3 bg-white dark:bg-gray-800 p-1.5 rounded-full border border-slate-200 dark:border-gray-600 shadow-sm">
  <button 
  onClick={() => setServiceStatusFilter('All')}
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
- serviceStatusFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'
+ serviceStatusFilter === 'All' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:bg-gray-800'
  }`}
  >
  All
@@ -651,7 +651,7 @@ const AdminServices = () => {
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
  serviceStatusFilter === 'Available' 
  ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm' 
- : 'border-transparent text-slate-500 hover:bg-slate-50 '
+ : 'border-transparent text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900 '
  }`}
  >
  Available
@@ -661,7 +661,7 @@ const AdminServices = () => {
  className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${
  serviceStatusFilter === 'Unavailable' 
  ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-sm' 
- : 'border-transparent text-slate-500 hover:bg-slate-50 '
+ : 'border-transparent text-slate-500 dark:text-gray-400 hover:bg-slate-50 dark:bg-gray-900 '
  }`}
  >
  Unavailable
@@ -669,9 +669,9 @@ const AdminServices = () => {
  </div>
  </div>
 
- <div className="bg-white /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden mt-6">
+ <div className="bg-white dark:bg-gray-800 /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden mt-6">
  <div className="p-5 border-b border-blue-50 flex items-center justify-between">
- <h3 className="text-xl font-extrabold text-slate-800 ">Medical Services Management</h3>
+ <h3 className="text-xl font-extrabold text-slate-800 dark:text-white ">Medical Services Management</h3>
  <button 
  onClick={() => setShowForm(true)}
  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all"
@@ -686,7 +686,7 @@ const AdminServices = () => {
  <div 
  key={service.id} 
  onClick={() => setSelectedService(service)}
- className="bg-white rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
+ className="bg-white dark:bg-gray-800 rounded-[1.2rem] p-5 shadow-sm border border-indigo-100/50 hover:shadow-md hover:border-indigo-300 hover:bg-indigo-50/10 cursor-pointer transition-all flex flex-col gap-4 relative"
  >
  <div className="flex justify-between items-start">
  <div className="flex gap-4">
@@ -706,7 +706,7 @@ const AdminServices = () => {
  {service.is_available ? 'Available' : 'Unavailable'}
  </span>
  </div>
- <p className="text-slate-500 text-[12px] font-medium max-w-[200px] truncate">{service.description || 'No description provided'}</p>
+ <p className="text-slate-500 dark:text-gray-400 text-[12px] font-medium max-w-[200px] truncate">{service.description || 'No description provided'}</p>
  <p className="text-[10px] font-bold text-indigo-500 mt-1 uppercase tracking-wider flex items-center gap-1">
  <MapPin size={10}/> {service.location || 'Location Not Set'}
  </p>
@@ -714,10 +714,10 @@ const AdminServices = () => {
  </div>
  </div>
 
- <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100 ">
+ <div className="flex items-center flex-wrap justify-between mt-1 pt-4 border-t border-slate-100 dark:border-gray-700 ">
  <div className="flex items-center gap-2 text-indigo-900 font-extrabold text-[14px]">
- <span className="text-slate-600 font-bold text-[13px]">Fee:</span>
- <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
+ <span className="text-slate-600 dark:text-gray-300 font-bold text-[13px]">Fee:</span>
+ <span className="flex items-center gap-1 bg-white dark:bg-gray-800 px-2 py-0.5 rounded-md border border-indigo-100 shadow-sm text-indigo-600">
  LKR {service.price ? parseFloat(service.price).toLocaleString() : '0'}
  </span>
  </div>
@@ -725,7 +725,7 @@ const AdminServices = () => {
  <div className="flex items-center gap-2">
  <button
  onClick={(e) => { e.stopPropagation(); handleEdit(service); }}
- className="px-3 py-1.5 bg-white text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
+ className="px-3 py-1.5 bg-white dark:bg-gray-800 text-blue-600 hover:bg-blue-50 border border-slate-200 dark:border-gray-600 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs shadow-sm"
  >
  <Edit2 size={13} /> Edit
  </button>
@@ -733,8 +733,8 @@ const AdminServices = () => {
  onClick={(e) => { e.stopPropagation(); toggleAvailability(service.id, service.is_available); }}
  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm border ${
  service.is_available 
- ? 'bg-white text-rose-600 border-rose-200 hover:bg-rose-50' 
- : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'
+ ? 'bg-white dark:bg-gray-800 text-rose-600 border-rose-200 hover:bg-rose-50' 
+ : 'bg-white dark:bg-gray-800 text-emerald-600 border-emerald-200 hover:bg-emerald-50'
  }`}
  >
  {service.is_available ? 'Hide' : 'Show'}
@@ -744,7 +744,7 @@ const AdminServices = () => {
  </div>
  ))}
  {filteredServices.length === 0 && (
- <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white rounded-2xl border border-indigo-100 border-dashed">
+ <div className="col-span-full p-10 text-center text-indigo-600 font-medium bg-white dark:bg-gray-800 rounded-2xl border border-indigo-100 border-dashed">
  No medical services match your search.
  </div>
  )}
@@ -757,11 +757,11 @@ const AdminServices = () => {
  {/* Selected Service Details Modal */}
  {selectedService && (
  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
- <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+ <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
  <div className="relative h-32 bg-gradient-to-r from-emerald-500 to-teal-600">
  <button 
  onClick={() => setSelectedService(null)}
- className="absolute top-4 right-4 text-white hover:bg-white /20 p-2 rounded-full transition-colors"
+ className="absolute top-4 right-4 text-white hover:bg-white dark:bg-gray-800 /20 p-2 rounded-full transition-colors"
  >
  <X size={20} />
  </button>
@@ -769,16 +769,16 @@ const AdminServices = () => {
  
  <div className="px-8 pb-8">
  <div className="flex justify-between items-start mb-6">
- <div className="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
+ <div className="w-24 h-24 rounded-2xl bg-white dark:bg-gray-800 border-4 border-white shadow-lg overflow-hidden flex-shrink-0 flex items-center justify-center text-teal-700 font-bold text-3xl -mt-12 relative z-10">
  <img src={`${import.meta.env.VITE_API_URL}/api/services/${selectedService.id}/image?t=${Date.now()}`} alt={selectedService.name} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; if(e.target.parentNode) e.target.parentNode.innerText = selectedService.name.charAt(0).toUpperCase(); }} />
  </div>
  
  {/* Toggle Switch */}
  <div className="flex flex-col items-end gap-2 mt-4">
- <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Service Status</span>
+ <span className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Service Status</span>
  <div className="flex items-center gap-3 cursor-pointer" onClick={() => toggleAvailability(selectedService.id, selectedService.is_available)}>
  <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${selectedService.is_available ? 'bg-blue-500' : 'bg-rose-200'}`}>
- <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedService.is_available ? 'translate-x-6' : 'translate-x-0'}`}></div>
+ <div className={`bg-white dark:bg-gray-800 w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${selectedService.is_available ? 'translate-x-6' : 'translate-x-0'}`}></div>
  </div>
  <span className={`text-sm font-black uppercase tracking-wider ${selectedService.is_available ? 'text-blue-600' : 'text-rose-500'}`}>
  {selectedService.is_available ? 'Available' : 'Unavailable'}
@@ -788,25 +788,25 @@ const AdminServices = () => {
  </div>
 
  <div>
- <h3 className="text-2xl font-black text-slate-800 ">{selectedService.name}</h3>
+ <h3 className="text-2xl font-black text-slate-800 dark:text-white ">{selectedService.name}</h3>
  <p className="text-teal-600 font-bold text-sm mt-1">{selectedService.location || 'Location Not Set'}</p>
  
  <div className="grid grid-cols-1 gap-4 mt-6">
- <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 ">
- <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Description</p>
- <p className="text-slate-800 font-medium text-sm">{selectedService.description || 'No description provided'}</p>
+ <div className="bg-slate-50 dark:bg-gray-900 p-3 rounded-xl border border-slate-100 dark:border-gray-700 ">
+ <p className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Description</p>
+ <p className="text-slate-800 dark:text-white font-medium text-sm">{selectedService.description || 'No description provided'}</p>
  </div>
  </div>
  
  <div className="grid grid-cols-2 gap-4 mt-4">
- <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 ">
- <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Consultation Fee</p>
- <p className="text-slate-800 font-semibold">LKR {selectedService.price ? parseFloat(selectedService.price).toLocaleString() : '0'}</p>
+ <div className="bg-slate-50 dark:bg-gray-900 p-3 rounded-xl border border-slate-100 dark:border-gray-700 ">
+ <p className="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1">Consultation Fee</p>
+ <p className="text-slate-800 dark:text-white font-semibold">LKR {selectedService.price ? parseFloat(selectedService.price).toLocaleString() : '0'}</p>
  </div>
  </div>
  </div>
 
- <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
+ <div className="mt-8 pt-6 border-t border-slate-100 dark:border-gray-700 flex justify-end">
  <button 
  onClick={() => handleDeleteService(selectedService)}
  className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold transition-colors"
@@ -823,18 +823,18 @@ const AdminServices = () => {
  {/* Custom Confirmation Modal */}
  {serviceToDelete && (
  <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
- <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200">
+ <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl animate-in zoom-in-95 duration-200">
  <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
  <Trash2 size={32} />
  </div>
- <h3 className="text-xl font-black text-slate-800 mb-2">Remove Service?</h3>
- <p className="text-slate-500 font-medium text-sm mb-6">
+ <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">Remove Service?</h3>
+ <p className="text-slate-500 dark:text-gray-400 font-medium text-sm mb-6">
  Are you sure you want to permanently delete <strong>{serviceToDelete.name}</strong>? This action cannot be undone.
  </p>
  <div className="flex gap-3">
  <button 
  onClick={() => setServiceToDelete(null)}
- className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+ className="flex-1 px-4 py-3 bg-slate-100 dark:bg-gray-800 hover:bg-slate-200 text-slate-700 dark:text-gray-200 rounded-xl font-bold transition-colors"
  >
  Cancel
  </button>

@@ -61,7 +61,7 @@ const GenericDashboardRedirect = () => {
 function App() {
   const { user } = useSelector((state) => state.auth);
   const showChatbot = !user || user.role === 'Patient';
-  const showAccessibility = true;
+  const showAccessibility = !user || user.role === 'Patient';
 
   return (
     <AccessibilityProvider>

@@ -8,6 +8,7 @@ import { logout } from '../../features/auth/authSlice';
 import WalkInRegistration from './WalkInRegistration';
 import LiveQueue from './LiveQueue';
 import GlobalQueueMonitor from './GlobalQueueMonitor';
+import ReceptionistServiceBooking from './ReceptionistServiceBooking';
 import Messages from '../Messages';
 
 const ReceptionistDashboard = () => {
@@ -97,13 +98,7 @@ const ReceptionistDashboard = () => {
  </div>
 
  <div className={`${activeTab === 'Booking' ? 'block animate-fadeIn' : 'hidden'}`}>
- <div className="bg-white dark:bg-gray-800 /50 backdrop-blur-sm rounded-3xl border border-dashed border-slate-200 dark:border-gray-600 p-12 text-center shadow-sm">
- <div className="w-20 h-20 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
- <Calendar size={32} />
- </div>
- <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Booking System</h2>
- <p className="text-slate-500 dark:text-gray-400">Coming soon in Phase 2</p>
- </div>
+ <ReceptionistServiceBooking />
  </div>
 
  <div className={`${activeTab === 'Messages' ? 'block animate-fadeIn' : 'hidden'}`}>

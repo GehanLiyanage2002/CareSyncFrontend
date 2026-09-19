@@ -270,6 +270,70 @@ const DoctorEarningsPage = () => {
               </div>
             </div>
 
+            {/* Compact Recent Transactions Table */}
+            {filteredAppointments.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-gray-700">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">Recent Transactions</h3>
+                    <p className="text-xs text-slate-500 mt-1">Based on selected filter</p>
+                  </div>
+                  <span className="text-sm font-bold text-slate-600 dark:text-gray-300 bg-slate-100 dark:bg-gray-700 px-3 py-1 rounded-lg">
+                    {filteredAppointments.length} Total
+                  </span>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead className="text-slate-400 dark:text-gray-500 uppercase tracking-wider font-semibold border-b border-slate-100 dark:border-gray-700">
+                      <tr>
+                        <th className="pb-3 pr-4">Date</th>
+                        <th className="pb-3 px-4">Patient</th>
+                        <th className="pb-3 px-4 text-right">Fee (LKR)</th>
+                        <th className="pb-3 px-4 text-right">Platform Fee (LKR)</th>
+                        <th className="pb-3 pl-4 text-right">Net Amount (LKR)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50 dark:divide-gray-700/50">
+                      {filteredAppointments.slice(0, 5).map((apt) => {
+                        const fee = parseFloat(apt.consultation_fee) || 0;
+                        const pFee = fee * 0.10;
+                        const net = fee * 0.90;
+                        return (
+                          <tr key={apt.id} className="group hover:bg-slate-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td className="py-3 pr-4 text-slate-500 dark:text-gray-400 font-medium text-xs">
+                              {new Date(apt.appointment_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="font-bold text-slate-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {apt.patient_name || 'Unknown'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right font-semibold text-slate-700 dark:text-gray-300 text-sm">
+                              {fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </td>
+                            <td className="py-3 px-4 text-right font-medium text-rose-500 text-sm">
+                              - {pFee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </td>
+                            <td className="py-3 pl-4 text-right font-black text-emerald-600 dark:text-emerald-400">
+                              + {net.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {filteredAppointments.length > 5 && (
+                  <div className="mt-4 pt-3 border-t border-slate-50 dark:border-gray-700 text-center">
+                    <p className="text-xs font-medium text-slate-400 dark:text-gray-500">
+                      Showing the latest 5 out of {filteredAppointments.length} transactions.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
 
 
           </div>

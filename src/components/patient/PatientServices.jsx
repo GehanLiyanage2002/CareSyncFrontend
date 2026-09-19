@@ -62,12 +62,6 @@ const PatientServices = () => {
     const order_id = `PSRV-${Date.now()}`;
     
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/services/book`, {
-        service_id: selectedService.id,
-        date,
-        time,
-        amount_paid: selectedService.price
-      }, { headers: { Authorization: token } });
       const hashRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/payment/generate-hash`, {
         order_id: order_id,
         amount: amount,
@@ -77,15 +71,6 @@ const PatientServices = () => {
       if (hashRes.data) {
         const { hash, merchant_id, amount: formattedAmount } = hashRes.data;
 
-        // Create booking object for PDF
-        const pdfBooking = {
-          id: res.data.booking.id,
-          patientName: user?.full_name || user?.name || 'Patient',
-          serviceName: selectedService.name,
-          price: selectedService.price,
-          date,
-          time,
-          status: 'In Progress'
         const payment = {
           sandbox: true,
           merchant_id: merchant_id,

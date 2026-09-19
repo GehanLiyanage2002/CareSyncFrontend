@@ -66,6 +66,7 @@ const AdminDashboard = () => {
  const [appointmentCurrentPage, setAppointmentCurrentPage] = useState(1);
  const appointmentsPerPage = 8;
  const [appointmentFilter, setAppointmentFilter] = useState('All');
+ const [earningFilter, setEarningFilter] = useState('All');
 
  useEffect(() => {
  setPatientCurrentPage(1);
@@ -225,7 +226,10 @@ const AdminDashboard = () => {
  await fetchAppointments();
  await fetchServiceBookings();
  }
- if (activeTab === 'Earnings') await fetchEarnings();
+ if (activeTab === 'Earnings') {
+ await fetchEarnings();
+ await fetchServiceBookings();
+ }
  setLoading(false);
  };
  loadData();
@@ -244,12 +248,13 @@ const AdminDashboard = () => {
   socket.on('disconnect', handleDisconnect);
   
   const refreshData = () => {
-  if (activeTab === 'Overview') {
-  fetchStats();
-  fetchEarnings();
-  }
-  if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
-  };
+ if (activeTab === 'Overview') {
+ fetchStats();
+ fetchEarnings();
+ }
+ if (activeTab === 'Appointments') { fetchAppointments(); fetchServiceBookings(); }
+ if (activeTab === 'Earnings') { fetchEarnings(); fetchServiceBookings(); }
+ };
 
   socket.on('appointmentStatusChanged', refreshData);
   socket.on('slotBooked', refreshData);
@@ -431,6 +436,30 @@ const AdminDashboard = () => {
  const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
  const currentAppointments = combinedAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
  const totalAppointmentPages = Math.ceil(combinedAppointments.length / appointmentsPerPage);
+
+ const serviceEarningsObj = {};
+ serviceBookings.forEach(booking => {
+   if (filterApptByDate(booking.date)) {
+     if (!serviceEarningsObj[booking.serviceName]) {
+       serviceEarningsObj[booking.serviceName] = {
+         serviceName: booking.serviceName,
+         price: booking.price,
+         completed_bookings: 0,
+         total_earnings: 0
+       };
+     }
+     if (booking.status === 'Completed') {
+       serviceEarningsObj[booking.serviceName].completed_bookings += 1;
+       serviceEarningsObj[booking.serviceName].total_earnings += parseFloat(booking.price || 0);
+     }
+   }
+ });
+ const serviceEarningsArray = Object.values(serviceEarningsObj).filter(s => s.completed_bookings > 0);
+
+ const totalDoctorEarnings = earnings.reduce((sum, item) => sum + parseFloat(item.total_earnings || 0), 0);
+ const totalServiceEarnings = serviceEarningsArray.reduce((sum, item) => sum + item.total_earnings, 0);
+ const totalOverallRevenue = totalDoctorEarnings + totalServiceEarnings;
+ const totalPlatformProfit = totalOverallRevenue * 0.10;
 
  return (
  <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-gray-900 overflow-hidden font-sans">
@@ -1231,41 +1260,274 @@ const AdminDashboard = () => {
 
  {/* EARNINGS TAB */}
  {activeTab === 'Earnings' && (
+ <div className="space-y-6">
+ <div className="mb-6 flex flex-col md:flex-row justify-end gap-4">
+ <div className="flex flex-col items-end gap-3">
+ <div className="flex bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-full p-1 shadow-sm overflow-x-auto max-w-full">
+ {['All Time', 'Today', 'This Week', 'This Month', 'Custom'].map(f => (
+ <button
+ key={f}
+ onClick={() => setDateFilter(f)}
+ className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all whitespace-nowrap ${
+ dateFilter === f ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:bg-gray-800 hover:text-slate-800 dark:text-white '
+ }`}
+ >
+ {f}
+ </button>
+ ))}
+ </div>
+ 
+ {dateFilter === 'Custom' && (
+ <div className="flex gap-2 items-center bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 p-1.5 rounded-full shadow-sm animate-in fade-in slide-in-from-top-2">
+ <input type="date" value={customDates.start} onChange={e => setCustomDates({...customDates, start: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 rounded-full focus:outline-none focus:border-blue-400" />
+ <span className="text-slate-400 text-xs font-bold">TO</span>
+ <input type="date" value={customDates.end} onChange={e => setCustomDates({...customDates, end: e.target.value})} className="text-xs px-3 py-1 bg-slate-50 dark:bg-gray-900 border border-slate-200 dark:border-gray-600 rounded-full focus:outline-none focus:border-blue-400" />
+ </div>
+ )}
+ </div>
+ </div>
+
+ {/* Summary Cards */}
+ <div className={`grid grid-cols-1 ${earningFilter === 'All' ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-6`}>
+ {earningFilter === 'All' && (
+ <>
+ {/* Overall Revenue */}
+ <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-lg shadow-blue-200 flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-blue-100 font-bold text-[11px] uppercase tracking-wider">Total Revenue</h4>
+ <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"><DollarSign size={20} className="text-white" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black">LKR {totalOverallRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+ 
+ {/* Platform Profit */}
+ <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-lg shadow-amber-200 flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-amber-100 font-bold text-[11px] uppercase tracking-wider">Platform Profit</h4>
+ <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"><TrendingUp size={20} className="text-white" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black">LKR {totalPlatformProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+
+ {/* Doctor Payouts */}
+ <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-slate-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-slate-500 dark:text-gray-400 font-bold text-[11px] uppercase tracking-wider">Doctor Payouts</h4>
+ <div className="bg-emerald-50 dark:bg-gray-700 p-2 rounded-xl"><UserRound size={20} className="text-emerald-500 dark:text-emerald-400" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black text-slate-800 dark:text-white">LKR {(totalDoctorEarnings * 0.9).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+
+ {/* Service Payouts */}
+ <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-slate-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-slate-500 dark:text-gray-400 font-bold text-[11px] uppercase tracking-wider">Service Payouts</h4>
+ <div className="bg-purple-50 dark:bg-gray-700 p-2 rounded-xl"><Stethoscope size={20} className="text-purple-500 dark:text-purple-400" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black text-slate-800 dark:text-white">LKR {(totalServiceEarnings * 0.9).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+ </>
+ )}
+
+ {earningFilter === 'Doctor' && (
+ <>
+ {/* Doctor Total Revenue */}
+ <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-lg shadow-blue-200 flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-blue-100 font-bold text-[11px] uppercase tracking-wider">Doctor Revenue</h4>
+ <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"><DollarSign size={20} className="text-white" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black">LKR {totalDoctorEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+ 
+ {/* Doctor Platform Profit */}
+ <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-lg shadow-amber-200 flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-amber-100 font-bold text-[11px] uppercase tracking-wider">Platform Profit (10%)</h4>
+ <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"><TrendingUp size={20} className="text-white" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black">LKR {(totalDoctorEarnings * 0.1).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+
+ {/* Doctor Payouts */}
+ <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-slate-500 dark:text-gray-400 font-bold text-[11px] uppercase tracking-wider">Doctor Payouts</h4>
+ <div className="bg-emerald-50 dark:bg-gray-700 p-2 rounded-xl"><UserRound size={20} className="text-emerald-500 dark:text-emerald-400" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black text-slate-800 dark:text-white">LKR {(totalDoctorEarnings * 0.9).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+ </>
+ )}
+
+ {earningFilter === 'Services' && (
+ <>
+ {/* Service Total Revenue */}
+ <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-lg shadow-blue-200 flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-blue-100 font-bold text-[11px] uppercase tracking-wider">Service Revenue</h4>
+ <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"><DollarSign size={20} className="text-white" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black">LKR {totalServiceEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+ 
+ {/* Service Platform Profit */}
+ <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 text-white shadow-lg shadow-amber-200 flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-amber-100 font-bold text-[11px] uppercase tracking-wider">Platform Profit (10%)</h4>
+ <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm"><TrendingUp size={20} className="text-white" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black">LKR {(totalServiceEarnings * 0.1).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+
+ {/* Service Payouts */}
+ <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-slate-100 dark:border-gray-700 shadow-sm flex flex-col justify-between">
+ <div className="flex justify-between items-center mb-4">
+ <h4 className="text-slate-500 dark:text-gray-400 font-bold text-[11px] uppercase tracking-wider">Service Payouts</h4>
+ <div className="bg-purple-50 dark:bg-gray-700 p-2 rounded-xl"><Stethoscope size={20} className="text-purple-500 dark:text-purple-400" /></div>
+ </div>
+ <div>
+ <p className="text-2xl font-black text-slate-800 dark:text-white">LKR {(totalServiceEarnings * 0.9).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+ </div>
+ </div>
+ </>
+ )}
+ </div>
+
  <div className="bg-white dark:bg-gray-800 /90 backdrop-blur-xl rounded-3xl shadow-sm border border-blue-100 overflow-hidden">
- <div className="p-6 border-b border-blue-100 bg-blue-50/30">
+ <div className="p-6 border-b border-blue-100 bg-blue-50/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+ <div>
  <h3 className="text-xl font-extrabold text-blue-800 flex items-center gap-2">
  <DollarSign size={24} /> Detailed Revenue Tracking
  </h3>
  <p className="text-sm font-medium text-blue-600 mt-1">Based on completed appointments and consultation fees.</p>
  </div>
+ <div className="bg-white dark:bg-gray-800 rounded-full p-1 border border-indigo-100 shadow-sm flex inline-flex">
+ {['All', 'Doctor', 'Services'].map((filter) => (
+ <button
+ key={filter}
+ onClick={() => setEarningFilter(filter)}
+ className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+ earningFilter === filter 
+ ? 'bg-[#1e293b] text-white shadow-md' 
+ : 'text-slate-500 hover:text-slate-700 dark:text-gray-200 hover:bg-slate-50 dark:bg-gray-900 '
+ }`}
+ >
+ {filter}
+ </button>
+ ))}
+ </div>
+ </div>
+ 
+ {(earningFilter === 'All' || earningFilter === 'Doctor') && (
  <div className="overflow-x-auto">
+ {earningFilter === 'All' && <div className="px-6 py-4 bg-slate-50 dark:bg-gray-900 border-b border-blue-50"><h4 className="font-extrabold text-slate-700 dark:text-gray-200">Doctor Earnings</h4></div>}
  <table className="w-full text-left border-collapse">
  <thead>
  <tr className="bg-white dark:bg-gray-800 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
  <th className="p-4 px-6 font-bold">Doctor Name</th>
  <th className="p-4 font-bold">Specialization</th>
  <th className="p-4 font-bold text-right">Fee (LKR)</th>
- <th className="p-4 font-bold text-right">Completed Appts</th>
- <th className="p-4 px-6 font-bold text-right">Total Earnings (LKR)</th>
+ <th className="p-4 font-bold text-center">Completed Appts</th>
+ <th className="p-4 font-bold text-right">Total Revenue</th>
+ <th className="p-4 font-bold text-right text-amber-600">Platform Profit (10%)</th>
+ <th className="p-4 px-6 font-bold text-right text-emerald-600">Doctor's Payout</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-blue-50">
- {earnings.map(earn => (
+ {earnings.map(earn => {
+ const totalRev = parseFloat(earn.total_earnings || 0);
+ const profit = totalRev * 0.10;
+ const payout = totalRev * 0.90;
+ return (
  <tr key={earn.doctor_id} className="hover:bg-blue-50/30 transition-colors">
  <td className="p-4 px-6 font-bold text-slate-700 dark:text-gray-200 ">{earn.doctor_name}</td>
  <td className="p-4 text-sm text-slate-600 dark:text-gray-300 font-medium">{earn.specialization}</td>
  <td className="p-4 text-right text-sm text-slate-600 dark:text-gray-300 font-medium">{parseFloat(earn.consultation_fee).toLocaleString()}</td>
- <td className="p-4 text-right font-bold text-slate-700 dark:text-gray-200 ">{earn.completed_appointments}</td>
- <td className="p-4 px-6 text-right font-black text-blue-600">
- {parseFloat(earn.total_earnings).toLocaleString()}
+ <td className="p-4 text-center font-bold text-slate-700 dark:text-gray-200 ">{earn.completed_appointments}</td>
+ <td className="p-4 text-right font-bold text-blue-600">
+ {totalRev.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+ </td>
+ <td className="p-4 text-right font-black text-amber-600">
+ {profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+ </td>
+ <td className="p-4 px-6 text-right font-black text-emerald-600">
+ {payout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
  </td>
  </tr>
- ))}
+ );
+ })}
  {earnings.length === 0 && (
- <tr><td colSpan="5" className="p-8 text-center text-slate-500 dark:text-gray-400 ">No earning data available.</td></tr>
+ <tr><td colSpan="7" className="p-8 text-center text-slate-500 dark:text-gray-400 ">No doctor earning data available.</td></tr>
  )}
  </tbody>
  </table>
+ </div>
+ )}
+
+ {(earningFilter === 'All' || earningFilter === 'Services') && (
+ <div className="overflow-x-auto">
+ {earningFilter === 'All' && <div className="px-6 py-4 bg-slate-50 dark:bg-gray-900 border-y border-blue-50"><h4 className="font-extrabold text-slate-700 dark:text-gray-200">Service Earnings</h4></div>}
+ <table className="w-full text-left border-collapse">
+ <thead>
+ <tr className="bg-white dark:bg-gray-800 border-b border-blue-100 text-blue-800 text-[11px] uppercase tracking-widest">
+ <th className="p-4 px-6 font-bold">Service Name</th>
+ <th className="p-4 font-bold">Category</th>
+ <th className="p-4 font-bold text-right">Price (LKR)</th>
+ <th className="p-4 font-bold text-center">Completed Bookings</th>
+ <th className="p-4 font-bold text-right">Total Revenue</th>
+ <th className="p-4 font-bold text-right text-amber-600">Platform Profit (10%)</th>
+ <th className="p-4 px-6 font-bold text-right text-purple-600">Service Payout</th>
+ </tr>
+ </thead>
+ <tbody className="divide-y divide-blue-50">
+ {serviceEarningsArray.map((earn, idx) => {
+ const totalRev = parseFloat(earn.total_earnings || 0);
+ const profit = totalRev * 0.10;
+ const payout = totalRev * 0.90;
+ return (
+ <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
+ <td className="p-4 px-6 font-bold text-slate-700 dark:text-gray-200 ">{earn.serviceName}</td>
+ <td className="p-4 text-sm text-slate-600 dark:text-gray-300 font-medium">Lab & Diagnostic</td>
+ <td className="p-4 text-right text-sm text-slate-600 dark:text-gray-300 font-medium">{parseFloat(earn.price).toLocaleString()}</td>
+ <td className="p-4 text-center font-bold text-slate-700 dark:text-gray-200 ">{earn.completed_bookings}</td>
+ <td className="p-4 text-right font-bold text-blue-600">
+ {totalRev.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+ </td>
+ <td className="p-4 text-right font-black text-amber-600">
+ {profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+ </td>
+ <td className="p-4 px-6 text-right font-black text-purple-600">
+ {payout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+ </td>
+ </tr>
+ );
+ })}
+ {serviceEarningsArray.length === 0 && (
+ <tr><td colSpan="7" className="p-8 text-center text-slate-500 dark:text-gray-400 ">No service earning data available.</td></tr>
+ )}
+ </tbody>
+ </table>
+ </div>
+ )}
  </div>
  </div>
  )}

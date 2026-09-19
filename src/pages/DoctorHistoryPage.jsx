@@ -10,7 +10,7 @@ const DoctorHistoryPage = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white selection:bg-teal-100 flex flex-col">
       <Header />
       
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-10">
+      <main className="flex-1 max-w-[1400px] w-full mx-auto p-4 md:p-8">
         <div className="min-h-[600px]">
           <AppointmentHistory />
         </div>

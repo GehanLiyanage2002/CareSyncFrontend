@@ -2,20 +2,105 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, Printer, Calendar, Loader } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { useLocation, useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PatientReviewsList from '../components/PatientReviewsList';
 
+const dayNameToIndex = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6
+};
+
+// Robust generator for upcoming dates from weekday recurring and specific date schedules
+const generateAvailableDates = (rawSchedules) => {
+  if (!rawSchedules || !Array.isArray(rawSchedules) || rawSchedules.length === 0) return [];
+
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const datesMap = new Map();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 1. Specific date schedules
+  rawSchedules.forEach(sch => {
+    if (sch.schedule_date) {
+      const parts = sch.schedule_date.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        const d = new Date(year, month, day);
+        if (d >= today) {
+          const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          datesMap.set(dateKey, {
+            ...sch,
+            schedule_date: dateKey,
+            dayName: daysOfWeek[d.getDay()],
+            dayNum: d.getDate(),
+            month: months[d.getMonth()],
+            year: d.getFullYear(),
+            formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`,
+            timestamp: d.getTime()
+          });
+        }
+      }
+    }
+  });
+
+  // 2. Weekday recurring schedules (generate next 28 days)
+  const weekdaySchedules = rawSchedules.filter(sch => sch.day_of_week && dayNameToIndex[sch.day_of_week.toLowerCase()] !== undefined);
+  if (weekdaySchedules.length > 0) {
+    for (let i = 0; i < 28; i++) {
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + i);
+      const targetDayIndex = targetDate.getDay();
+
+      const year = targetDate.getFullYear();
+      const month = targetDate.getMonth();
+      const day = targetDate.getDate();
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+      const matchingSchedule = weekdaySchedules.find(
+        sch => dayNameToIndex[sch.day_of_week.toLowerCase()] === targetDayIndex
+      );
+
+      if (matchingSchedule && !datesMap.has(dateKey)) {
+        datesMap.set(dateKey, {
+          ...matchingSchedule,
+          schedule_date: dateKey,
+          dayName: daysOfWeek[targetDayIndex],
+          dayNum: day,
+          month: months[month],
+          year: year,
+          formattedDate: `${day} ${months[month]} ${year}`,
+          timestamp: targetDate.getTime()
+        });
+      }
+    }
+  }
+
+  return Array.from(datesMap.values()).sort((a, b) => a.timestamp - b.timestamp);
+};
+
 const BookServicePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const initialService = location.state?.service;
+  const serviceIdParam = searchParams.get('id') || searchParams.get('serviceId');
 
-  const [service] = useState(initialService || {});
+  const [service, setService] = useState(initialService || {});
   const { user, token } = useSelector(state => state.auth);
 
   const [schedules, setSchedules] = useState([]);
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [selectedDateObj, setSelectedDateObj] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash');
@@ -29,12 +114,27 @@ const BookServicePage = () => {
   const [reviewStats, setReviewStats] = useState({ average_rating: 0, total_reviews: 0 });
   const [loadingReviews, setLoadingReviews] = useState(true);
 
+  // If initialService wasn't in state but ID is in searchParams or localStorage
+  useEffect(() => {
+    if (!service.id && serviceIdParam) {
+      axios.get(`${import.meta.env.VITE_API_URL}/api/services`)
+        .then(res => {
+          if (res.data.success && res.data.services) {
+            const found = res.data.services.find(s => String(s.id) === String(serviceIdParam));
+            if (found) {
+              setService(found);
+            }
+          }
+        })
+        .catch(err => console.error('Failed to fetch services for booking:', err));
+    }
+  }, [service.id, serviceIdParam]);
+
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/api/reviews/public/recent`)
       .then(res => {
         if (res.data.success && res.data.reviews) {
           setReviews(res.data.reviews);
-          // compute mock stats for clinic
           const total = res.data.reviews.length;
           const avg = total > 0 ? res.data.reviews.reduce((acc, r) => acc + r.rating, 0) / total : 0;
           setReviewStats({ average_rating: (Math.round(avg * 10) / 10).toFixed(1), total_reviews: total });
@@ -48,30 +148,26 @@ const BookServicePage = () => {
   const [slotPage, setSlotPage] = useState(0);
   const SLOTS_PER_PAGE = 12;
 
+  // Fetch service schedules and generate available dates
   useEffect(() => {
     const fetchSchedules = async () => {
       if (!service.id) return;
       setLoadingDates(true);
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/services/${service.id}/schedules`, {
-          headers: { Authorization: token }
+          headers: token ? { Authorization: token } : {}
         });
-        if (res.data.success && res.data.schedules) {
-          const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-          const formattedSchedules = res.data.schedules.map(sch => {
-            const d = new Date(sch.schedule_date);
-            return {
-              ...sch,
-              dayName: daysOfWeek[d.getDay()],
-              dayNum: d.getDate(),
-              month: months[d.getMonth()],
-              year: d.getFullYear(),
-              formattedDate: `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
-            };
-          });
-          setSchedules(formattedSchedules);
+        if (res.data.success) {
+          let dates = [];
+          if (res.data.available_dates && res.data.available_dates.length > 0) {
+            dates = res.data.available_dates;
+          } else if (res.data.schedules) {
+            dates = generateAvailableDates(res.data.schedules);
+          }
+          setSchedules(dates);
+          if (dates.length > 0 && !selectedDateObj) {
+            setSelectedDateObj(dates[0]);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch service schedules", error);
@@ -80,11 +176,32 @@ const BookServicePage = () => {
       }
     };
     fetchSchedules();
-  }, [service, token]);
+  }, [service.id, token]);
+
+  // Fetch booked slots whenever selected date changes
+  useEffect(() => {
+    if (!service.id || !selectedDateObj?.schedule_date) {
+      setBookedSlots([]);
+      return;
+    }
+    const fetchBooked = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/services/${service.id}/booked-slots?date=${selectedDateObj.schedule_date}`
+        );
+        if (res.data.success && res.data.booked_slots) {
+          setBookedSlots(res.data.booked_slots);
+        }
+      } catch (err) {
+        console.error("Failed to fetch booked slots:", err);
+      }
+    };
+    fetchBooked();
+  }, [service.id, selectedDateObj?.schedule_date]);
 
   // Generate slots for selected schedule
   const generateSlots = (schedule) => {
-    if (!schedule) return [];
+    if (!schedule || !schedule.start_time || !schedule.end_time) return [];
     const slots = [];
     let [currHour, currMin] = schedule.start_time.split(':').map(Number);
     let [endHour, endMin] = schedule.end_time.split(':').map(Number);
@@ -112,30 +229,35 @@ const BookServicePage = () => {
 
   let dynamicSlots = generateSlots(selectedDateObj);
 
-  if (selectedDateObj) {
+  if (selectedDateObj && selectedDateObj.schedule_date) {
     const now = new Date();
-    const scheduleDate = new Date(selectedDateObj.schedule_date);
+    const parts = selectedDateObj.schedule_date.split('-');
+    if (parts.length === 3) {
+      const schYear = parseInt(parts[0], 10);
+      const schMonth = parseInt(parts[1], 10) - 1;
+      const schDay = parseInt(parts[2], 10);
 
-    if (
-      scheduleDate.getFullYear() === now.getFullYear() &&
-      scheduleDate.getMonth() === now.getMonth() &&
-      scheduleDate.getDate() === now.getDate()
-    ) {
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
+      if (
+        schYear === now.getFullYear() &&
+        schMonth === now.getMonth() &&
+        schDay === now.getDate()
+      ) {
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
 
-      dynamicSlots = dynamicSlots.filter(timeStr => {
-        const [slotHour, slotMinute] = timeStr.split(':').map(Number);
-        if (slotHour > currentHour) return true;
-        if (slotHour === currentHour && slotMinute > currentMinute) return true;
-        return false;
-      });
+        dynamicSlots = dynamicSlots.filter(timeStr => {
+          const [slotHour, slotMinute] = timeStr.split(':').map(Number);
+          if (slotHour > currentHour) return true;
+          if (slotHour === currentHour && slotMinute > currentMinute) return true;
+          return false;
+        });
+      }
     }
   }
 
   const validateForm = () => {
     const newErrors = {};
-    if (!selectedDateObj) newErrors.date = 'Select a date';
+    if (!selectedDateObj || !selectedDateObj.schedule_date) newErrors.date = 'Select a date';
     if (!selectedTime) newErrors.time = 'Select a time slot';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -144,7 +266,7 @@ const BookServicePage = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      const amount = service.price || 0;
+      const amount = Number(service.price) || 0;
 
       const submitBooking = async () => {
         try {
@@ -228,7 +350,7 @@ const BookServicePage = () => {
 
   const formatTimeDisplay = (time24) => {
     const [h, m] = time24.split(':');
-    const hours = parseInt(h);
+    const hours = parseInt(h, 10);
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const hours12 = hours % 12 || 12;
     return `${hours12.toString().padStart(2, '0')}:${m} ${ampm}`;
@@ -238,7 +360,7 @@ const BookServicePage = () => {
     window.print();
   };
 
-  if (!initialService) {
+  if (!initialService && !serviceIdParam && !service.id) {
     return <Navigate to="/services" replace />;
   }
 
@@ -333,20 +455,26 @@ const BookServicePage = () => {
                             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                               {visibleSlots.map((slot24, idx) => {
                                 const displayTime = formatTimeDisplay(slot24);
+                                const isBooked = bookedSlots.includes(slot24);
                                 return (
                                   <button
                                     key={idx}
                                     type="button"
+                                    disabled={isBooked}
                                     onClick={() => {
+                                      if (isBooked) return;
                                       setSelectedTime(slot24);
                                       if (errors.time) setErrors({ ...errors, time: '' });
                                     }}
-                                    className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${selectedTime === slot24
-                                      ? 'bg-blue-500 border-blue-500 text-white shadow scale-105'
-                                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-400'
-                                      }`}
+                                    className={`py-2 px-3 text-xs rounded-xl font-bold border transition-all duration-200 ${
+                                      isBooked
+                                        ? 'bg-gray-100 dark:bg-gray-800/40 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                                        : selectedTime === slot24
+                                        ? 'bg-blue-500 border-blue-500 text-white shadow scale-105'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-400'
+                                    }`}
                                   >
-                                    {displayTime}
+                                    {displayTime} {isBooked ? '(Booked)' : ''}
                                   </button>
                                 );
                               })}

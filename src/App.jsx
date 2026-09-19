@@ -16,6 +16,7 @@ import PatientMedicalHistoryPage from './pages/PatientMedicalHistoryPage';
 import DoctorDashboardHome from './pages/DoctorDashboardHome';
 import DoctorKanbanPage from './pages/DoctorKanbanPage';
 import DoctorHistoryPage from './pages/DoctorHistoryPage';
+import DoctorEarningsPage from './pages/DoctorEarningsPage';
 import DoctorReviewsPage from './pages/DoctorReviewsPage';
 import ReceptionistDashboard from './pages/Receptionist/ReceptionistDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -197,6 +198,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['Doctor']}>
                 <DoctorHistoryPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/doctor/earnings" 
+            element={
+              <ProtectedRoute allowedRoles={['Doctor']}>
+                <DoctorEarningsPage />
               </ProtectedRoute>
             } 
           />

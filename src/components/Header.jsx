@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse, History, Star } from 'lucide-react';
+import { Moon, Sun, User, X, Home, Calendar, Settings, LogOut, HeartPulse, History, Star, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
@@ -235,6 +235,21 @@ const Header = () => {
                       >
                         <Star className="text-amber-400" size={20} />
                         <span className="font-medium text-slate-700 dark:text-slate-200">My Reviews</span>
+                      </button>
+                    )}
+
+                    {/* My Earnings — Doctor only */}
+                    {user?.role === 'Doctor' && (
+                      <button 
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          navigate('/doctor/earnings');
+                        }}
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-slate-800 transition-colors text-left border-b border-slate-100 dark:border-slate-800"
+                        aria-label="View your earnings and payouts"
+                      >
+                        <DollarSign className="text-emerald-500" size={20} />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">My Earnings</span>
                       </button>
                     )}
 

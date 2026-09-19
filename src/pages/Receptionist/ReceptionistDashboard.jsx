@@ -34,7 +34,7 @@ const ReceptionistDashboard = () => {
  { name: 'Patient Queue', icon: <Users /> },
  { name: 'Live Queue', icon: <Monitor /> },
  { name: 'Walk-in', icon: <UserPlus /> },
- { name: 'Booking', icon: <Calendar /> },
+ { name: 'Services Booking', icon: <Calendar /> },
  { name: 'Messages', icon: <Mail /> },
  ];
 
@@ -97,7 +97,7 @@ const ReceptionistDashboard = () => {
  <WalkInRegistration />
  </div>
 
- <div className={`${activeTab === 'Booking' ? 'block animate-fadeIn' : 'hidden'}`}>
+ <div className={`${activeTab === 'Services Booking' ? 'block animate-fadeIn' : 'hidden'}`}>
  <ReceptionistServiceBooking />
  </div>
 

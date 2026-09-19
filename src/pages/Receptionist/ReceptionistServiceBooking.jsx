@@ -797,9 +797,9 @@ const ReceptionistServiceBooking = () => {
                       </td>
                       <td className="py-3 px-3 font-semibold text-slate-800 dark:text-white">
                         <div>{bk.patientName}</div>
-                        {bk.patientPhone && (
-                          <div className="text-[10px] text-slate-400">{bk.patientPhone}</div>
-                        )}
+                        <div className="text-[10px] text-slate-400">
+                          {(!bk.patientPhone || bk.patientPhone.length > 20) ? 'No Contact Number' : bk.patientPhone}
+                        </div>
                       </td>
                       <td className="py-3 px-3 font-bold text-slate-700 dark:text-gray-200">
                         {bk.serviceName}

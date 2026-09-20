@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import ReviewModal from '../components/patient/ReviewModal';
-import { Calendar, Clock, Star, ChevronRight, Stethoscope, Hash, CreditCard, CheckCircle, XCircle, AlertCircle, ClockIcon } from 'lucide-react';
+import { Calendar, Clock, Star, ChevronRight, Stethoscope, Hash, CreditCard, CheckCircle, XCircle, AlertCircle, ClockIcon, Printer } from 'lucide-react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -35,13 +35,14 @@ const statusConfig = {
 
 const PatientAppointmentsPage = () => {
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => state.auth);
   const [appointments, setAppointments] = useState([]);
   const [serviceBookings, setServiceBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [appointmentTypeFilter, setAppointmentTypeFilter] = useState('All');
   const [reviewTarget, setReviewTarget] = useState(null);
+  const [receiptToPrint, setReceiptToPrint] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -262,6 +263,17 @@ const PatientAppointmentsPage = () => {
                           </span>
                         </div>
                       </div>
+                      <div className="flex-shrink-0 flex flex-col gap-2">
+                         {apt.status === 'completed' && (
+                           <button
+                             onClick={() => setReceiptToPrint(apt)}
+                             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-sm shadow-sm transition-all duration-200 whitespace-nowrap border border-indigo-200"
+                           >
+                             <Printer size={15} />
+                             View Receipt
+                           </button>
+                         )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -375,6 +387,65 @@ const PatientAppointmentsPage = () => {
           onClose={() => setReviewTarget(null)}
           onReviewSubmitted={handleReviewSubmitted}
         />
+      )}
+
+      {/* RECEIPT MODAL */}
+      {receiptToPrint && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 print:p-0 print:bg-white">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl relative border border-slate-100 dark:border-gray-700">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-2 font-black text-lg">
+                CS
+              </div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-white">CareSync Medical Center</h3>
+              <p className="text-[11px] text-slate-400">Official Service Appointment Receipt</p>
+            </div>
+
+            <div className="bg-slate-50 dark:bg-gray-900 rounded-2xl p-5 border border-slate-100 dark:border-gray-700 space-y-2.5 text-xs mb-6">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-gray-800">
+                <span className="text-slate-400 uppercase font-bold text-[10px]">Booking ID</span>
+                <span className="font-mono font-bold text-indigo-600">#{receiptToPrint.id}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-gray-400">Patient:</span>
+                <span className="font-bold text-slate-800 dark:text-white">{user?.full_name || 'Patient'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-gray-400">Service:</span>
+                <span className="font-bold text-slate-800 dark:text-white">{receiptToPrint.serviceName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-gray-400">Date:</span>
+                <span className="font-bold text-slate-800 dark:text-white">{formatDate(receiptToPrint.date)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-gray-400">Time:</span>
+                <span className="font-bold text-slate-800 dark:text-white">{formatTime(receiptToPrint.time)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-gray-800">
+                <span className="text-slate-500 dark:text-gray-400">Amount Paid:</span>
+                <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                  Rs. {receiptToPrint.price}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3 print:hidden">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 py-3 border border-slate-200 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 font-bold rounded-xl transition flex items-center justify-center gap-2 text-xs"
+              >
+                <Printer size={15} /> Print Receipt
+              </button>
+              <button
+                onClick={() => setReceiptToPrint(null)}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition text-xs shadow-md"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

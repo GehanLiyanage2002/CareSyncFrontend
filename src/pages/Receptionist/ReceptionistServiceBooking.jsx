@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Printer,
   ChevronRight,
+  ChevronDown,
   Info,
   MapPin,
   CalendarCheck,
@@ -48,6 +49,7 @@ const ReceptionistServiceBooking = () => {
   // Time Slots State
   const [bookedSlots, setBookedSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
 
   // Patient Selection State
@@ -68,6 +70,16 @@ const ReceptionistServiceBooking = () => {
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [bookingFilterQuery, setBookingFilterQuery] = useState('');
   const [receiptToPrint, setReceiptToPrint] = useState(null);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const [selectedServiceFilter, setSelectedServiceFilter] = useState('All');
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [bookingFilterQuery, selectedServiceFilter]);
 
   // Close patient dropdown when clicking outside
   useEffect(() => {
@@ -322,17 +334,52 @@ const ReceptionistServiceBooking = () => {
     window.print();
   };
 
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      const payload = { status: newStatus };
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/services/bookings/${bookingId}/status`, payload, {
+        headers: { Authorization: token }
+      });
+      toast.success(`Booking status updated to ${newStatus}`);
+      
+      // Update local state
+      setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
+      
+      // If completed, trigger receipt
+      if (newStatus === 'Completed') {
+        const completedBooking = bookings.find(b => b.id === bookingId);
+        if (completedBooking) {
+          setReceiptToPrint({ ...completedBooking, status: 'Completed' });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update status', err);
+      toast.error('Failed to update booking status');
+    }
+  };
+
   // Filtered services based on search query
   const filteredServices = services.filter(s =>
     s.name.toLowerCase().includes(serviceSearchQuery.toLowerCase()) ||
     (s.location && s.location.toLowerCase().includes(serviceSearchQuery.toLowerCase()))
   );
 
-  // Filtered bookings based on query
-  const filteredBookingsList = bookings.filter(b =>
-    (b.patientName && b.patientName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
-    (b.serviceName && b.serviceName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
-    (b.date && b.date.includes(bookingFilterQuery))
+  const uniqueServiceNames = ['All', ...new Set(bookings.map(b => b.serviceName).filter(Boolean))];
+
+  const filteredBookingsList = bookings.filter(b => {
+    const matchesQuery = (b.patientName && b.patientName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
+      (b.serviceName && b.serviceName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
+      (b.date && b.date.includes(bookingFilterQuery));
+    
+    const matchesService = selectedServiceFilter === 'All' || b.serviceName === selectedServiceFilter;
+    
+    return matchesQuery && matchesService;
+  });
+
+  const totalPages = Math.ceil(filteredBookingsList.length / itemsPerPage);
+  const paginatedBookings = filteredBookingsList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   return (
@@ -731,8 +778,26 @@ const ReceptionistServiceBooking = () => {
 
       {/* VIEW 2: SERVICE BOOKINGS LOG */}
       {activeSubTab === 'bookings' && (
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-gray-700 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-4">
+          {/* Service Filter Pills */}
+          <div className="flex flex-wrap gap-2">
+            {uniqueServiceNames.map(serviceName => (
+              <button
+                key={serviceName}
+                onClick={() => setSelectedServiceFilter(serviceName)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-sm ${
+                  selectedServiceFilter === serviceName
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 border border-slate-200 dark:border-gray-700'
+                }`}
+              >
+                {serviceName}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-gray-700 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-slate-800 dark:text-white">Service Bookings History</h2>
               <p className="text-xs text-slate-500 dark:text-gray-400">All medical service reservations placed by patients & reception</p>
@@ -784,7 +849,7 @@ const ReceptionistServiceBooking = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-gray-700">
-                  {filteredBookingsList.map((bk) => (
+                  {paginatedBookings.map((bk) => (
                     <tr key={bk.id} className="hover:bg-slate-50/60 dark:hover:bg-gray-750 transition-colors">
                       <td className="py-3 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">
                         #{bk.id}
@@ -807,31 +872,100 @@ const ReceptionistServiceBooking = () => {
                       <td className="py-3 px-3 font-black text-slate-800 dark:text-white">
                         Rs. {bk.price}
                       </td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                          bk.status === 'Completed'
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
-                            : bk.status === 'Cancelled'
-                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'
-                            : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
-                        }`}>
+                      <td className="py-3 px-3 relative">
+                        <button
+                          onClick={() => setOpenDropdownId(openDropdownId === bk.id ? null : bk.id)}
+                          className={`px-3 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm transition-all ${
+                            bk.status === 'Completed'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                              : bk.status === 'Cancelled'
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'
+                              : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+                          }`}
+                        >
                           {bk.status || 'In Progress'}
-                        </span>
+                          <ChevronDown size={12} className={`transition-transform duration-200 ${openDropdownId === bk.id ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {openDropdownId === bk.id && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setOpenDropdownId(null)}></div>
+                            <div className="absolute top-full left-2 mt-1 w-32 bg-white dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                              <button
+                                onClick={() => { handleStatusChange(bk.id, 'In Progress'); setOpenDropdownId(null); }}
+                                className="w-full text-left px-4 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors"
+                              >
+                                In Progress
+                              </button>
+                              <button
+                                onClick={() => { handleStatusChange(bk.id, 'Completed'); setOpenDropdownId(null); }}
+                                className="w-full text-left px-4 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-gray-700 transition-colors border-t border-slate-50 dark:border-gray-700"
+                              >
+                                Completed
+                              </button>
+                              <button
+                                onClick={() => { handleStatusChange(bk.id, 'Cancelled'); setOpenDropdownId(null); }}
+                                className="w-full text-left px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-gray-700 transition-colors border-t border-slate-50 dark:border-gray-700"
+                              >
+                                Cancelled
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </td>
                       <td className="py-3 px-3 text-right">
-                        <button
-                          onClick={() => setReceiptToPrint(bk)}
-                          className="px-2.5 py-1 text-slate-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 border border-slate-200 dark:border-gray-600 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 hover:bg-white transition"
-                        >
-                          <Printer size={12} /> Receipt
-                        </button>
+                        {bk.status === 'Completed' && (
+                          <button
+                            onClick={() => setReceiptToPrint(bk)}
+                            className="px-2.5 py-1 text-slate-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 border border-slate-200 dark:border-gray-600 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 hover:bg-white transition"
+                          >
+                            <Printer size={12} /> Receipt
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-gray-700">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-gray-400">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredBookingsList.length)} of {filteredBookingsList.length} entries
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-gray-700 disabled:opacity-50 text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition"
+                    >
+                      Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
+                          currentPage === i + 1 
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' 
+                            : 'border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-gray-700 disabled:opacity-50 text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
+        </div>
         </div>
       )}
 

@@ -441,18 +441,12 @@ const ReceptionistServiceBooking = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-gray-400">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-gray-400 mt-1">
                           <span className="flex items-center gap-1">
                             <MapPin size={11} className="text-slate-400" />
                             {srv.location || 'Clinic Unit'}
                           </span>
                         </div>
-
-                        {srv.description && (
-                          <p className="text-[11px] text-slate-400 line-clamp-1">
-                            {srv.description}
-                          </p>
-                        )}
                       </button>
                     );
                   })}

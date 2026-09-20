@@ -70,6 +70,16 @@ const ReceptionistServiceBooking = () => {
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [bookingFilterQuery, setBookingFilterQuery] = useState('');
   const [receiptToPrint, setReceiptToPrint] = useState(null);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const [selectedServiceFilter, setSelectedServiceFilter] = useState('All');
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [bookingFilterQuery, selectedServiceFilter]);
 
   // Close patient dropdown when clicking outside
   useEffect(() => {
@@ -354,11 +364,22 @@ const ReceptionistServiceBooking = () => {
     (s.location && s.location.toLowerCase().includes(serviceSearchQuery.toLowerCase()))
   );
 
-  // Filtered bookings based on query
-  const filteredBookingsList = bookings.filter(b =>
-    (b.patientName && b.patientName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
-    (b.serviceName && b.serviceName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
-    (b.date && b.date.includes(bookingFilterQuery))
+  const uniqueServiceNames = ['All', ...new Set(bookings.map(b => b.serviceName).filter(Boolean))];
+
+  const filteredBookingsList = bookings.filter(b => {
+    const matchesQuery = (b.patientName && b.patientName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
+      (b.serviceName && b.serviceName.toLowerCase().includes(bookingFilterQuery.toLowerCase())) ||
+      (b.date && b.date.includes(bookingFilterQuery));
+    
+    const matchesService = selectedServiceFilter === 'All' || b.serviceName === selectedServiceFilter;
+    
+    return matchesQuery && matchesService;
+  });
+
+  const totalPages = Math.ceil(filteredBookingsList.length / itemsPerPage);
+  const paginatedBookings = filteredBookingsList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   return (
@@ -757,8 +778,26 @@ const ReceptionistServiceBooking = () => {
 
       {/* VIEW 2: SERVICE BOOKINGS LOG */}
       {activeSubTab === 'bookings' && (
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-gray-700 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-4">
+          {/* Service Filter Pills */}
+          <div className="flex flex-wrap gap-2">
+            {uniqueServiceNames.map(serviceName => (
+              <button
+                key={serviceName}
+                onClick={() => setSelectedServiceFilter(serviceName)}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-sm ${
+                  selectedServiceFilter === serviceName
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 border border-slate-200 dark:border-gray-700'
+                }`}
+              >
+                {serviceName}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-gray-700 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-slate-800 dark:text-white">Service Bookings History</h2>
               <p className="text-xs text-slate-500 dark:text-gray-400">All medical service reservations placed by patients & reception</p>
@@ -810,7 +849,7 @@ const ReceptionistServiceBooking = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-gray-700">
-                  {filteredBookingsList.map((bk) => (
+                  {paginatedBookings.map((bk) => (
                     <tr key={bk.id} className="hover:bg-slate-50/60 dark:hover:bg-gray-750 transition-colors">
                       <td className="py-3 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">
                         #{bk.id}
@@ -888,8 +927,45 @@ const ReceptionistServiceBooking = () => {
                   ))}
                 </tbody>
               </table>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-gray-700">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-gray-400">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredBookingsList.length)} of {filteredBookingsList.length} entries
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-gray-700 disabled:opacity-50 text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition"
+                    >
+                      Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
+                          currentPage === i + 1 
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' 
+                            : 'border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700'
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-gray-700 disabled:opacity-50 text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
+        </div>
         </div>
       )}
 

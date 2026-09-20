@@ -21,7 +21,7 @@ const BookAppointmentPage = () => {
   const { user, token } = useSelector(state => state.auth);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('Cash'); // 'Cash' or 'Online'
+  const [paymentMethod, setPaymentMethod] = useState(isTelemedicine ? 'Online' : 'Cash'); // Default to Online for telemedicine
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [tokenNumber, setTokenNumber] = useState(null);
@@ -626,13 +626,17 @@ const BookAppointmentPage = () => {
               <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-xl transition-colors duration-300">
                 <button
                   type="button"
+                  disabled={isTelemedicine}
                   onClick={() => setPaymentMethod('Cash')}
                   aria-label="Pay cash at the hospital counter"
                   className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${
-                    paymentMethod === 'Cash'
-                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
+                    isTelemedicine 
+                      ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                      : paymentMethod === 'Cash'
+                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
+                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-200 dark:hover:text-gray-300'
                   }`}
+                  title={isTelemedicine ? "Cash payment is not available for Telemedicine" : ""}
                 >
                   Cash
                 </button>

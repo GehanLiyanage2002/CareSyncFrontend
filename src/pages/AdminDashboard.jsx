@@ -258,6 +258,7 @@ const AdminDashboard = () => {
 
   socket.on('appointmentStatusChanged', refreshData);
   socket.on('slotBooked', refreshData);
+  socket.on('bookingStatusUpdated', refreshData);
   
   // Listen for doctor updates to refresh the doctors list
   const refreshDoctors = () => {
@@ -292,6 +293,7 @@ const AdminDashboard = () => {
     socket.off('doctorAvailabilityChanged', refreshDoctors);
     socket.off('patientRegistered', refreshPatients);
     socket.off('patientUpdated', refreshPatients);
+    socket.off('bookingStatusUpdated', refreshData);
   };
   }, [activeTab, dateFilter, customDates]);
 

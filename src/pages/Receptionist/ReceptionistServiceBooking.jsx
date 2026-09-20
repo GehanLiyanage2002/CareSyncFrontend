@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Printer,
   ChevronRight,
+  ChevronDown,
   Info,
   MapPin,
   CalendarCheck,
@@ -48,6 +49,7 @@ const ReceptionistServiceBooking = () => {
   // Time Slots State
   const [bookedSlots, setBookedSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
 
   // Patient Selection State
@@ -320,6 +322,30 @@ const ReceptionistServiceBooking = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      const payload = { status: newStatus };
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/services/bookings/${bookingId}/status`, payload, {
+        headers: { Authorization: token }
+      });
+      toast.success(`Booking status updated to ${newStatus}`);
+      
+      // Update local state
+      setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
+      
+      // If completed, trigger receipt
+      if (newStatus === 'Completed') {
+        const completedBooking = bookings.find(b => b.id === bookingId);
+        if (completedBooking) {
+          setReceiptToPrint({ ...completedBooking, status: 'Completed' });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update status', err);
+      toast.error('Failed to update booking status');
+    }
   };
 
   // Filtered services based on search query
@@ -807,24 +833,56 @@ const ReceptionistServiceBooking = () => {
                       <td className="py-3 px-3 font-black text-slate-800 dark:text-white">
                         Rs. {bk.price}
                       </td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                          bk.status === 'Completed'
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
-                            : bk.status === 'Cancelled'
-                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'
-                            : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
-                        }`}>
+                      <td className="py-3 px-3 relative">
+                        <button
+                          onClick={() => setOpenDropdownId(openDropdownId === bk.id ? null : bk.id)}
+                          className={`px-3 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1.5 shadow-sm transition-all ${
+                            bk.status === 'Completed'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                              : bk.status === 'Cancelled'
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'
+                              : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+                          }`}
+                        >
                           {bk.status || 'In Progress'}
-                        </span>
+                          <ChevronDown size={12} className={`transition-transform duration-200 ${openDropdownId === bk.id ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {openDropdownId === bk.id && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setOpenDropdownId(null)}></div>
+                            <div className="absolute top-full left-2 mt-1 w-32 bg-white dark:bg-gray-800 border border-slate-100 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                              <button
+                                onClick={() => { handleStatusChange(bk.id, 'In Progress'); setOpenDropdownId(null); }}
+                                className="w-full text-left px-4 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-50 dark:hover:bg-gray-700 transition-colors"
+                              >
+                                In Progress
+                              </button>
+                              <button
+                                onClick={() => { handleStatusChange(bk.id, 'Completed'); setOpenDropdownId(null); }}
+                                className="w-full text-left px-4 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-gray-700 transition-colors border-t border-slate-50 dark:border-gray-700"
+                              >
+                                Completed
+                              </button>
+                              <button
+                                onClick={() => { handleStatusChange(bk.id, 'Cancelled'); setOpenDropdownId(null); }}
+                                className="w-full text-left px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-gray-700 transition-colors border-t border-slate-50 dark:border-gray-700"
+                              >
+                                Cancelled
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </td>
                       <td className="py-3 px-3 text-right">
-                        <button
-                          onClick={() => setReceiptToPrint(bk)}
-                          className="px-2.5 py-1 text-slate-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 border border-slate-200 dark:border-gray-600 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 hover:bg-white transition"
-                        >
-                          <Printer size={12} /> Receipt
-                        </button>
+                        {bk.status === 'Completed' && (
+                          <button
+                            onClick={() => setReceiptToPrint(bk)}
+                            className="px-2.5 py-1 text-slate-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400 border border-slate-200 dark:border-gray-600 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 hover:bg-white transition"
+                          >
+                            <Printer size={12} /> Receipt
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

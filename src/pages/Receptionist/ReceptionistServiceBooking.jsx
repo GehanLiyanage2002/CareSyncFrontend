@@ -441,18 +441,12 @@ const ReceptionistServiceBooking = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-gray-400">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-gray-400 mt-1">
                           <span className="flex items-center gap-1">
                             <MapPin size={11} className="text-slate-400" />
                             {srv.location || 'Clinic Unit'}
                           </span>
                         </div>
-
-                        {srv.description && (
-                          <p className="text-[11px] text-slate-400 line-clamp-1">
-                            {srv.description}
-                          </p>
-                        )}
                       </button>
                     );
                   })}
@@ -797,9 +791,9 @@ const ReceptionistServiceBooking = () => {
                       </td>
                       <td className="py-3 px-3 font-semibold text-slate-800 dark:text-white">
                         <div>{bk.patientName}</div>
-                        {bk.patientPhone && (
-                          <div className="text-[10px] text-slate-400">{bk.patientPhone}</div>
-                        )}
+                        <div className="text-[10px] text-slate-400">
+                          {(!bk.patientPhone || bk.patientPhone.length > 20) ? 'No Contact Number' : bk.patientPhone}
+                        </div>
                       </td>
                       <td className="py-3 px-3 font-bold text-slate-700 dark:text-gray-200">
                         {bk.serviceName}

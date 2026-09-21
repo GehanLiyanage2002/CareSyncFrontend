@@ -91,8 +91,22 @@ const Login = () => {
       const { token, user } = response.data;
       dispatch(loginSuccess({ user, token }));
       
-      toast.success(`Welcome back, Dr. ${user?.full_name || 'Doctor'}`);
-      navigate('/doctor/dashboard');
+      if (user?.role === 'Patient') {
+        toast.success(`Welcome back, ${user?.full_name || user?.name || 'Patient'}`);
+        navigate('/');
+      } else if (user?.role === 'Doctor') {
+        toast.success(`Welcome back, Dr. ${user?.full_name || user?.name || 'Doctor'}`);
+        navigate('/doctor/dashboard');
+      } else if (user?.role === 'Receptionist') {
+        toast.success(`Welcome back, ${user?.full_name || user?.name || 'Receptionist'}`);
+        navigate('/receptionist');
+      } else if (user?.role === 'Admin') {
+        toast.success(`Welcome back, ${user?.full_name || user?.name || 'Admin'}`);
+        navigate('/admin');
+      } else {
+        toast.success(`Welcome back, ${user?.full_name || user?.name || 'User'}`);
+        navigate('/dashboard');
+      }
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Face not recognized. Please try again or use email/password.');

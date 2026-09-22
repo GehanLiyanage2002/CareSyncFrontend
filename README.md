@@ -62,19 +62,19 @@ The optimized files will be generated in the `dist` directory.
 - **Biometrics:** `face-api.js` enables highly secure, passwordless authentication, ensuring the person logging in is physically present.
 - **Network Isolation & Proxies:** Frontend NGINX is configured to dynamically rewrite API routes in production to prevent Cross-Origin Resource Sharing (CORS) exploits.
 
-## 🚀 Deployment Guide (Docker / AKS)
+## 🚀 Deployment Guide (Azure Static Web Apps)
 
-1. **Build Image:**
-   ```bash
-   docker build -t caresync.azurecr.io/caresync-frontend:latest .
-   ```
-2. **Push to Azure Container Registry:**
-   ```bash
-   docker push caresync.azurecr.io/caresync-frontend:latest
-   ```
-3. **Deploy Workloads:**
-   ```bash
-   kubectl apply -f deployment.yaml
-   ```
-4. **Configure Ingress & TLS:**
-   Assign Azure DNS Label and apply Let's Encrypt Issuer for secure access.
+1. **Provision Azure Static Web App:**
+   - Create a new Static Web App in the Azure Portal.
+   - Connect your GitHub repository.
+   - Select `React` (or Custom) as the build preset.
+   - Set the App location to `/` and the Output location to `dist`.
+
+2. **Configure Environment Variables:**
+   Add your `VITE_API_URL` and other required environment variables in the Static Web App Configuration settings.
+
+3. **Deploy via GitHub Actions:**
+   Azure will automatically create a GitHub Actions workflow in your repository that builds and deploys your frontend on every push to the main branch.
+
+4. **Custom Domains & SSL:**
+   Azure Static Web Apps automatically provides a default domain and SSL. You can configure custom domains directly in the Azure Portal under the Custom Domains tab.
